@@ -1,0 +1,17 @@
+# Ignore all
+*
+
+# Exclude these files:
+!/**/
+!**/*.asm
+!**/*.c
+!**/*.py
+!**/*.cpp
+!**/*.sh
+!**/*.h
+!**/*.md
+!.myfuncs
+!.gitignore
+!**/*.java
+!**/*.html
+!essentials.txt

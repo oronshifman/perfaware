@@ -113,7 +113,7 @@ void InitOpTable(inst_t *op_table)
     op_table[MOV_IMMEDIATE_TO_REG_W_REG].field[REG] = (inst_field_t){REG, UNINITIALIZED, 0, 0b111, 0};
     op_table[MOV_IMMEDIATE_TO_REG_W_REG].field[RM] = (inst_field_t){RM, NOT_USED, 0, 0, 0};
     op_table[MOV_IMMEDIATE_TO_REG_W_REG].field[DISP] = (inst_field_t){DISP, NOT_USED, 0, 0, 0};
-    op_table[MOV_IMMEDIATE_TO_REG_W_REG].field[DATA] = (inst_field_t){DATA, UNINITIALIZED, 0, 0, 0};
+    op_table[MOV_IMMEDIATE_TO_REG_W_REG].field[DATA] = (inst_field_t){DATA, UNINITIALIZED, 8, 0xff, 0};
     op_table[MOV_IMMEDIATE_TO_REG_W_REG].field[JMP_OFFSET] = (inst_field_t){JMP_OFFSET, NOT_USED, 0, 0, 0};
 
     op_table[ADD_SUB_CMP_IMMEDIATE_TO_RM].operation_type = NONE;

@@ -10,6 +10,8 @@ set_reg_func_ptr reg_setters[NUM_SETTERS] =
     SetByteRegValue, SetWordRegValue
 };
 
+static uint16_t GetOperandValue(operand_t *operand);
+
 void ExecuteInstruction(expression_t *instruction)
 {
     if (reg_mem == NULL)
@@ -17,11 +19,41 @@ void ExecuteInstruction(expression_t *instruction)
         reg_mem = InitMemory();
     }
     
-    // reg_setters[instruction->field[W].value](reg_mem, dest, src);
+    uint16_t dest = GetOperandValue(&instruction->dest);
+    uint16_t src = GetOperandValue(&instruction->src);
+   
+    reg_setters[instruction->dest.size](reg_mem, dest, src);
 }
 
-static void ToRm(inst_t *instruction, uint8_t dest, uint16_t src)
+static uint16_t GetOperandValue(operand_t *operand)
 {
+    switch (operand->operand_type)
+    {
+        case REGISTER:
+        {
+            return operand->reg_code;
+        } break;
+
+        case EFFECTIVE_ADDR:
+        {
+            return operand->ea_code;
+        } break;
+
+        case DIRECT_ADDR:
+        {
+            return operand->disp;
+        } break;
+
+        case IMMEDIATE:
+        {
+            return operand->unsigned_immediate;
+        } break;
+
+        default:
+        {
+            // TODO: find a default behavior
+        } break;
+    }
 }
 
 void PrintMemory()

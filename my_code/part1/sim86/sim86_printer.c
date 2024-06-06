@@ -65,7 +65,7 @@ void PrintInstructionAsm(expression_t *instruction)
     sprintf(&buff[strlen(buff)], ", ");
     AddOperandToBuff(buff, &instruction->src);
  
-    printf("%s\n", buff);
+    printf("%s", buff);
 }
 
 static void AddOperandToBuff(char *buff, operand_t *operand)

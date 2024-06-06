@@ -1,7 +1,4 @@
 #include "sim86_executer.h"
-#include "sim86_memory.h"
-
-reg_mem_t *reg_mem;
 
 typedef void (*set_reg_func_ptr)(reg_mem_t *, uint8_t, uint16_t);
 
@@ -12,17 +9,12 @@ set_reg_func_ptr reg_setters[NUM_SETTERS] =
 
 static uint16_t GetOperandValue(operand_t *operand);
 
-void ExecuteInstruction(expression_t *instruction)
+void ExecuteInstruction(expression_t *instruction, reg_mem_t *reg_mem)
 {
-    if (reg_mem == NULL)
-    {
-        reg_mem = InitMemory();
-    }
-    
-    uint16_t dest = GetOperandValue(&instruction->dest);
+    uint8_t reg_code = GetOperandValue(&instruction->dest);
     uint16_t src = GetOperandValue(&instruction->src);
-   
-    reg_setters[instruction->dest.size](reg_mem, dest, src);
+
+    reg_setters[instruction->dest.size](reg_mem, reg_code, src);
 }
 
 static uint16_t GetOperandValue(operand_t *operand)
@@ -31,7 +23,7 @@ static uint16_t GetOperandValue(operand_t *operand)
     {
         case REGISTER:
         {
-            return operand->reg_code;
+            return operand->reg_code; // TODO: change this to get value from register!
         } break;
 
         case EFFECTIVE_ADDR:
@@ -54,9 +46,4 @@ static uint16_t GetOperandValue(operand_t *operand)
             // TODO: find a default behavior
         } break;
     }
-}
-
-void PrintMemory()
-{
-    PrintRegistersState(reg_mem);
 }

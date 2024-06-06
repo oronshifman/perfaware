@@ -6,43 +6,47 @@
 #include "sim86_decoder.h"
 #include "sim86_printer.h"
 #include "sim86_executer.h"
+#include "sim86_memory.h"
 
 char *str_options[NUM_OPTIONS] = 
 {
     "-exec", "-print"
 };
 
-typedef void (*option_func_ptr)(expression_t *);
-// printf("%d\n", __LINE__); // NOTE: print for debugging++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+typedef void (*option_func_ptr)(expression_t *, reg_mem_t *);
+
+static void Print(expression_t *expression, reg_mem_t *reg_mem);
+static void Exec(expression_t *expression, reg_mem_t *reg_mem);
 
 void DecodeBin(FILE *bin, uint8_t option)
 {
     assert(bin);
 
+    reg_mem_t *reg_mem;
     option_func_ptr option_func = NULL;
     switch (option)
     {
         case EXEC_BIN:
         {
-            // TODO: impl ExecuteInstruction in executor modul
-            option_func = ExecuteInstruction;
+            option_func = Exec;
+            reg_mem = InitMemory();
         } break;
 
         case PRINT_TO_ASM:
         {
-            option_func = PrintInstructionAsm;
+            option_func = Print;
         } break;
     }
 
     expression_t *decoded_inst = malloc(sizeof(*decoded_inst));
     while (GetNextInstruction(decoded_inst, bin)) 
     {
-        option_func(decoded_inst);
+        option_func(decoded_inst, reg_mem);
     }
     
     if (option == EXEC_BIN)
     {
-        PrintMemory();
+        PrintAllRegisters(reg_mem);
     }
 }
 
@@ -59,4 +63,19 @@ uint8_t ParseOption(char *option)
     }
 
     return -1;
+}
+
+static void Print(expression_t *expression, reg_mem_t *reg_mem)
+{
+    PrintInstructionAsm(expression);
+    printf("\n");
+}
+
+static void Exec(expression_t *expression, reg_mem_t *reg_mem)
+{
+    PrintInstructionAsm(expression);
+    PrintSingleRegister(reg_mem, expression->dest.size, expression->dest.reg_code, BEFOR_EXEC);
+    ExecuteInstruction(expression, reg_mem);
+    PrintSingleRegister(reg_mem, expression->dest.size, expression->dest.reg_code, AFTER_EXEC);
+    printf("\n");
 }

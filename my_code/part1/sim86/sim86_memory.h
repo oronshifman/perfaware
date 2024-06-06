@@ -16,6 +16,12 @@ enum reg_types
     REG_TYPES
 };
 
+enum befor_after_exec
+{
+    BEFOR_EXEC,
+    AFTER_EXEC
+};
+
 enum w_reg
 {
     AX,
@@ -29,7 +35,6 @@ enum w_reg
 
     WORD_REGS
 };
-
 
 enum b_reg
 {
@@ -47,11 +52,12 @@ typedef struct reg_mem
 } reg_mem_t;
 
 reg_mem_t *InitMemory(void);
-void SetWordRegValue(reg_mem_t *registers, uint8_t reg, uint16_t value);
-void SetByteRegValue(reg_mem_t *registers, uint8_t reg, uint16_t value);
-uint16_t GetWordRegValue(reg_mem_t *registers, uint8_t reg);
-uint8_t GetByteRegValue(reg_mem_t *registers, uint8_t reg);
-void PrintRegistersState(reg_mem_t *registers);
+void SetWordRegValue(reg_mem_t *reg_mem, uint8_t reg, uint16_t value);
+void SetByteRegValue(reg_mem_t *reg_mem, uint8_t reg, uint16_t value);
+uint16_t GetWordRegValue(reg_mem_t *reg_mem, uint8_t reg);
+uint16_t GetByteRegValue(reg_mem_t *reg_mem, uint8_t reg);
+void PrintAllRegisters(reg_mem_t *reg_mem);
+void PrintSingleRegister(reg_mem_t *reg_mem, uint8_t size, uint8_t reg, enum befor_after_exec when);
 
 #endif /* __SIM86_MEMORY_H__ */ 
 

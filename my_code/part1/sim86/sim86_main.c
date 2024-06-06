@@ -27,8 +27,3 @@ int32_t main(int32_t argc, uint8_t *argv[])
    
     return 0;
 }
-
-// 29/05/24
-// TODO: everithing works till line 46 in listing_41; start from printer. all should be ok in the decoder
-// fix listing_41
-// test to see that listing_39 still works correctlly

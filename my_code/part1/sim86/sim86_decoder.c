@@ -7,20 +7,20 @@ static inst_t op_table[256] = {NONE};
 
 static void GetInstructionForm(uint8_t op_code, inst_t *instruction);
 static void InitInstructionValues(inst_t *instruction, uint16_t instruction_bytes, FILE *bin);
-static void InitDecodedInst(expresion_t *decoded_inst, inst_t *full_inst, uint16_t instruction_bytes);
+static void InitDecodedInst(expression_t *decoded_inst, inst_t *full_inst, uint16_t instruction_bytes);
 static void InitField(inst_t * instruction, uint8_t field, uint16_t instruction_bytes);
 static void InitFieldWithExtraBytes(inst_t *instruction, uint8_t field, uint8_t bytes_to_read, FILE *bin);
 static void SetDispState(inst_t *instruction);
 static uint8_t isArithmeticImmediateToAcc(uint16_t instruction_bytes);
-static void GetSrc(expresion_t *decoded_inst, inst_t *instruction);
-static void GetDest(expresion_t *decoded_inst, inst_t *instruction, uint16_t instruction_bytes);
-
+static void GetSrc(expression_t *decoded_inst, inst_t *instruction, uint16_t instruction_bytes);
+static void GetDest(expression_t *decoded_inst, inst_t *instruction, uint16_t instruction_bytes);
+static void InitOperand(operand_t *operand, enum operand_type type, uint8_t size, uint16_t disp);
 /**
  * 
  * @description - fills <instruction> with the next instruction decoded from <bin>
  * @return - 0 if failed 1 if success
 */
-int GetNextInstruction(expresion_t *decoded_inst, FILE *bin)
+int GetNextInstruction(expression_t *decoded_inst, FILE *bin)
 {
     if (op_table[0].operation_type == NONE)
     {
@@ -61,98 +61,114 @@ static void GetInstructionForm(uint8_t op_code, inst_t *full_inst)
     full_inst->field[JMP_OFFSET] = op_table[op_code].field[JMP_OFFSET];
 }
 
-static void InitDecodedInst(expresion_t *decoded_inst, inst_t *full_inst, uint16_t instruction_bytes)
+static void InitDecodedInst(expression_t *decoded_inst, inst_t *full_inst, uint16_t instruction_bytes)
 {
     decoded_inst->operation_type = full_inst->operation_type;
     GetDest(decoded_inst, full_inst, instruction_bytes);
-    GetSrc(decoded_inst, full_inst);
+    GetSrc(decoded_inst, full_inst, instruction_bytes);
 }
 
-static void GetSrc(expresion_t *decoded_inst, inst_t *full_inst)
+static void GetSrc(expression_t *decoded_inst, inst_t *full_inst, uint16_t instruction_bytes)
 {
     operand_t *src = &decoded_inst->src;
+
+    if (full_inst->operation_type == JMP)
+    {
+        InitOperand(src, JUMP_OFFSET, full_inst->field[W].value, 0);
+        src->jmp_offset = full_inst->field[JMP_OFFSET].value;
+
+        return;
+    }
+
     if (full_inst->field[D].value)
     {
-        src->operand_type = EFFECTIVE_ADDR;
-        src->size = full_inst->field[W].value;
         src->ea_code = full_inst->field[RM].value;
         if (full_inst->field[DISP].state == INITIALIZED)
         {
-            src->disp = full_inst->field[DISP].value;
+            InitOperand(src, EFFECTIVE_ADDR, full_inst->field[W].value, full_inst->field[DISP].value);
         }
         else
         {
-            src->disp = 0;
+            InitOperand(src, EFFECTIVE_ADDR, full_inst->field[W].value, 0);
         }
+
+        return;
     }
 
     if (full_inst->field[DATA].state == INITIALIZED)
     {
-        src->operand_type = IMMEDIATE;
-        src->size = full_inst->field[W].value;
+        InitOperand(src, IMMEDIATE, full_inst->field[W].value, 0);
         src->unsigned_immediate = full_inst->field[DATA].value;
-        src->disp = 0;
+
         return;
     }
 
-    src->operand_type = REGISTER;
-    src->size = full_inst->field[W].value;
+    InitOperand(src, REGISTER, full_inst->field[W].value, 0);
     src->ea_code = full_inst->field[REG].value;
-    src->disp = 0;
-    // if (full_inst->field[D].value)
-    // {
-    //     decoded_inst->src = full_inst->field[RM];
-    //     decoded_inst->disp = full_inst->field[DISP];
-    //     return;
-    // }
-
-    // if (full_inst->field[DATA].state == INITIALIZED)
-    // {
-    //     decoded_inst->src = full_inst->field[DATA];
-    //     return;
-    // }
-
-    // decoded_inst->src = full_inst->field[REG];
 }
 
-static void GetDest(expresion_t *decoded_inst, inst_t *full_inst, uint16_t instruction_bytes)
+
+static void GetDest(expression_t *decoded_inst, inst_t *full_inst, uint16_t instruction_bytes)
 {
+    operand_t *dest = &decoded_inst->dest;
+
     if (full_inst->operation_type == JMP)
     {
-        decoded_inst->dest = full_inst->field[JMP_OFFSET];
-        decoded_inst->dest.mask = instruction_bytes >> full_inst->field[JMP_OFFSET].offset; // NOTE: the op_code for the jump is in the mask field
+        InitOperand(dest, JUMP_CODE, full_inst->field[W].value, 0);
+
+        uint8_t jmp_code = (instruction_bytes & 0xff) - 112 < 100 ? 
+                           (instruction_bytes & 0xff) - 112 :
+                           (instruction_bytes & 0xff) - 212 + 4;
+        dest->jmp_code = jmp_code;
+
         return;
     }
-
+    
     // NOTE: if mod is NOT used this is "immediate to register" or "mem to accumulator" (true for arithmetics too)
     if (full_inst->field[MOD].state == NOT_USED)
     {
-        decoded_inst->dest = full_inst->field[REG];
+        InitOperand(dest, REGISTER, full_inst->field[W].value, 0);
+        dest->reg_code = full_inst->field[REG].value;
+
         return;
     }
 
     // NOTE: if mod IS used this is "immediate to rm", "rm to/from reg" (true for arithmetics too)
-    if (full_inst->field[D].state == INITIALIZED && full_inst->field[D].value)
+    if ((full_inst->field[D].state == INITIALIZED && full_inst->field[D].value))
     {
-        decoded_inst->dest = full_inst->field[REG];
+        InitOperand(dest, REGISTER, full_inst->field[W].value, 0);
+        dest->reg_code = full_inst->field[REG].value;
+
         return;
     }
 
     if (full_inst->field[MOD].value == 0b11)
     {
-        decoded_inst->dest = full_inst->field[RM];
-        decoded_inst->dest.field_type = REG;
+        InitOperand(dest, REGISTER, full_inst->field[W].value, 0);
+        dest->reg_code = full_inst->field[RM].value;
+
         return;
     }
 
+    // NOTE: dest is direct address
     if (full_inst->field[MOD].value == 0b00 && full_inst->field[RM].value == 0b110)
     {
-        decoded_inst->dest = full_inst->field[DISP];
+        InitOperand(dest, DIRECT_ADDR, full_inst->field[W].value, full_inst->field[DISP].value);
+        dest->ea_code = full_inst->field[RM].value;
+
         return;
     }
     
-    decoded_inst->dest = full_inst->field[RM];
-    decoded_inst->disp = full_inst->field[DISP];
+    // NOTE: else dest is ea with disp
+    InitOperand(dest, EFFECTIVE_ADDR, full_inst->field[W].value, full_inst->field[DISP].value);
+    dest->ea_code = full_inst->field[RM].value;
+}
+
+static void InitOperand(operand_t *operand, enum operand_type type, uint8_t size, uint16_t disp)
+{
+    operand->operand_type = type;
+    operand->size = size;
+    operand->disp = disp;
 }
 
 static void InitInstructionValues(inst_t *instruction, uint16_t instruction_bytes, FILE *bin)
@@ -176,8 +192,24 @@ static void InitInstructionValues(inst_t *instruction, uint16_t instruction_byte
         }
     }
 
-    SetDispState(instruction);
+    // NOTE: set disp state
+    if (instruction->field[MOD].value == 0b01 || 
+        instruction->field[MOD].value == 0b10)
+    {
+        instruction->field[DISP].state = UNINITIALIZED;
+    }
+    else if (instruction->field[MOD].value == 0b00 && 
+             instruction->field[RM].value == 0b110)
+    {
+        instruction->field[DISP].state = UNINITIALIZED;
+        instruction->field[DISP].mask = 2; // NOTE: the size to read is in the mask
+    }
+    else
+    {
+        instruction->field[DISP].state = NOT_USED;
+    }
 
+    // NOTE: initialize disp
     if (instruction->field[DISP].state == UNINITIALIZED)
     {
         uint8_t disp_size = instruction->field[MOD].value == 0 ? 
@@ -189,6 +221,7 @@ static void InitInstructionValues(inst_t *instruction, uint16_t instruction_byte
                                 bin);
     }
 
+    // NOTE: initialize data
     if (instruction->field[DATA].state == UNINITIALIZED)
     {
         if ((instruction_bytes & OP_MASK) >> 4 == 0b1011 ||
@@ -284,22 +317,4 @@ static void InitFieldWithExtraBytes(inst_t *instruction, uint8_t field, uint8_t 
 {
     fread(&instruction->field[field].value, bytes_to_read, 1, bin);
     instruction->field[field].state = INITIALIZED;
-}
-
-static void SetDispState(inst_t *instruction)
-{
-    if (instruction->field[MOD].value == 0b01 || 
-        instruction->field[MOD].value == 0b10)
-    {
-        instruction->field[DISP].state = UNINITIALIZED;
-        return;
-    }
-    else if (instruction->field[MOD].value == 0b00 && 
-             instruction->field[RM].value == 0b110)
-    {
-        instruction->field[DISP].state = UNINITIALIZED;
-        instruction->field[DISP].mask = 2; // NOTE: the size to read is in the mask
-        return;
-    }
-    instruction->field[DISP].state = NOT_USED;
 }

@@ -10,7 +10,7 @@ set_reg_func_ptr reg_setters[NUM_SETTERS] =
     SetByteRegValue, SetWordRegValue
 };
 
-void ExecuteInstruction(expresion_t *instruction)
+void ExecuteInstruction(expression_t *instruction)
 {
     if (reg_mem == NULL)
     {

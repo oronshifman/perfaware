@@ -27,32 +27,32 @@
 #define CMP_IMMEDIATE_TO_RM 0b111 // reg field
 #define CMP_IMMEDIATE_TO_ACC 0b00111100
 
-#define JE 0b01110100
-#define JL 0b01111100
-#define JLE 0b01111110
-#define JB 0b01110010
-#define JBE 0b01110110
-#define JP 0b01111010
 #define JO 0b01110000
-#define JS 0b01111000
-#define JNE 0b01110101
-#define JNL 0b01111101
-#define JG 0b01111111
-#define JNB 0b01110011
-#define JA 0b01110111
-#define JNP 0b01111011
 #define JNO 0b01110001
+#define JB 0b01110010
+#define JNB 0b01110011
+#define JE 0b01110100
+#define JNE 0b01110101
+#define JBE 0b01110110
+#define JA 0b01110111
+#define JS 0b01111000
 #define JNS 0b01111001
-#define LOOP 0b11100010
-#define LOOPZ 0b11100001
+#define JP 0b01111010
+#define JNP 0b01111011
+#define JL 0b01111100
+#define JNL 0b01111101
+#define JLE 0b01111110
+#define JG 0b01111111
 #define LOOPNZ 0b11100000
+#define LOOPZ 0b11100001
+#define LOOP 0b11100010
 #define JCXZ 0b11100011
 
 void InitOpTable(inst_t *op_table)
 {
     op_table[MOV_RM_TO_FROM_REG].operation_type = MOV;
     op_table[MOV_RM_TO_FROM_REG].field[D] = (inst_field_t){D, UNINITIALIZED, 1, 0b1, 0};
-    op_table[MOV_RM_TO_FROM_REG].field[W] = (inst_field_t){W, UNINITIALIZED, 0, 1, 0};
+    op_table[MOV_RM_TO_FROM_REG].field[W] = (inst_field_t){W, UNINITIALIZED, 0, 0b1, 0};
     op_table[MOV_RM_TO_FROM_REG].field[S] = (inst_field_t){S, NOT_USED, 0, 0, 0};
     op_table[MOV_RM_TO_FROM_REG].field[MOD] = (inst_field_t){MOD, UNINITIALIZED, 14, 0b11, 0};
     op_table[MOV_RM_TO_FROM_REG].field[REG] = (inst_field_t){REG, UNINITIALIZED, 11, 0b111, 0};
@@ -63,7 +63,7 @@ void InitOpTable(inst_t *op_table)
 
     op_table[MOV_IMMEDIATE_TO_RM].operation_type = MOV;
     op_table[MOV_IMMEDIATE_TO_RM].field[D] = (inst_field_t){D, NOT_USED, 0, 0, 0};
-    op_table[MOV_IMMEDIATE_TO_RM].field[W] = (inst_field_t){W, UNINITIALIZED, 0, 1, 0};
+    op_table[MOV_IMMEDIATE_TO_RM].field[W] = (inst_field_t){W, UNINITIALIZED, 0, 0b1, 0};
     op_table[MOV_IMMEDIATE_TO_RM].field[S] = (inst_field_t){S, NOT_USED, 0, 0, 0};
     op_table[MOV_IMMEDIATE_TO_RM].field[MOD] = (inst_field_t){MOD, UNINITIALIZED, 14, 0b11, 0};
     op_table[MOV_IMMEDIATE_TO_RM].field[REG] = (inst_field_t){REG, NOT_USED, 0, 0, 0};

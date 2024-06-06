@@ -9,7 +9,8 @@ enum operand_type
 {
     REGISTER,
     EFFECTIVE_ADDR,
-    MEMORY,
+    DIRECT_ADDR,
+    JUMP_CODE,
     JUMP_OFFSET,
     IMMEDIATE,
 
@@ -22,27 +23,28 @@ typedef struct operand
     uint8_t size; // NOTE: 1 for word 0 for byte
     union
     {
+        uint8_t jmp_code;
         uint8_t reg_code;
         uint8_t ea_code;
-        int32_t signed_immediate; // NOTE: if JMP this will be initialized
-        uint32_t unsigned_immediate;
+        int8_t jmp_offset; // NOTE: if JMP, this will be initialized as jump offset
+        uint16_t unsigned_immediate;
     };    
-    uint16_t disp;
+    uint16_t disp; // NOTE: this is out of the union because it's needed WITH ea_code
 } operand_t;
 
-typedef struct expresion
+typedef struct expression
 {
     enum operation_type operation_type;
-    operand_t dest;
+    operand_t dest; // NOTE: if JMP, <jmp_code in dest> and <jmp offset is in src.signed_immediate>
     operand_t src;
-} expresion_t;
+} expression_t;
 
 /*
     @ prams: 
         instruction: pointer to an instruction struct to be feeled by decoder.
         bin:         binary file to read from.
 */
-int GetNextInstruction(expresion_t *decoded_inst, FILE *bin);
+int GetNextInstruction(expression_t *decoded_inst, FILE *bin);
 
 #endif /* __SIM86_DECODER_H__ */
 

@@ -20,7 +20,6 @@
 ;   imdt to acc: 0000010w data        data if w=1
 
 bits 16                             
-
 ;add bx, [bx+si]                     ; 0x1803
 ;add bx, [bp]                        ; 0x5e03 00
 ;add si, 2                           ; 0xc683 02, 1100 0110 1000 0011
@@ -89,8 +88,8 @@ bits 16
 ;cmp [bp + si + 4], bh
 ;cmp [bp + di + 6], di
 ;cmp byte [bx], 34
-;cmp word [4834], 29             ; 0x3e83 12e2 001d
-;cmp word [4834], 350            ; 0x3e81 12e2 015e      0011 1110 1000 0001  m0001 0010 1110 0010
+cmp word [4834], 29             ; 0x3e83 12e2 001d      mod|reg|rm   op     |s|w  
+cmp word [4834], 350            ; 0x3e81 12e2 015e      00 |111|110  1000 00|0|1  0001 0010 1110 0010
 ;cmp ax, [bp]
 ;cmp al, [bx + si]
 ;cmp ax, bx
@@ -99,31 +98,31 @@ bits 16
 ;cmp al, -30
 ;cmp al, 9
 ;
-test_label0:
-jnz test_label1
-jnz test_label0
-test_label1:
-jnz test_label0
-jnz test_label1
-
-label:
-je label
-jl label
-jle label
-jb label
-jbe label
-jp label
-jo label
-js label
-jne label
-jnl label
-jg label
-jnb label
-ja label
-jnp label
-jno label
-jns label
-loop label
-loopz label
-loopnz label
-jcxz label
+;test_label0:
+;jnz test_label1
+;jnz test_label0
+;test_label1:
+;jnz test_label0
+;jnz test_label1
+;
+;label:
+;je label
+;jl label
+;jle label
+;jb label
+;jbe label
+;jp label
+;jo label
+;js label
+;jne label
+;jnl label
+;jg label
+;jnb label
+;ja label
+;jnp label
+;jno label
+;jns label
+;loop label
+;loopz label
+;loopnz label
+;jcxz label

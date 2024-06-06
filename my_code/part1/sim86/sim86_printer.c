@@ -6,6 +6,7 @@
 #define NUM_EA 8
 #define NUM_REG 8
 #define NUM_REG_SIZES 2
+#define NUM_JMP_TYPES 20
 
 enum mods
 {
@@ -15,12 +16,20 @@ enum mods
     TO_REG
 };
 
-static uint8_t *op_nems[NUM_OPERATION_TYPES] = 
+static char *op_nems[NUM_OPERATION_TYPES] = 
 {
-    "", "mov", "add", "sub", "cmp", "jmp"
+    "", "mov", "add", "sub", "cmp", ""
 };
 
-static uint8_t *reg_table[NUM_REG_SIZES][NUM_REG] = 
+static char *jmp_types[NUM_JMP_TYPES] = 
+{
+    "jo", "jno", "jb", "jnb", "je",
+    "jne", "jbe", "ja", "js", "jns",
+    "jp", "jnp", "jl", "jnl", "jle",
+    "jg", "loopnz", "loopz", "loop", "jcxz"
+};
+
+static char *reg_table[NUM_REG_SIZES][NUM_REG] = 
 {
     // byte (0)
     {"al", "cl", "dl", "bl", 
@@ -30,74 +39,68 @@ static uint8_t *reg_table[NUM_REG_SIZES][NUM_REG] =
      "sp", "bp", "si", "di"}
 };
 
-static uint8_t *ea_calc[NUM_EA] = 
+static char *ea_calc[NUM_EA] = 
 {
     "bx + si", "bx + di", "bp + si", "bp + di",
     "si", "di", "bp","bx"
 };  
 
-void PrintInstructionAsm(decoded_inst_t *instruction)
+static void AddOperandToBuff(char *buff, operand_t *operand);
+
+void PrintInstructionAsm(expression_t *instruction)
 {
     char buff[50];
 
-    if (instruction->op_type == JMP)
+    if (instruction->operation_type == JMP)
     {
-        // TODO: handle printing the jumps!!!!
-        sprintf(buff, "%s ", op_nems[instruction->op_type]);
-        sprintf(&buff[strlen(buff)], "%d", instruction->dest.value);
+        sprintf(buff, "%s ", jmp_types[instruction->dest.jmp_code]);
+        sprintf(&buff[strlen(buff)], "%d", instruction->src.jmp_offset);
         printf("%s\n", buff);
         return;
     }
     
-    sprintf(buff, "%s ", op_nems[instruction->op_type]);
+    sprintf(buff, "%s ", op_nems[instruction->operation_type]);
 
-    // NOTE: print dest
-    if (instruction->dest.field_type == RM)
-    {
-        sprintf(&buff[strlen(buff)], "[%s", ea_calc[instruction->dest.value]);
-        
-        if (instruction->disp.state == INITIALIZED)
-        {
-            sprintf(&buff[strlen(buff)], " + %d], ", instruction->disp.value);
-        }
-        else
-        {
-            sprintf(&buff[strlen(buff)], "], ");
-        }
-    }
-    else if (instruction->dest.field_type == DISP)
-    {
-        sprintf(&buff[strlen(buff)], "[%d], ", instruction->dest.value);
-    }
-    else
-    {
-        sprintf(&buff[strlen(buff)], "%s, ", reg_table[instruction->w.value][instruction->dest.value]);
-    }   
-
-    // NOTE: print src
-    if (instruction->src.field_type == RM)
-    {
-        sprintf(&buff[strlen(buff)], "[%s", ea_calc[instruction->src.value]);
-        if (instruction->disp.state == INITIALIZED)
-        {
-            sprintf(&buff[strlen(buff)], " + %d]", instruction->disp.value);
-        }
-        else
-        {
-            sprintf(&buff[strlen(buff)], "]");
-        }
-    }
-    else
-    {
-        if (instruction->src.field_type == DATA)
-        {
-            sprintf(&buff[strlen(buff)], "%d", instruction->src.value);    
-        }
-        else
-        {
-            sprintf(&buff[strlen(buff)], "%s", reg_table[instruction->w.value][instruction->src.value]);
-        }
-    }
-  
+    AddOperandToBuff(buff, &instruction->dest);
+    sprintf(&buff[strlen(buff)], ", ");
+    AddOperandToBuff(buff, &instruction->src);
+ 
     printf("%s\n", buff);
+}
+
+static void AddOperandToBuff(char *buff, operand_t *operand)
+{
+    switch (operand->operand_type)
+    {
+        case REGISTER:
+        {
+            sprintf(&buff[strlen(buff)], "%s", reg_table[operand->size][operand->reg_code]);
+        } break;
+
+        case EFFECTIVE_ADDR:
+        {
+            sprintf(&buff[strlen(buff)], "[%s", ea_calc[operand->ea_code]);
+            if (operand->disp)
+            {
+                sprintf(&buff[strlen(buff)], " + %d]", operand->disp);
+                break;
+            }
+            sprintf(&buff[strlen(buff)], "]");
+        } break;
+
+        case DIRECT_ADDR:
+        {
+            sprintf(&buff[strlen(buff)], "[%d]", operand->disp);
+        } break;
+
+        case IMMEDIATE:
+        {
+            sprintf(&buff[strlen(buff)], "%d", operand->unsigned_immediate);
+        } break;
+
+        default:
+        {
+            sprintf(&buff[strlen(buff)], " <--ERROR--> ");
+        } break;
+    }
 }

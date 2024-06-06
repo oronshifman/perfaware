@@ -12,7 +12,7 @@ char *str_options[NUM_OPTIONS] =
     "-exec", "-print"
 };
 
-typedef void (*option_func_ptr)(expresion_t *);
+typedef void (*option_func_ptr)(expression_t *);
 // printf("%d\n", __LINE__); // NOTE: print for debugging++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 void DecodeBin(FILE *bin, uint8_t option)
@@ -34,7 +34,7 @@ void DecodeBin(FILE *bin, uint8_t option)
         } break;
     }
 
-    expresion_t *decoded_inst = malloc(sizeof(*decoded_inst));
+    expression_t *decoded_inst = malloc(sizeof(*decoded_inst));
     while (GetNextInstruction(decoded_inst, bin)) 
     {
         option_func(decoded_inst);

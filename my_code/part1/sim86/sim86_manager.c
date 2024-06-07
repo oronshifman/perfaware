@@ -46,6 +46,7 @@ void DecodeBin(FILE *bin, uint8_t option)
     
     if (option == EXEC_BIN)
     {
+        printf("\n\n");
         PrintAllRegisters(reg_mem);
     }
 }
@@ -74,8 +75,8 @@ static void Print(expression_t *expression, reg_mem_t *reg_mem)
 static void Exec(expression_t *expression, reg_mem_t *reg_mem)
 {
     PrintInstructionAsm(expression);
-    PrintSingleRegister(reg_mem, expression->dest.size, expression->dest.reg_code, BEFOR_EXEC);
+    PrintSingleRegister(reg_mem, expression->operands[DEST].size, expression->operands[DEST].reg_code, BEFOR_EXEC);
     ExecuteInstruction(expression, reg_mem);
-    PrintSingleRegister(reg_mem, expression->dest.size, expression->dest.reg_code, AFTER_EXEC);
+    PrintSingleRegister(reg_mem, expression->operands[DEST].size, expression->operands[DEST].reg_code, AFTER_EXEC);
     printf("\n");
 }

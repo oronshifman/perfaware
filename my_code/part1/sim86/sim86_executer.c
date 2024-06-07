@@ -1,29 +1,40 @@
 #include "sim86_executer.h"
 
 typedef void (*set_reg_func_ptr)(reg_mem_t *, uint8_t, uint16_t);
+typedef uint16_t (*get_reg_func_ptr)(reg_mem_t *, uint8_t);
 
 set_reg_func_ptr reg_setters[NUM_SETTERS] =
 {
     SetByteRegValue, SetWordRegValue
 };
 
-static uint16_t GetOperandValue(operand_t *operand);
+get_reg_func_ptr reg_getters[NUM_GETTERS] =
+{
+    GetByteRegValue, GetWordRegValue
+};
+
+static uint16_t GetOperandValue(reg_mem_t *reg_mem, operand_t *operand);
 
 void ExecuteInstruction(expression_t *instruction, reg_mem_t *reg_mem)
 {
-    uint8_t reg_code = GetOperandValue(&instruction->dest);
-    uint16_t src = GetOperandValue(&instruction->src);
+    uint8_t reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
+    uint16_t src = GetOperandValue(reg_mem, &instruction->operands[SRC]);
 
-    reg_setters[instruction->dest.size](reg_mem, reg_code, src);
+    reg_setters[instruction->operands[DEST].size](reg_mem, reg_code, src);
 }
 
-static uint16_t GetOperandValue(operand_t *operand)
+static uint16_t GetOperandValue(reg_mem_t *reg_mem, operand_t *operand)
 {
     switch (operand->operand_type)
     {
         case REGISTER:
         {
-            return operand->reg_code; // TODO: change this to get value from register!
+            // TODO: change this to get value from register!
+            if (operand->direction == DEST)
+            {
+                return operand->reg_code;
+            }
+            return reg_getters[operand->size](reg_mem, operand->reg_code);
         } break;
 
         case EFFECTIVE_ADDR:

@@ -49,7 +49,8 @@ uint16_t GetWordRegValue(reg_mem_t *reg_mem, uint8_t reg)
     assert(reg_mem);
     assert(reg < WORD_REGS);
 
-    return *(uint16_t *)&(reg_mem->memory[reg]);
+    uint8_t reg_trans = translation_table[WORD][reg];
+    return *(uint16_t *)&(reg_mem->memory[reg_trans]);
 }
 
 uint16_t GetByteRegValue(reg_mem_t *reg_mem, uint8_t reg)
@@ -57,7 +58,8 @@ uint16_t GetByteRegValue(reg_mem_t *reg_mem, uint8_t reg)
     assert(reg_mem);
     assert(reg < BYTE_REGS);
 
-    return reg_mem->memory[reg];
+    uint8_t reg_trans = translation_table[BYTE][reg];
+    return reg_mem->memory[reg_trans];
 }
 
 void PrintSingleRegister(reg_mem_t *reg_mem, uint8_t size, uint8_t reg, enum befor_after_exec when)
@@ -77,14 +79,12 @@ void PrintSingleRegister(reg_mem_t *reg_mem, uint8_t size, uint8_t reg, enum bef
         GetByteRegValue, GetWordRegValue
     };
     
-    uint8_t reg_trans = translation_table[size][reg];
-    
     if (when == BEFOR_EXEC)
     {
-        printf(" ; %s: (0x%x)->", reg_table[size][reg], reg_getters[size](reg_mem, reg_trans));
+        printf(" ; %s: (0x%x)->", reg_table[size][reg], reg_getters[size](reg_mem, reg));
         return;
     }
-    printf("(0x%x)", reg_getters[size](reg_mem, reg_trans));
+    printf("(0x%x)", reg_getters[size](reg_mem, reg));
 }
 
 void PrintAllRegisters(reg_mem_t *reg_mem)

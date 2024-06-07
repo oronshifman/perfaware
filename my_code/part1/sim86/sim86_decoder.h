@@ -17,8 +17,17 @@ enum operand_type
     NUM_OPERAND_TYPES
 };
 
+enum direction
+{
+    DEST,
+    SRC,
+
+    NUM_OPERANDS
+};
+
 typedef struct operand
 {
+    enum direction direction;
     enum operand_type operand_type;
     uint8_t size; // NOTE: 1 for word 0 for byte
     union
@@ -35,8 +44,7 @@ typedef struct operand
 typedef struct expression
 {
     enum operation_type operation_type;
-    operand_t dest; // NOTE: if JMP, <jmp_code in dest> and <jmp offset is in src.signed_immediate>
-    operand_t src;
+    operand_t operands[NUM_OPERANDS]; // NOTE: if JMP, <jmp_code in dest> and <jmp offset is in src.signed_immediate>
 } expression_t;
 
 /*

@@ -53,17 +53,17 @@ void PrintInstructionAsm(expression_t *instruction)
 
     if (instruction->operation_type == JMP)
     {
-        sprintf(buff, "%s ", jmp_types[instruction->dest.jmp_code]);
-        sprintf(&buff[strlen(buff)], "%d", instruction->src.jmp_offset);
+        sprintf(buff, "%s ", jmp_types[instruction->operands[DEST].jmp_code]);
+        sprintf(&buff[strlen(buff)], "%d", instruction->operands[SRC].jmp_offset);
         printf("%s\n", buff);
         return;
     }
     
     sprintf(buff, "%s ", op_nems[instruction->operation_type]);
 
-    AddOperandToBuff(buff, &instruction->dest);
+    AddOperandToBuff(buff, &instruction->operands[DEST]);
     sprintf(&buff[strlen(buff)], ", ");
-    AddOperandToBuff(buff, &instruction->src);
+    AddOperandToBuff(buff, &instruction->operands[SRC]);
  
     printf("%s", buff);
 }

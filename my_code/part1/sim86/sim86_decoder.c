@@ -70,7 +70,8 @@ static void InitDecodedInst(expression_t *decoded_inst, inst_t *full_inst, uint1
 
 static void GetSrc(expression_t *decoded_inst, inst_t *full_inst, uint16_t instruction_bytes)
 {
-    operand_t *src = &decoded_inst->src;
+    operand_t *src = &decoded_inst->operands[SRC];
+    src->direction = SRC;
 
     if (full_inst->operation_type == JMP)
     {
@@ -110,8 +111,9 @@ static void GetSrc(expression_t *decoded_inst, inst_t *full_inst, uint16_t instr
 
 static void GetDest(expression_t *decoded_inst, inst_t *full_inst, uint16_t instruction_bytes)
 {
-    operand_t *dest = &decoded_inst->dest;
-
+    operand_t *dest = &decoded_inst->operands[DEST];
+    dest->direction = DEST;
+    
     if (full_inst->operation_type == JMP)
     {
         InitOperand(dest, JUMP_CODE, full_inst->field[W].value, 0);

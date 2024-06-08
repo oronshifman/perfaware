@@ -4,6 +4,6 @@
 #include "sim86_decoder.h"
 #include "sim86_memory.h"
 
-void ExecuteInstruction(expression_t *instruction, reg_mem_t *reg_mem);
+void ExecutorExecInst(expression_t *instruction, reg_mem_t *reg_mem);
 
 #endif /* __SIM86_EXECUTER_H__ */

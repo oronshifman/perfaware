@@ -12,7 +12,7 @@ enum option_types
     NUM_OPTIONS
 };
 
-void DecodeBin(FILE *bin, uint8_t option);
-uint8_t ParseOption(char *option);
+void ManagerDecodeBin(FILE *bin, uint8_t option);
+uint8_t ManagerParseOption(char *option);
 
 #endif /* __SIM86_MANAGER_H__ */

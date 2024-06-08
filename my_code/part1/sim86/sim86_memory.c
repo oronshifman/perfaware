@@ -5,6 +5,40 @@
 
 #include "sim86_memory.h"
 
+enum w_reg
+{
+    AX,
+    BX = 2,
+    CX = 4,
+    DX = 6,
+    SP = 8,
+    BP = 10,
+    SI = 12,
+    DI = 14,
+
+    WORD_REGS
+};
+
+enum b_reg
+{
+    AL, AH,
+    BL, BH,
+    CL, CH,
+    DL, DH,
+
+    BYTE_REGS
+};
+
+enum flags_reg
+{
+    FLAGS_REG_SIZE = 1,
+
+    ZF = 0x80,
+    SF = 0x40,
+    
+    FLAGS_REG = 16
+};
+
 uint8_t translation_table[REG_TYPES][NUM_REGS] = 
 {
     {AL, CL, DL, BL, AH, CH, DH, BH},
@@ -13,7 +47,7 @@ uint8_t translation_table[REG_TYPES][NUM_REGS] =
 
 typedef uint16_t (*get_reg_func_ptr)(reg_mem_t *, uint8_t);
 
-reg_mem_t *InitMemory(void)
+reg_mem_t *MemoryCreate(void)
 {
     reg_mem_t *reg_mem = (reg_mem_t *)calloc(1, sizeof(*reg_mem));
     if (!reg_mem)
@@ -25,7 +59,14 @@ reg_mem_t *InitMemory(void)
     return reg_mem;
 }
 
-void SetWordRegValue(reg_mem_t *reg_mem, uint8_t reg, uint16_t value)
+void MemoryDestroy(reg_mem_t *reg_mem)
+{
+    assert(reg_mem != NULL);
+
+    free(reg_mem);
+}
+
+void MemorySetWordRegValue(reg_mem_t *reg_mem, uint8_t reg, uint16_t value)
 {
     assert(reg_mem);
     assert(reg < WORD_REGS);
@@ -35,7 +76,7 @@ void SetWordRegValue(reg_mem_t *reg_mem, uint8_t reg, uint16_t value)
     *where = value;
 }
 
-void SetByteRegValue(reg_mem_t *reg_mem, uint8_t reg, uint16_t value)
+void MemorySetByteRegValue(reg_mem_t *reg_mem, uint8_t reg, uint16_t value)
 {
     assert(reg_mem);
     assert(reg < BYTE_REGS);
@@ -44,7 +85,7 @@ void SetByteRegValue(reg_mem_t *reg_mem, uint8_t reg, uint16_t value)
     reg_mem->memory[reg_trans] = value;
 }
 
-uint16_t GetWordRegValue(reg_mem_t *reg_mem, uint8_t reg)
+uint16_t MemoryGetWordRegValue(reg_mem_t *reg_mem, uint8_t reg)
 {
     assert(reg_mem);
     assert(reg < WORD_REGS);
@@ -53,7 +94,7 @@ uint16_t GetWordRegValue(reg_mem_t *reg_mem, uint8_t reg)
     return *(uint16_t *)&(reg_mem->memory[reg_trans]);
 }
 
-uint16_t GetByteRegValue(reg_mem_t *reg_mem, uint8_t reg)
+uint16_t MemoryGetByteRegValue(reg_mem_t *reg_mem, uint8_t reg)
 {
     assert(reg_mem);
     assert(reg < BYTE_REGS);
@@ -62,7 +103,33 @@ uint16_t GetByteRegValue(reg_mem_t *reg_mem, uint8_t reg)
     return reg_mem->memory[reg_trans];
 }
 
-void PrintSingleRegister(reg_mem_t *reg_mem, uint8_t size, uint8_t reg, enum befor_after_exec when)
+uint8_t MemorySetZF(reg_mem_t *reg_mem, uint8_t )
+{
+    assert(reg_mem);
+    // TODO: finish impl
+    return reg_mem->memory[FLAGS_REG] ^ ZF;
+}
+
+uint8_t MemoryGetZF(reg_mem_t *reg_mem)
+{
+    assert(reg_mem);
+    // TODO: finish impl
+}
+
+uint8_t MemorySetSF(reg_mem_t *reg_mem)
+{
+    assert(reg_mem);
+    // TODO: finish impl
+}
+
+uint8_t MemoryGetSF(reg_mem_t *reg_mem)
+{
+    assert(reg_mem);
+    // TODO: finish impl
+}
+
+
+void MemoryPrintSingleReg(reg_mem_t *reg_mem, uint8_t size, uint8_t reg, enum befor_after_exec when)
 {
     char *reg_table[REG_TYPES][NUM_REGS] = 
     {
@@ -76,7 +143,7 @@ void PrintSingleRegister(reg_mem_t *reg_mem, uint8_t size, uint8_t reg, enum bef
 
     get_reg_func_ptr reg_getters[NUM_GETTERS] =
     {
-        GetByteRegValue, GetWordRegValue
+        MemoryGetByteRegValue, MemoryGetWordRegValue
     };
     
     if (when == BEFOR_EXEC)
@@ -87,7 +154,7 @@ void PrintSingleRegister(reg_mem_t *reg_mem, uint8_t size, uint8_t reg, enum bef
     printf("(0x%x)", reg_getters[size](reg_mem, reg));
 }
 
-void PrintAllRegisters(reg_mem_t *reg_mem)
+void MemoryPrintAllReg(reg_mem_t *reg_mem)
 {
     printf("ax - 0x%x (%d)\n", *(uint16_t *)(reg_mem->memory + AX), *(uint16_t *)(reg_mem->memory + AX));
     printf("bx - 0x%x (%d)\n", *(uint16_t *)(reg_mem->memory + BX), *(uint16_t *)(reg_mem->memory + BX));

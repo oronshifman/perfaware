@@ -48,7 +48,7 @@
 #define LOOP 0b11100010
 #define JCXZ 0b11100011
 
-void InitOpTable(inst_t *op_table)
+void InstructionInitOpTable(inst_t *op_table)
 {
     op_table[MOV_RM_TO_FROM_REG].operation_type = MOV;
     op_table[MOV_RM_TO_FROM_REG].field[D] = (inst_field_t){D, UNINITIALIZED, 1, 0b1, 0};

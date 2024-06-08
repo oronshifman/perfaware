@@ -52,7 +52,7 @@ typedef struct expression
         instruction: pointer to an instruction struct to be feeled by decoder.
         bin:         binary file to read from.
 */
-int GetNextInstruction(expression_t *decoded_inst, FILE *bin);
+int DecoderGetNextInst(expression_t *decoded_inst, FILE *bin);
 
 #endif /* __SIM86_DECODER_H__ */
 

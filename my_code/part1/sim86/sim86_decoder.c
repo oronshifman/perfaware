@@ -20,11 +20,11 @@ static void InitOperand(operand_t *operand, enum operand_type type, uint8_t size
  * @description - fills <instruction> with the next instruction decoded from <bin>
  * @return - 0 if failed 1 if success
 */
-int GetNextInstruction(expression_t *decoded_inst, FILE *bin)
+int DecoderGetNextInst(expression_t *decoded_inst, FILE *bin)
 {
     if (op_table[0].operation_type == NONE)
     {
-        InitOpTable(op_table);
+        InstructionInitOpTable(op_table);
     }
 
     uint16_t instruction_bytes = 0;

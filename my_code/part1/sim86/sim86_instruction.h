@@ -53,6 +53,6 @@ typedef struct inst
     inst_field_t field[NUM_FIELDS];
 } inst_t;
 
-void InitOpTable(inst_t *op_table);
+void InstructionInitOpTable(inst_t *op_table);
 
 #endif /* __SIM86_GENERAL_H__ */ 

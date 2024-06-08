@@ -18,7 +18,7 @@ typedef void (*option_func_ptr)(expression_t *, reg_mem_t *);
 static void Print(expression_t *expression, reg_mem_t *reg_mem);
 static void Exec(expression_t *expression, reg_mem_t *reg_mem);
 
-void DecodeBin(FILE *bin, uint8_t option)
+void ManagerDecodeBin(FILE *bin, uint8_t option)
 {
     assert(bin);
 
@@ -29,7 +29,7 @@ void DecodeBin(FILE *bin, uint8_t option)
         case EXEC_BIN:
         {
             option_func = Exec;
-            reg_mem = InitMemory();
+            reg_mem = MemoryCreate();
         } break;
 
         case PRINT_TO_ASM:
@@ -39,7 +39,7 @@ void DecodeBin(FILE *bin, uint8_t option)
     }
 
     expression_t *decoded_inst = malloc(sizeof(*decoded_inst));
-    while (GetNextInstruction(decoded_inst, bin)) 
+    while (DecoderGetNextInst(decoded_inst, bin)) 
     {
         option_func(decoded_inst, reg_mem);
     }
@@ -47,11 +47,12 @@ void DecodeBin(FILE *bin, uint8_t option)
     if (option == EXEC_BIN)
     {
         printf("\n\n");
-        PrintAllRegisters(reg_mem);
+        MemoryPrintAllReg(reg_mem);
+        MemoryDestroy(reg_mem);
     }
 }
 
-uint8_t ParseOption(char *option)
+uint8_t ManagerParseOption(char *option)
 {
     assert(option);
 
@@ -68,15 +69,15 @@ uint8_t ParseOption(char *option)
 
 static void Print(expression_t *expression, reg_mem_t *reg_mem)
 {
-    PrintInstructionAsm(expression);
+    PrinterPrintInst(expression);
     printf("\n");
 }
 
 static void Exec(expression_t *expression, reg_mem_t *reg_mem)
 {
-    PrintInstructionAsm(expression);
-    PrintSingleRegister(reg_mem, expression->operands[DEST].size, expression->operands[DEST].reg_code, BEFOR_EXEC);
-    ExecuteInstruction(expression, reg_mem);
-    PrintSingleRegister(reg_mem, expression->operands[DEST].size, expression->operands[DEST].reg_code, AFTER_EXEC);
+    PrinterPrintInst(expression);
+    MemoryPrintSingleReg(reg_mem, expression->operands[DEST].size, expression->operands[DEST].reg_code, BEFOR_EXEC);
+    ExecutorExecInst(expression, reg_mem);
+    MemoryPrintSingleReg(reg_mem, expression->operands[DEST].size, expression->operands[DEST].reg_code, AFTER_EXEC);
     printf("\n");
 }

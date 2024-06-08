@@ -5,17 +5,17 @@ typedef uint16_t (*get_reg_func_ptr)(reg_mem_t *, uint8_t);
 
 set_reg_func_ptr reg_setters[NUM_SETTERS] =
 {
-    SetByteRegValue, SetWordRegValue
+    MemorySetByteRegValue, MemorySetWordRegValue
 };
 
 get_reg_func_ptr reg_getters[NUM_GETTERS] =
 {
-    GetByteRegValue, GetWordRegValue
+    MemoryGetByteRegValue, MemoryGetWordRegValue
 };
 
 static uint16_t GetOperandValue(reg_mem_t *reg_mem, operand_t *operand);
 
-void ExecuteInstruction(expression_t *instruction, reg_mem_t *reg_mem)
+void ExecutorExecInst(expression_t *instruction, reg_mem_t *reg_mem)
 {
     uint8_t reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
     uint16_t src = GetOperandValue(reg_mem, &instruction->operands[SRC]);

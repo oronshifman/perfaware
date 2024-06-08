@@ -8,7 +8,7 @@ int32_t main(int32_t argc, uint8_t *argv[])
         return 1;
     }
     
-    uint8_t option = ParseOption(argv[1]); 
+    uint8_t option = ManagerParseOption(argv[1]); 
     if (option < 0)
     {
         printf("Invalid option");
@@ -23,7 +23,7 @@ int32_t main(int32_t argc, uint8_t *argv[])
         return 1;
     }
 
-    DecodeBin(bin, option);
+    ManagerDecodeBin(bin, option);
    
     return 0;
 }

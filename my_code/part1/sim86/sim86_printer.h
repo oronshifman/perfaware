@@ -3,6 +3,6 @@
 
 #include "sim86_decoder.h"
 
-void PrintInstructionAsm(expression_t *instruction);
+void PrinterPrintInst(expression_t *instruction);
 
 #endif /* __SIM86_PRINTER_H__ */

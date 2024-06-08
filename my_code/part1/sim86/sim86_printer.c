@@ -47,7 +47,7 @@ static char *ea_calc[NUM_EA] =
 
 static void AddOperandToBuff(char *buff, operand_t *operand);
 
-void PrintInstructionAsm(expression_t *instruction)
+void PrinterPrintInst(expression_t *instruction)
 {
     char buff[50];
 

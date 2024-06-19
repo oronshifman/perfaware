@@ -79,5 +79,6 @@ static void Exec(expression_t *expression, reg_mem_t *reg_mem)
     MemoryPrintSingleReg(reg_mem, expression->operands[DEST].size, expression->operands[DEST].reg_code, BEFOR_EXEC);
     ExecutorExecInst(expression, reg_mem);
     MemoryPrintSingleReg(reg_mem, expression->operands[DEST].size, expression->operands[DEST].reg_code, AFTER_EXEC);
+    MemoryPrintFlags(reg_mem);
     printf("\n");
 }

@@ -147,7 +147,7 @@ void MemoryPrintSingleReg(reg_mem_t *reg_mem, uint8_t size, uint8_t reg, enum be
          "sp", "bp", "si", "di"}
     };
 
-    get_reg_func_ptr reg_getters[NUM_GETTERS] =
+    get_reg_func_ptr reg_getters[NUM_REG_GETTERS] =
     {
         MemoryGetByteRegValue, MemoryGetWordRegValue
     };
@@ -158,6 +158,11 @@ void MemoryPrintSingleReg(reg_mem_t *reg_mem, uint8_t size, uint8_t reg, enum be
         return;
     }
     printf("(0x%x)", reg_getters[size](reg_mem, reg));
+}
+
+void MemoryPrintFlags(reg_mem_t *reg_mem)
+{
+    printf(" ZF: %d, SF: %d", MemoryGetFlag(reg_mem, ZF), MemoryGetFlag(reg_mem, SF));
 }
 
 void MemoryPrintAllReg(reg_mem_t *reg_mem)

@@ -5,8 +5,9 @@
 
 #define NUM_REGS 8
 
-#define NUM_SETTERS 2
-#define NUM_GETTERS 2
+#define NUM_REG_SETTERS 2
+#define NUM_REG_GETTERS 2
+#define NUM_FLAG_SETTERS 2
 
 enum reg_types
 {
@@ -43,6 +44,7 @@ uint16_t MemoryGetWordRegValue(reg_mem_t *reg_mem, uint8_t reg);
 uint16_t MemoryGetByteRegValue(reg_mem_t *reg_mem, uint8_t reg);
 void MemoryPrintAllReg(reg_mem_t *reg_mem);
 void MemoryPrintSingleReg(reg_mem_t *reg_mem, uint8_t size, uint8_t reg, enum befor_after_exec when);
+void MemoryPrintFlags(reg_mem_t *reg_mem);
 void MemoryFlagOn(reg_mem_t *reg_mem, uint8_t flag);
 void MemoryFlagOff(reg_mem_t *reg_mem, uint8_t flag);
 uint8_t MemoryGetFlag(reg_mem_t *reg_mem, uint8_t flag);

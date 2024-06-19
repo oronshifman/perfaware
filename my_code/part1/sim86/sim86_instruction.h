@@ -5,7 +5,7 @@
 
 enum operation_type
 {
-    NONE, // for initailizing to 0
+    NONE, // for initializing to 0
 
     MOV,
     ADD,
@@ -49,7 +49,7 @@ typedef struct inst_field
 
 typedef struct inst
 {
-    enum operation_type operation_type;        // NOTE: coresponds to enum operation_types from sim86_general.h
+    enum operation_type operation_type;        // NOTE: corresponds to enum operation_types from sim86_general.h
     inst_field_t field[NUM_FIELDS];
 } inst_t;
 

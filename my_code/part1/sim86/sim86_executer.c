@@ -14,13 +14,75 @@ get_reg_func_ptr reg_getters[NUM_GETTERS] =
 };
 
 static uint16_t GetOperandValue(reg_mem_t *reg_mem, operand_t *operand);
+static void MovToReg(expression_t *instruction, reg_mem_t *reg_mem);
+static void ExecSub(expression_t *instruction, reg_mem_t *reg_mem);
+static void ExecAdd(expression_t *instruction, reg_mem_t *reg_mem);
+static void ExecCmp(expression_t *instruction, reg_mem_t *reg_mem);
+static void ExecJmp(expression_t *instruction, reg_mem_t *reg_mem);
 
 void ExecutorExecInst(expression_t *instruction, reg_mem_t *reg_mem)
 {
-    uint8_t reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
-    uint16_t src = GetOperandValue(reg_mem, &instruction->operands[SRC]);
+    switch(instruction->operation_type)
+    {
+        case MOV:
+        {
+            MovToReg(instruction, reg_mem);
+        } break;
 
-    reg_setters[instruction->operands[DEST].size](reg_mem, reg_code, src);
+        case SUB:
+        {
+            ExecSub(instruction, reg_mem);
+        } break;
+
+        case ADD:
+        {
+            ExecAdd(instruction, reg_mem);
+        } break;
+
+        case CMP:
+        {
+            ExecCmp(instruction, reg_mem);
+        } break;
+
+        case JMP:
+        {
+            ExecJmp(instruction, reg_mem);
+        } break;
+    }
+}
+
+static void MovToReg(expression_t *instruction, reg_mem_t *reg_mem)
+{
+    uint8_t reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
+    uint16_t src_value = GetOperandValue(reg_mem, &instruction->operands[SRC]);
+
+    reg_setters[instruction->operands[DEST].size](reg_mem, reg_code, src_value);
+}
+
+static void ExecSub(expression_t *instruction, reg_mem_t *reg_mem)
+{
+    uint8_t reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
+    uint16_t src_value = GetOperandValue(reg_mem, &instruction->operands[SRC]);
+
+    uint16_t reg_value = reg_getters[instruction->operands[DEST].size](reg_mem, reg_code);
+    reg_setters[instruction->operands[DEST].size](reg_mem, reg_code, reg_value - src_value);
+}
+
+static void ExecAdd(expression_t *instruction, reg_mem_t *reg_mem)
+{
+}
+
+static void ExecCmp(expression_t *instruction, reg_mem_t *reg_mem)
+{
+    uint8_t reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
+    uint16_t src_value = GetOperandValue(reg_mem, &instruction->operands[SRC]);
+
+    uint16_t reg_value = reg_getters[instruction->operands[DEST].size](reg_mem, reg_code);
+    
+}
+
+static void ExecJmp(expression_t *instruction, reg_mem_t *reg_mem)
+{
 }
 
 static uint16_t GetOperandValue(reg_mem_t *reg_mem, operand_t *operand)
@@ -29,7 +91,6 @@ static uint16_t GetOperandValue(reg_mem_t *reg_mem, operand_t *operand)
     {
         case REGISTER:
         {
-            // TODO: change this to get value from register!
             if (operand->direction == DEST)
             {
                 return operand->reg_code;

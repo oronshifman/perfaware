@@ -22,6 +22,14 @@ enum befor_after_exec
     AFTER_EXEC
 };
 
+enum flags
+{
+    ZF,
+    SF,
+
+    NUM_FLAGS
+};
+
 typedef struct reg_mem
 {
     uint8_t memory[REG_TYPES * NUM_REGS];
@@ -35,10 +43,9 @@ uint16_t MemoryGetWordRegValue(reg_mem_t *reg_mem, uint8_t reg);
 uint16_t MemoryGetByteRegValue(reg_mem_t *reg_mem, uint8_t reg);
 void MemoryPrintAllReg(reg_mem_t *reg_mem);
 void MemoryPrintSingleReg(reg_mem_t *reg_mem, uint8_t size, uint8_t reg, enum befor_after_exec when);
-uint8_t MemorySetZF(reg_mem_t *reg_mem);
-uint8_t MemoryGetZF(reg_mem_t *reg_mem);
-uint8_t MemorySetSF(reg_mem_t *reg_mem);
-uint8_t MemoryGetSF(reg_mem_t *reg_mem);
+void MemoryFlagOn(reg_mem_t *reg_mem, uint8_t flag);
+void MemoryFlagOff(reg_mem_t *reg_mem, uint8_t flag);
+uint8_t MemoryGetFlag(reg_mem_t *reg_mem, uint8_t flag);
 
 #endif /* __SIM86_MEMORY_H__ */ 
 

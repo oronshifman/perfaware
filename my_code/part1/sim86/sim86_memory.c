@@ -33,13 +33,26 @@ enum flags_reg
 {
     FLAGS_REG_SIZE = 1,
 
-    ZF = 0x80,
-    SF = 0x40,
+    SF_INDEX = 6,
+    ZF_INDEX = 7,
+
+    ZF_MASK = 0x80,
+    SF_MASK = 0x40,
     
     FLAGS_REG = 16
 };
 
-uint8_t translation_table[REG_TYPES][NUM_REGS] = 
+uint8_t flag_mask_table[NUM_FLAGS] =
+{
+    ZF_MASK, SF_MASK
+};
+
+uint8_t flag_index_table[NUM_FLAGS] =
+{
+    ZF_INDEX, SF_INDEX
+};
+
+uint8_t register_translation_table[REG_TYPES][NUM_REGS] = 
 {
     {AL, CL, DL, BL, AH, CH, DH, BH},
     {AX, CX, DX, BX, SP, BP, SI, DI}
@@ -55,6 +68,7 @@ reg_mem_t *MemoryCreate(void)
         perror("Failed to init reg_mem");
         exit(1);
     }
+    reg_mem->memory[FLAGS_REG] = 0;
 
     return reg_mem;
 }
@@ -71,7 +85,7 @@ void MemorySetWordRegValue(reg_mem_t *reg_mem, uint8_t reg, uint16_t value)
     assert(reg_mem);
     assert(reg < WORD_REGS);
 
-    uint8_t reg_trans = translation_table[WORD][reg];
+    uint8_t reg_trans = register_translation_table[WORD][reg];
     uint16_t *where = (uint16_t *)&(reg_mem->memory[reg_trans]);
     *where = value;
 }
@@ -81,7 +95,7 @@ void MemorySetByteRegValue(reg_mem_t *reg_mem, uint8_t reg, uint16_t value)
     assert(reg_mem);
     assert(reg < BYTE_REGS);
 
-    uint8_t reg_trans = translation_table[BYTE][reg];
+    uint8_t reg_trans = register_translation_table[BYTE][reg];
     reg_mem->memory[reg_trans] = value;
 }
 
@@ -90,7 +104,7 @@ uint16_t MemoryGetWordRegValue(reg_mem_t *reg_mem, uint8_t reg)
     assert(reg_mem);
     assert(reg < WORD_REGS);
 
-    uint8_t reg_trans = translation_table[WORD][reg];
+    uint8_t reg_trans = register_translation_table[WORD][reg];
     return *(uint16_t *)&(reg_mem->memory[reg_trans]);
 }
 
@@ -99,35 +113,27 @@ uint16_t MemoryGetByteRegValue(reg_mem_t *reg_mem, uint8_t reg)
     assert(reg_mem);
     assert(reg < BYTE_REGS);
 
-    uint8_t reg_trans = translation_table[BYTE][reg];
+    uint8_t reg_trans = register_translation_table[BYTE][reg];
     return reg_mem->memory[reg_trans];
 }
 
-uint8_t MemorySetZF(reg_mem_t *reg_mem, uint8_t )
+void MemoryFlagOn(reg_mem_t *reg_mem, uint8_t flag)
 {
     assert(reg_mem);
-    // TODO: finish impl
-    return reg_mem->memory[FLAGS_REG] ^ ZF;
+    reg_mem->memory[FLAGS_REG] |= flag_mask_table[flag];
 }
 
-uint8_t MemoryGetZF(reg_mem_t *reg_mem)
+void MemoryFlagOff(reg_mem_t *reg_mem, uint8_t flag)
 {
     assert(reg_mem);
-    // TODO: finish impl
+    reg_mem->memory[FLAGS_REG] &= ~flag_mask_table[flag];
 }
 
-uint8_t MemorySetSF(reg_mem_t *reg_mem)
+uint8_t MemoryGetFlag(reg_mem_t *reg_mem, uint8_t flag)
 {
     assert(reg_mem);
-    // TODO: finish impl
+    return (reg_mem->memory[FLAGS_REG] & flag_mask_table[flag]) >> flag_index_table[flag];
 }
-
-uint8_t MemoryGetSF(reg_mem_t *reg_mem)
-{
-    assert(reg_mem);
-    // TODO: finish impl
-}
-
 
 void MemoryPrintSingleReg(reg_mem_t *reg_mem, uint8_t size, uint8_t reg, enum befor_after_exec when)
 {

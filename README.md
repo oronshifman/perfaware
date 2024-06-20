@@ -1,12 +1,54 @@
-By: Oron Shifman
+---
+# Project By: Oron Shifman
 
-This project is following the course "Performance-Aware Programming" by Casey Muratori.
+This project follows the course "Performance-Aware Programming" by Casey Muratori.
 
-The Program can be run by cloning the repo, building the binary with the build_sim86.sh and then running the binary as follows:
-sim86.out [option] [binary_to_operat_on]
+## Description
 
-[option]: Is eather -print or -exec.
-  -print: will print a disassembly of [binary_to_operat_on]
-  -exec: will execut the instruction in [binary_to_operat_on] on the memory module and print out info about the execution prosses.
+This program, `sim86`, provides functionality for disassembling and executing x86 assembly instructions.
 
-The program supports dissassembly operations that appear in the listings in decoding_listing_asm directory, and execution of operations that appear in execution_listing_asm.
+## Usage
+
+1. **Clone the repository:**
+   ```
+   git clone https://github.com/oronshifman/perfaware.git
+   cd perfawer
+   ```
+
+2. **Build the binary:**
+   ```
+   ./build_sim86.sh
+   ```
+
+3. **Run the program:**
+   ```
+   ./sim86.out [option] [binary_to_operate_on]
+   ```
+
+   - `[option]` can be either `-print` or `-exec`:
+     - `-print`: Print a disassembly of `[binary_to_operate_on]`.
+     - `-exec`: Execute the instructions in `[binary_to_operate_on]` on the memory module and print information about the execution process.
+
+## Supported Operations
+
+The program supports:
+- Disassembly operations found in the listings in the `decoding_listing_asm` directory.
+- Execution of operations found in the `execution_listing_asm` directory.
+
+## Examples
+
+### Printing Disassembly
+
+To print the disassembly of a binary file named `example_binary`:
+```
+./sim86.out -print example_binary
+```
+
+### Executing Instructions
+
+To execute the instructions of `example_binary` and print execution information:
+```
+./sim86.out -exec example_binary
+```
+
+---

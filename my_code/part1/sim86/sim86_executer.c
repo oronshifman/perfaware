@@ -25,6 +25,7 @@ static void ExecSub(expression_t *instruction, reg_mem_t *reg_mem);
 static void ExecAdd(expression_t *instruction, reg_mem_t *reg_mem);
 static void ExecCmp(expression_t *instruction, reg_mem_t *reg_mem);
 static void ExecJmp(expression_t *instruction, reg_mem_t *reg_mem);
+static uint16_t DoOperation(expression_t *instruction, reg_mem_t *reg_mem, uint8_t reg_code, uint16_t src_value, uint8_t op);
 static uint16_t GetSignBitMask(uint8_t size);
 static uint8_t GetSignBitVal(uint8_t size, uint16_t op_outcome, uint16_t sing_bit_mask);
 
@@ -72,23 +73,19 @@ static void ExecSub(expression_t *instruction, reg_mem_t *reg_mem)
     uint8_t reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
     uint16_t src_value = GetOperandValue(reg_mem, &instruction->operands[SRC]);
 
-    uint16_t reg_value = reg_getters[instruction->operands[DEST].size](reg_mem, reg_code);
-
-    uint16_t sing_bit_mask = GetSignBitMask(instruction->operands[DEST].size);
-
-    uint16_t op_outcome = reg_value - src_value;
-    uint8_t sign_bit_val = GetSignBitVal(instruction->operands[DEST].size, op_outcome, sing_bit_mask);
+    uint16_t op_outcome = DoOperation(instruction, reg_mem, reg_code, src_value, SUB);
 
     reg_setters[instruction->operands[DEST].size](reg_mem, reg_code, op_outcome);
-    mem_flag_setters[sign_bit_val](reg_mem, SF);
-    mem_flag_setters[op_outcome == 0](reg_mem, ZF);
-
-    // NOTE: for debug and feedback
-    // printf("ZF: %d, SF: %d\n", MemoryGetFlag(reg_mem, ZF), MemoryGetFlag(reg_mem, SF));
 }
 
 static void ExecAdd(expression_t *instruction, reg_mem_t *reg_mem)
 {
+    uint8_t reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
+    uint16_t src_value = GetOperandValue(reg_mem, &instruction->operands[SRC]);
+
+    uint16_t op_outcome = DoOperation(instruction, reg_mem, reg_code, src_value, ADD);
+
+    reg_setters[instruction->operands[DEST].size](reg_mem, reg_code, op_outcome);
 }
 
 static void ExecCmp(expression_t *instruction, reg_mem_t *reg_mem)
@@ -96,12 +93,43 @@ static void ExecCmp(expression_t *instruction, reg_mem_t *reg_mem)
     uint8_t reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
     uint16_t src_value = GetOperandValue(reg_mem, &instruction->operands[SRC]);
 
-    uint16_t reg_value = reg_getters[instruction->operands[DEST].size](reg_mem, reg_code);
-    
+    uint16_t op_outcome = DoOperation(instruction, reg_mem, reg_code, src_value, SUB);
 }
 
 static void ExecJmp(expression_t *instruction, reg_mem_t *reg_mem)
 {
+}
+
+static uint16_t DoOperation(expression_t *instruction, reg_mem_t *reg_mem, uint8_t reg_code, uint16_t src_value, uint8_t op)
+{
+    uint16_t reg_value = reg_getters[instruction->operands[DEST].size](reg_mem, reg_code);
+
+    uint16_t sing_bit_mask = GetSignBitMask(instruction->operands[DEST].size);
+
+    uint16_t op_outcome;
+    switch (op)
+    {
+        case ADD:
+        {
+            op_outcome = reg_value + src_value;
+        } break;
+        
+        case SUB:
+        {
+            op_outcome = reg_value - src_value;
+        } break;
+
+        default:
+        {
+            return -1;
+        } break;
+    }
+    uint8_t sign_bit_val = GetSignBitVal(instruction->operands[DEST].size, op_outcome, sing_bit_mask);
+
+    mem_flag_setters[sign_bit_val](reg_mem, SF);
+    mem_flag_setters[op_outcome == 0](reg_mem, ZF);
+
+    return op_outcome;
 }
 
 static uint16_t GetSignBitMask(uint8_t size)

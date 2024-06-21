@@ -27,7 +27,7 @@ u8 DecoderGetNextInst(expression_t *decoded_inst, reg_mem_t *reg_mem)
     }
 
     u16 instruction_bytes = 0;
-    if(fread(&instruction_bytes, sizeof(instruction_bytes), 1, bin) != 1) 
+    if(fread(&instruction_bytes, sizeof(instruction_bytes), 1, bin) != 1) // TODO(21/6/24): fix
     {
         if (ferror(bin))
         {
@@ -39,7 +39,7 @@ u8 DecoderGetNextInst(expression_t *decoded_inst, reg_mem_t *reg_mem)
     inst_t full_inst;
     GetInstructionForm(instruction_bytes & OP_MASK, &full_inst);
 
-    InitInstructionValues(&full_inst, instruction_bytes, bin);
+    InitInstructionValues(&full_inst, instruction_bytes, bin); // TODO(21/6/24): fix
 
     InitDecodedInst(decoded_inst, &full_inst, instruction_bytes);
 

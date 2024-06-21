@@ -1,8 +1,8 @@
 #include "sim86_executer.h"
 
-typedef void (*set_reg_func_ptr)(reg_mem_t *, uint8_t, uint16_t);
-typedef uint16_t (*get_reg_func_ptr)(reg_mem_t *, uint8_t);
-typedef void (*memory_flag_setter_func_ptr)(reg_mem_t *, uint8_t);
+typedef void (*set_reg_func_ptr)(reg_mem_t *, u8, u16);
+typedef u16 (*get_reg_func_ptr)(reg_mem_t *, u8);
+typedef void (*memory_flag_setter_func_ptr)(reg_mem_t *, u8);
 
 set_reg_func_ptr reg_setters[NUM_REG_SETTERS] =
 {
@@ -19,15 +19,15 @@ memory_flag_setter_func_ptr mem_flag_setters[NUM_FLAG_SETTERS] =
     MemoryFlagOff, MemoryFlagOn
 };
 
-static uint16_t GetOperandValue(reg_mem_t *reg_mem, operand_t *operand);
+static u16 GetOperandValue(reg_mem_t *reg_mem, operand_t *operand);
 static void MovToReg(expression_t *instruction, reg_mem_t *reg_mem);
 static void ExecSub(expression_t *instruction, reg_mem_t *reg_mem);
 static void ExecAdd(expression_t *instruction, reg_mem_t *reg_mem);
 static void ExecCmp(expression_t *instruction, reg_mem_t *reg_mem);
 static void ExecJmp(expression_t *instruction, reg_mem_t *reg_mem);
-static uint16_t DoOperation(expression_t *instruction, reg_mem_t *reg_mem, uint8_t reg_code, uint16_t src_value, uint8_t op);
-static uint16_t GetSignBitMask(uint8_t size);
-static uint8_t GetSignBitVal(uint8_t size, uint16_t op_outcome, uint16_t sing_bit_mask);
+static u16 DoOperation(expression_t *instruction, reg_mem_t *reg_mem, u8 reg_code, u16 src_value, u8 op);
+static u16 GetSignBitMask(u8 size);
+static u8 GetSignBitVal(u8 size, u16 op_outcome, u16 sing_bit_mask);
 
 void ExecutorExecInst(expression_t *instruction, reg_mem_t *reg_mem)
 {
@@ -62,51 +62,51 @@ void ExecutorExecInst(expression_t *instruction, reg_mem_t *reg_mem)
 
 static void MovToReg(expression_t *instruction, reg_mem_t *reg_mem)
 {
-    uint8_t reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
-    uint16_t src_value = GetOperandValue(reg_mem, &instruction->operands[SRC]);
+    u8 reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
+    u16 src_value = GetOperandValue(reg_mem, &instruction->operands[SRC]);
 
     reg_setters[instruction->operands[DEST].size](reg_mem, reg_code, src_value);
 }
 
 static void ExecSub(expression_t *instruction, reg_mem_t *reg_mem)
 {
-    uint8_t reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
-    uint16_t src_value = GetOperandValue(reg_mem, &instruction->operands[SRC]);
+    u8 reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
+    u16 src_value = GetOperandValue(reg_mem, &instruction->operands[SRC]);
 
-    uint16_t op_outcome = DoOperation(instruction, reg_mem, reg_code, src_value, SUB);
+    u16 op_outcome = DoOperation(instruction, reg_mem, reg_code, src_value, SUB);
 
     reg_setters[instruction->operands[DEST].size](reg_mem, reg_code, op_outcome);
 }
 
 static void ExecAdd(expression_t *instruction, reg_mem_t *reg_mem)
 {
-    uint8_t reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
-    uint16_t src_value = GetOperandValue(reg_mem, &instruction->operands[SRC]);
+    u8 reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
+    u16 src_value = GetOperandValue(reg_mem, &instruction->operands[SRC]);
 
-    uint16_t op_outcome = DoOperation(instruction, reg_mem, reg_code, src_value, ADD);
+    u16 op_outcome = DoOperation(instruction, reg_mem, reg_code, src_value, ADD);
 
     reg_setters[instruction->operands[DEST].size](reg_mem, reg_code, op_outcome);
 }
 
 static void ExecCmp(expression_t *instruction, reg_mem_t *reg_mem)
 {
-    uint8_t reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
-    uint16_t src_value = GetOperandValue(reg_mem, &instruction->operands[SRC]);
+    u8 reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
+    u16 src_value = GetOperandValue(reg_mem, &instruction->operands[SRC]);
 
-    uint16_t op_outcome = DoOperation(instruction, reg_mem, reg_code, src_value, SUB);
+    u16 op_outcome = DoOperation(instruction, reg_mem, reg_code, src_value, SUB);
 }
 
 static void ExecJmp(expression_t *instruction, reg_mem_t *reg_mem)
 {
 }
 
-static uint16_t DoOperation(expression_t *instruction, reg_mem_t *reg_mem, uint8_t reg_code, uint16_t src_value, uint8_t op)
+static u16 DoOperation(expression_t *instruction, reg_mem_t *reg_mem, u8 reg_code, u16 src_value, u8 op)
 {
-    uint16_t reg_value = reg_getters[instruction->operands[DEST].size](reg_mem, reg_code);
+    u16 reg_value = reg_getters[instruction->operands[DEST].size](reg_mem, reg_code);
 
-    uint16_t sing_bit_mask = GetSignBitMask(instruction->operands[DEST].size);
+    u16 sing_bit_mask = GetSignBitMask(instruction->operands[DEST].size);
 
-    uint16_t op_outcome;
+    u16 op_outcome;
     switch (op)
     {
         case ADD:
@@ -124,7 +124,7 @@ static uint16_t DoOperation(expression_t *instruction, reg_mem_t *reg_mem, uint8
             return -1;
         } break;
     }
-    uint8_t sign_bit_val = GetSignBitVal(instruction->operands[DEST].size, op_outcome, sing_bit_mask);
+    u8 sign_bit_val = GetSignBitVal(instruction->operands[DEST].size, op_outcome, sing_bit_mask);
 
     mem_flag_setters[sign_bit_val](reg_mem, SF);
     mem_flag_setters[op_outcome == 0](reg_mem, ZF);
@@ -132,18 +132,18 @@ static uint16_t DoOperation(expression_t *instruction, reg_mem_t *reg_mem, uint8
     return op_outcome;
 }
 
-static uint16_t GetSignBitMask(uint8_t size)
+static u16 GetSignBitMask(u8 size)
 {
     return size == 0 ? (1 << 7) : (1 << 15);
 }
 
-static uint8_t GetSignBitVal(uint8_t size, uint16_t op_outcome, uint16_t sing_bit_mask)
+static u8 GetSignBitVal(u8 size, u16 op_outcome, u16 sing_bit_mask)
 {
-    uint8_t num_shifts = size == 0 ? 7 : 15;
+    u8 num_shifts = size == 0 ? 7 : 15;
     return (op_outcome & sing_bit_mask) >> num_shifts;
 }
 
-static uint16_t GetOperandValue(reg_mem_t *reg_mem, operand_t *operand)
+static u16 GetOperandValue(reg_mem_t *reg_mem, operand_t *operand)
 {
     switch (operand->operand_type)
     {

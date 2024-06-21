@@ -5,29 +5,28 @@
 
 static inst_t op_table[256] = {NONE};
 
-static void GetInstructionForm(uint8_t op_code, inst_t *instruction);
-static void InitInstructionValues(inst_t *instruction, uint16_t instruction_bytes, FILE *bin);
-static void InitDecodedInst(expression_t *decoded_inst, inst_t *full_inst, uint16_t instruction_bytes);
-static void InitField(inst_t * instruction, uint8_t field, uint16_t instruction_bytes);
-static void InitFieldWithExtraBytes(inst_t *instruction, uint8_t field, uint8_t bytes_to_read, FILE *bin);
-static void SetDispState(inst_t *instruction);
-static uint8_t isArithmeticImmediateToAcc(uint16_t instruction_bytes);
-static void GetSrc(expression_t *decoded_inst, inst_t *instruction, uint16_t instruction_bytes);
-static void GetDest(expression_t *decoded_inst, inst_t *instruction, uint16_t instruction_bytes);
-static void InitOperand(operand_t *operand, enum operand_type type, uint8_t size, uint16_t disp);
+static void GetInstructionForm(u8 op_code, inst_t *instruction);
+static void InitInstructionValues(inst_t *instruction, u16 instruction_bytes, FILE *bin);
+static void InitDecodedInst(expression_t *decoded_inst, inst_t *full_inst, u16 instruction_bytes);
+static void InitField(inst_t * instruction, u8 field, u16 instruction_bytes);
+static void InitFieldWithExtraBytes(inst_t *instruction, u8 field, u8 bytes_to_read, FILE *bin);
+static u8 isArithmeticImmediateToAcc(u16 instruction_bytes);
+static void GetSrc(expression_t *decoded_inst, inst_t *instruction, u16 instruction_bytes);
+static void GetDest(expression_t *decoded_inst, inst_t *instruction, u16 instruction_bytes);
+static void InitOperand(operand_t *operand, enum operand_type type, u8 size, u16 disp);
 /**
  * 
  * @description - fills <instruction> with the next instruction decoded from <bin>
  * @return - 0 if failed 1 if success
 */
-int DecoderGetNextInst(expression_t *decoded_inst, FILE *bin)
+u8 DecoderGetNextInst(expression_t *decoded_inst, reg_mem_t *reg_mem)
 {
     if (op_table[0].operation_type == NONE)
     {
         InstructionInitOpTable(op_table);
     }
 
-    uint16_t instruction_bytes = 0;
+    u16 instruction_bytes = 0;
     if(fread(&instruction_bytes, sizeof(instruction_bytes), 1, bin) != 1) 
     {
         if (ferror(bin))
@@ -47,7 +46,7 @@ int DecoderGetNextInst(expression_t *decoded_inst, FILE *bin)
     return 1;
 }
 
-static void GetInstructionForm(uint8_t op_code, inst_t *full_inst) 
+static void GetInstructionForm(u8 op_code, inst_t *full_inst) 
 {
     full_inst->operation_type = op_table[op_code].operation_type;
     full_inst->field[D] = op_table[op_code].field[D];
@@ -61,14 +60,14 @@ static void GetInstructionForm(uint8_t op_code, inst_t *full_inst)
     full_inst->field[JMP_OFFSET] = op_table[op_code].field[JMP_OFFSET];
 }
 
-static void InitDecodedInst(expression_t *decoded_inst, inst_t *full_inst, uint16_t instruction_bytes)
+static void InitDecodedInst(expression_t *decoded_inst, inst_t *full_inst, u16 instruction_bytes)
 {
     decoded_inst->operation_type = full_inst->operation_type;
     GetDest(decoded_inst, full_inst, instruction_bytes);
     GetSrc(decoded_inst, full_inst, instruction_bytes);
 }
 
-static void GetSrc(expression_t *decoded_inst, inst_t *full_inst, uint16_t instruction_bytes)
+static void GetSrc(expression_t *decoded_inst, inst_t *full_inst, u16 instruction_bytes)
 {
     operand_t *src = &decoded_inst->operands[SRC];
     src->direction = SRC;
@@ -109,7 +108,7 @@ static void GetSrc(expression_t *decoded_inst, inst_t *full_inst, uint16_t instr
 }
 
 
-static void GetDest(expression_t *decoded_inst, inst_t *full_inst, uint16_t instruction_bytes)
+static void GetDest(expression_t *decoded_inst, inst_t *full_inst, u16 instruction_bytes)
 {
     operand_t *dest = &decoded_inst->operands[DEST];
     dest->direction = DEST;
@@ -118,7 +117,7 @@ static void GetDest(expression_t *decoded_inst, inst_t *full_inst, uint16_t inst
     {
         InitOperand(dest, JUMP_CODE, full_inst->field[W].value, 0);
 
-        uint8_t jmp_code = (instruction_bytes & 0xff) - 112 < 100 ? 
+        u8 jmp_code = (instruction_bytes & 0xff) - 112 < 100 ? 
                            (instruction_bytes & 0xff) - 112 :
                            (instruction_bytes & 0xff) - 212 + 4;
         dest->jmp_code = jmp_code;
@@ -166,27 +165,27 @@ static void GetDest(expression_t *decoded_inst, inst_t *full_inst, uint16_t inst
     dest->ea_code = full_inst->field[RM].value;
 }
 
-static void InitOperand(operand_t *operand, enum operand_type type, uint8_t size, uint16_t disp)
+static void InitOperand(operand_t *operand, enum operand_type type, u8 size, u16 disp)
 {
     operand->operand_type = type;
     operand->size = size;
     operand->disp = disp;
 }
 
-static void InitInstructionValues(inst_t *instruction, uint16_t instruction_bytes, FILE *bin)
+static void InitInstructionValues(inst_t *instruction, u16 instruction_bytes, FILE *bin)
 {
     enum operation_type inst_operation_type = instruction->operation_type;
     if (inst_operation_type == NONE)
     {
-        uint8_t imdt_to_reg[] = {ADD,NONE,NONE,NONE,NONE,SUB,NONE,CMP};
+        u8 imdt_to_reg[] = {ADD,NONE,NONE,NONE,NONE,SUB,NONE,CMP};
         
-        uint8_t field_offset = instruction->field[REG].offset;
-        uint16_t field_mask = instruction->field[REG].mask << field_offset;
+        u8 field_offset = instruction->field[REG].offset;
+        u16 field_mask = instruction->field[REG].mask << field_offset;
 
         instruction->operation_type = imdt_to_reg[(instruction_bytes & field_mask) >> field_offset];
     }
 
-    for (uint8_t field_type = 0; field_type < DISP; ++field_type) 
+    for (u8 field_type = 0; field_type < DISP; ++field_type) 
     {
         if (instruction->field[field_type].state == UNINITIALIZED)
         {
@@ -214,7 +213,7 @@ static void InitInstructionValues(inst_t *instruction, uint16_t instruction_byte
     // NOTE: initialize disp
     if (instruction->field[DISP].state == UNINITIALIZED)
     {
-        uint8_t disp_size = instruction->field[MOD].value == 0 ? 
+        u8 disp_size = instruction->field[MOD].value == 0 ? 
                             instruction->field[DISP].mask :
                             instruction->field[MOD].value;
         InitFieldWithExtraBytes(instruction,
@@ -235,11 +234,11 @@ static void InitInstructionValues(inst_t *instruction, uint16_t instruction_byte
             }
             else
             {
-                uint8_t extra_byte = 0;
+                u8 extra_byte = 0;
                 fread(&extra_byte, instruction->field[W].value, 1, bin);
                 
-                uint8_t offset = instruction->field[DATA].offset;
-                uint16_t mask = instruction->field[DATA].mask << offset;
+                u8 offset = instruction->field[DATA].offset;
+                u16 mask = instruction->field[DATA].mask << offset;
 
                 instruction->field[DATA].value = (instruction_bytes & mask) >> offset | extra_byte << offset; 
                 instruction->field[DATA].state = INITIALIZED;
@@ -247,9 +246,9 @@ static void InitInstructionValues(inst_t *instruction, uint16_t instruction_byte
             return;
         }
 
-        uint8_t w = instruction->field[W].value;
-        uint8_t s = instruction->field[S].value;
-        uint8_t bytes_to_read = 0;
+        u8 w = instruction->field[W].value;
+        u8 s = instruction->field[S].value;
+        u8 bytes_to_read = 0;
         if (instruction->field[S].state != NOT_USED)
         {
             if (w == 1 && s == 1 || w == 0 && s == 0)
@@ -277,10 +276,10 @@ static void InitInstructionValues(inst_t *instruction, uint16_t instruction_byte
     }
 }
 
-static uint8_t isArithmeticImmediateToAcc(uint16_t instruction_bytes) {
-    uint8_t ADD_IMMEDIATE_TO_ACC = 0b00000100;
-    uint8_t SUB_IMMEDIATE_TO_ACC = 0b00000100;
-    uint8_t CMP_IMMEDIATE_TO_ACC = 0b00000100;
+static u8 isArithmeticImmediateToAcc(u16 instruction_bytes) {
+    u8 ADD_IMMEDIATE_TO_ACC = 0b00000100;
+    u8 SUB_IMMEDIATE_TO_ACC = 0b00000100;
+    u8 CMP_IMMEDIATE_TO_ACC = 0b00000100;
 
     switch (instruction_bytes & OP_MASK)
     {
@@ -306,16 +305,16 @@ static uint8_t isArithmeticImmediateToAcc(uint16_t instruction_bytes) {
     }
 }
 
-static void InitField(inst_t *instruction, uint8_t field, uint16_t instruction_bytes)
+static void InitField(inst_t *instruction, u8 field, u16 instruction_bytes)
 {
-    uint8_t field_offset = instruction->field[field].offset;
-    uint16_t field_mask = instruction->field[field].mask << field_offset;
+    u8 field_offset = instruction->field[field].offset;
+    u16 field_mask = instruction->field[field].mask << field_offset;
 
     instruction->field[field].value = (instruction_bytes & field_mask) >> field_offset;
     instruction->field[field].state = INITIALIZED;
 }
 
-static void InitFieldWithExtraBytes(inst_t *instruction, uint8_t field, uint8_t bytes_to_read, FILE *bin)
+static void InitFieldWithExtraBytes(inst_t *instruction, u8 field, u8 bytes_to_read, FILE *bin)
 {
     fread(&instruction->field[field].value, bytes_to_read, 1, bin);
     instruction->field[field].state = INITIALIZED;

@@ -18,18 +18,19 @@ typedef void (*option_func_ptr)(expression_t *, reg_mem_t *);
 static void Print(expression_t *expression, reg_mem_t *reg_mem);
 static void Exec(expression_t *expression, reg_mem_t *reg_mem);
 
-void ManagerDecodeBin(FILE *bin, uint8_t option)
+void ManagerOperate(FILE *bin, u8 option)
 {
     assert(bin);
 
-    reg_mem_t *reg_mem;
+    reg_mem_t *reg_mem = MemoryCreate();
+    MemorySetupCodeSeg(reg_mem, bin);
+
     option_func_ptr option_func = NULL;
     switch (option)
     {
         case EXEC_BIN:
         {
             option_func = Exec;
-            reg_mem = MemoryCreate();
         } break;
 
         case PRINT_TO_ASM:
@@ -39,7 +40,7 @@ void ManagerDecodeBin(FILE *bin, uint8_t option)
     }
 
     expression_t *decoded_inst = malloc(sizeof(*decoded_inst));
-    while (DecoderGetNextInst(decoded_inst, bin)) 
+    while (DecoderGetNextInst(decoded_inst, reg_mem)) 
     {
         option_func(decoded_inst, reg_mem);
     }
@@ -52,7 +53,7 @@ void ManagerDecodeBin(FILE *bin, uint8_t option)
     }
 }
 
-uint8_t ManagerParseOption(char *option)
+u8 ManagerParseOption(char *option)
 {
     assert(option);
 

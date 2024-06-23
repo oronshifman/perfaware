@@ -77,6 +77,8 @@ typedef struct reg_mem
 } reg_mem_t;
 
 static void InitSegRegs(reg_mem_t * reg_mem);
+static u16 MemoryGetMemoryValue(reg_mem_t *reg_mem, u8 segment, u16 offset);
+static void MemoryIncIPByN(reg_mem_t *reg_mem, u16 n);
 
 reg_mem_t *MemoryCreate(void)
 {
@@ -109,7 +111,7 @@ static void InitSegRegs(reg_mem_t * reg_mem)
     reg_mem->memory[IP] = 0;
 }
 
-void MemorySetupCodeSeg(reg_mem_t *reg_mem, FILE *bin)
+s64 MemorySetupCodeSeg(reg_mem_t *reg_mem, FILE *bin)
 {
     assert(reg_mem);
     assert((s8)reg_mem->memory[CS] == -1);
@@ -119,11 +121,19 @@ void MemorySetupCodeSeg(reg_mem_t *reg_mem, FILE *bin)
 
     u16 data = 0;
     for (u32 offset = first_available_addr;
-         fread(&data, sizeof(u16), 1, bin) == 1;
+         fread(&data, sizeof(data), 1, bin) == 1;
          offset += 2)
     {
         *(u16 *)&reg_mem->memory[offset] = data;
     }
+
+    if (ferror(bin))
+    {
+        perror("MemorySetupCodeSeg");
+        exit(1);
+    }
+
+    return ftell(bin);
 }
 
 void MemorySetWordRegValue(reg_mem_t *reg_mem, u8 reg, u16 value)
@@ -163,14 +173,27 @@ u16 MemoryGetByteRegValue(reg_mem_t *reg_mem, u8 reg)
     return reg_mem->memory[reg_trans];
 }
 
-u16 MemoryGetMemoryValue(reg_mem_t *reg_mem, u8 segment, u16 offset)
+u16 MemoryNextGetNByteMemory(reg_mem_t *reg_mem, u8 segment, u8 n)
+{
+    assert(reg_mem);
+    assert(segment >= 0 && segment < NUM_SEGMENTS);
+    assert(n > 0 && n <= 2);
+
+    u16 ip = reg_mem->memory[IP];
+    u16 bytes = MemoryGetMemoryValue(reg_mem, CODE_SEG, ip); 
+    MemoryIncIPByN(reg_mem, n);
+
+    return bytes;
+}
+
+static u16 MemoryGetMemoryValue(reg_mem_t *reg_mem, u8 segment, u16 offset)
 {
     u8 segment_trans = register_translation_table[SEGMENT][segment];
     u16 segment_base = reg_mem->memory[segment_trans];
     return *(u16 *)&(reg_mem->memory[segment_base + offset]);
 }
 
-void MemoryIncIPByN(reg_mem_t *reg_mem, u16 n)
+static void MemoryIncIPByN(reg_mem_t *reg_mem, u16 n)
 {
     assert(reg_mem);
     reg_mem->memory[IP] += n;

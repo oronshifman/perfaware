@@ -23,7 +23,7 @@ void ManagerOperate(FILE *bin, u8 option)
     assert(bin);
 
     reg_mem_t *reg_mem = MemoryCreate();
-    MemorySetupCodeSeg(reg_mem, bin);
+    s64 code_left = MemorySetupCodeSeg(reg_mem, bin);
 
     option_func_ptr option_func = NULL;
     switch (option)
@@ -40,8 +40,9 @@ void ManagerOperate(FILE *bin, u8 option)
     }
 
     expression_t *decoded_inst = malloc(sizeof(*decoded_inst));
-    while (DecoderGetNextInst(decoded_inst, reg_mem)) 
+    while (code_left) 
     {
+        code_left -= DecoderGetNextInst(decoded_inst, reg_mem);
         option_func(decoded_inst, reg_mem);
     }
     

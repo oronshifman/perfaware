@@ -1,15 +1,14 @@
 #include "sim86_decoder.h"
 
-
 #define OP_MASK  0xfc
 
 static inst_t op_table[256] = {NONE};
 
 static void GetInstructionForm(u8 op_code, inst_t *instruction);
-static void InitInstructionValues(inst_t *instruction, u16 instruction_bytes, FILE *bin);
+static void InitInstructionValues(inst_t *instruction, u16 instruction_bytes, reg_mem_t *reg_mem, u8 *bytes_read);
 static void InitDecodedInst(expression_t *decoded_inst, inst_t *full_inst, u16 instruction_bytes);
 static void InitField(inst_t * instruction, u8 field, u16 instruction_bytes);
-static void InitFieldWithExtraBytes(inst_t *instruction, u8 field, u8 bytes_to_read, FILE *bin);
+static void InitFieldWithExtraBytes(inst_t *instruction, u8 field, u8 bytes_to_read, reg_mem_t *reg_mem);
 static u8 isArithmeticImmediateToAcc(u16 instruction_bytes);
 static void GetSrc(expression_t *decoded_inst, inst_t *instruction, u16 instruction_bytes);
 static void GetDest(expression_t *decoded_inst, inst_t *instruction, u16 instruction_bytes);
@@ -17,7 +16,7 @@ static void InitOperand(operand_t *operand, enum operand_type type, u8 size, u16
 /**
  * 
  * @description - fills <instruction> with the next instruction decoded from <bin>
- * @return - 0 if failed 1 if success
+ * @return - number of bytes read from code segment
 */
 u8 DecoderGetNextInst(expression_t *decoded_inst, reg_mem_t *reg_mem)
 {
@@ -26,24 +25,18 @@ u8 DecoderGetNextInst(expression_t *decoded_inst, reg_mem_t *reg_mem)
         InstructionInitOpTable(op_table);
     }
 
-    u16 instruction_bytes = 0;
-    if(fread(&instruction_bytes, sizeof(instruction_bytes), 1, bin) != 1) // TODO(21/6/24): fix
-    {
-        if (ferror(bin))
-        {
-            perror("GetNextInstruction");
-        }
-        return 0;
-    }
+    // TODO(23.7.24): changed from work with IP (3 lines)
+    u16 instruction_bytes = MemoryNextGetNByteMemory(reg_mem, CODE_SEG, sizeof(instruction_bytes)); // TODO(23.7.24): under construction
+    u8 bytes_read = sizeof(instruction_bytes);
 
     inst_t full_inst;
     GetInstructionForm(instruction_bytes & OP_MASK, &full_inst);
 
-    InitInstructionValues(&full_inst, instruction_bytes, bin); // TODO(21/6/24): fix
+    InitInstructionValues(&full_inst, instruction_bytes, reg_mem, &bytes_read); // TODO(23.7.24): under construction
 
     InitDecodedInst(decoded_inst, &full_inst, instruction_bytes);
 
-    return 1;
+    return bytes_read;
 }
 
 static void GetInstructionForm(u8 op_code, inst_t *full_inst) 
@@ -172,7 +165,7 @@ static void InitOperand(operand_t *operand, enum operand_type type, u8 size, u16
     operand->disp = disp;
 }
 
-static void InitInstructionValues(inst_t *instruction, u16 instruction_bytes, FILE *bin)
+static void InitInstructionValues(inst_t *instruction, u16 instruction_bytes, reg_mem_t *reg_mem, u8 *bytes_read)
 {
     enum operation_type inst_operation_type = instruction->operation_type;
     if (inst_operation_type == NONE)
@@ -219,7 +212,8 @@ static void InitInstructionValues(inst_t *instruction, u16 instruction_bytes, FI
         InitFieldWithExtraBytes(instruction,
                                 DISP,
                                 disp_size, 
-                                bin);
+                                reg_mem); // TODO(23.7.24): changed from bin to reg_mem
+        *bytes_read += disp_size;
     }
 
     // NOTE: initialize data
@@ -234,8 +228,9 @@ static void InitInstructionValues(inst_t *instruction, u16 instruction_bytes, FI
             }
             else
             {
-                u8 extra_byte = 0;
-                fread(&extra_byte, instruction->field[W].value, 1, bin);
+                // TODO(23.7.24): changed from work with IP (3 lines)
+                u8 extra_byte = MemoryNextGetNByteMemory(reg_mem, CODE_SEG, sizeof(extra_byte));
+                *bytes_read += sizeof(extra_byte);
                 
                 u8 offset = instruction->field[DATA].offset;
                 u16 mask = instruction->field[DATA].mask << offset;
@@ -272,7 +267,8 @@ static void InitInstructionValues(inst_t *instruction, u16 instruction_bytes, FI
         InitFieldWithExtraBytes(instruction,
                                 DATA,
                                 bytes_to_read, 
-                                bin);
+                                reg_mem); // TODO(23.7.24): changed from bin to reg_mem
+        *bytes_read += bytes_to_read;
     }
 }
 
@@ -314,8 +310,18 @@ static void InitField(inst_t *instruction, u8 field, u16 instruction_bytes)
     instruction->field[field].state = INITIALIZED;
 }
 
-static void InitFieldWithExtraBytes(inst_t *instruction, u8 field, u8 bytes_to_read, FILE *bin)
+static void InitFieldWithExtraBytes(inst_t *instruction, u8 field, u8 bytes_to_read, reg_mem_t *reg_mem)
 {
-    fread(&instruction->field[field].value, bytes_to_read, 1, bin);
+    switch (bytes_to_read)
+    {
+        case 1:
+        {
+            instruction->field[field].value = (u8) MemoryNextGetNByteMemory(reg_mem, CODE_SEG, bytes_to_read);
+        } break;
+        case 2:
+        {
+            instruction->field[field].value = MemoryNextGetNByteMemory(reg_mem, CODE_SEG, bytes_to_read);
+        } break;
+    }
     instruction->field[field].state = INITIALIZED;
 }

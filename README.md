@@ -1,5 +1,6 @@
 ---
-# Project By: Oron Shifman
+# Project Name: sim86
+### By: Oron Shifman
 
 This project follows the course "Performance-Aware Programming" by Casey Muratori.
 

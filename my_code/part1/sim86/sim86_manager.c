@@ -42,7 +42,8 @@ void ManagerOperate(FILE *bin, u8 option)
     expression_t *decoded_inst = malloc(sizeof(*decoded_inst));
     while (code_left) 
     {
-        code_left -= DecoderGetNextInst(decoded_inst, reg_mem);
+        u8 inst_len = DecoderGetNextInst(decoded_inst, reg_mem);
+        code_left -= inst_len;
         option_func(decoded_inst, reg_mem);
     }
     

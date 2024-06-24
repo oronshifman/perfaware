@@ -78,7 +78,6 @@ typedef struct reg_mem
 
 static void InitSegRegs(reg_mem_t * reg_mem);
 static u16 MemoryGetMemoryValue(reg_mem_t *reg_mem, u8 segment, u16 offset);
-static void MemoryIncIPByN(reg_mem_t *reg_mem, u16 n);
 
 reg_mem_t *MemoryCreate(void)
 {
@@ -179,9 +178,9 @@ u16 MemoryNextGetNByteMemory(reg_mem_t *reg_mem, u8 segment, u8 n)
     assert(segment >= 0 && segment < NUM_SEGMENTS);
     assert(n > 0 && n <= 2);
 
-    u16 ip = reg_mem->memory[IP];
+    u16 ip = *(u16 *)&reg_mem->memory[IP];
     u16 bytes = MemoryGetMemoryValue(reg_mem, CODE_SEG, ip); 
-    MemoryIncIPByN(reg_mem, n);
+    *(u16 *)&reg_mem->memory[IP] += n;
 
     return bytes;
 }
@@ -191,12 +190,6 @@ static u16 MemoryGetMemoryValue(reg_mem_t *reg_mem, u8 segment, u16 offset)
     u8 segment_trans = register_translation_table[SEGMENT][segment];
     u16 segment_base = reg_mem->memory[segment_trans];
     return *(u16 *)&(reg_mem->memory[segment_base + offset]);
-}
-
-static void MemoryIncIPByN(reg_mem_t *reg_mem, u16 n)
-{
-    assert(reg_mem);
-    reg_mem->memory[IP] += n;
 }
 
 void MemoryDecIPByN(reg_mem_t *reg_mem, u16 n)

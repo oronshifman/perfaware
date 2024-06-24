@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "sim86_instruction.h"
+#include "sim86_memory.h"
 
 enum operand_type
 {
@@ -29,16 +30,16 @@ typedef struct operand
 {
     enum direction direction;
     enum operand_type operand_type;
-    uint8_t size; // NOTE: 1 for word 0 for byte
+    u8 size; // NOTE: 1 for word 0 for byte
     union
     {
-        uint8_t jmp_code;
-        uint8_t reg_code;
-        uint8_t ea_code;
-        int8_t jmp_offset; // NOTE: if JMP, this will be initialized as jump offset
-        uint16_t unsigned_immediate;
+        u8 jmp_code;
+        u8 reg_code;
+        u8 ea_code;
+        s8 jmp_offset; // NOTE: if JMP, this will be initialized as jump offset
+        u16 unsigned_immediate;
     };    
-    uint16_t disp; // NOTE: this is out of the union because it's needed WITH ea_code
+    u16 disp; // NOTE: this is out of the union because it's needed WITH ea_code
 } operand_t;
 
 typedef struct expression
@@ -52,7 +53,7 @@ typedef struct expression
         instruction: pointer to an instruction struct to be feeled by decoder.
         bin:         binary file to read from.
 */
-int DecoderGetNextInst(expression_t *decoded_inst, FILE *bin);
+u8 DecoderGetNextInst(expression_t *decoded_inst, reg_mem_t *reg_mem);
 
 #endif /* __SIM86_DECODER_H__ */
 

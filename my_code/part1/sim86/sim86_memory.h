@@ -1,9 +1,11 @@
 #ifndef __SIM86_MEMORY_H__
 #define __SIM86_MEMORY_H__
 
-#include <stdint.h>
+#include "my_int.h"
 
-#define NUM_REGS 8
+#define BYTES_IN_KB 1024
+#define KB_IN_MB 1024
+#define NUM_GENERAL_PURPOSE_REG 8
 
 #define NUM_REG_SETTERS 2
 #define NUM_REG_GETTERS 2
@@ -13,7 +15,8 @@ enum reg_types
 {
     BYTE,
     WORD,
-
+    SEGMENT,
+    
     REG_TYPES
 };
 
@@ -21,6 +24,16 @@ enum befor_after_exec
 {
     BEFOR_EXEC,
     AFTER_EXEC
+};
+
+enum segments
+{
+    CODE_SEG,
+    DATA_SEG,
+    STACK_SEG,
+    EXTRA_SEG,
+
+    NUM_SEGMENTS
 };
 
 enum flags
@@ -31,23 +44,33 @@ enum flags
     NUM_FLAGS
 };
 
-typedef struct reg_mem
-{
-    uint8_t memory[REG_TYPES * NUM_REGS];
-} reg_mem_t;
+typedef struct reg_mem reg_mem_t;
 
 reg_mem_t *MemoryCreate(void);
 void MemoryDestroy(reg_mem_t *reg_mem);
-void MemorySetWordRegValue(reg_mem_t *reg_mem, uint8_t reg, uint16_t value);
-void MemorySetByteRegValue(reg_mem_t *reg_mem, uint8_t reg, uint16_t value);
-uint16_t MemoryGetWordRegValue(reg_mem_t *reg_mem, uint8_t reg);
-uint16_t MemoryGetByteRegValue(reg_mem_t *reg_mem, uint8_t reg);
+
+void MemorySetWordRegValue(reg_mem_t *reg_mem, u8 reg, u16 value);
+void MemorySetByteRegValue(reg_mem_t *reg_mem, u8 reg, u16 value);
+u16 MemoryGetWordRegValue(reg_mem_t *reg_mem, u8 reg);
+u16 MemoryGetByteRegValue(reg_mem_t *reg_mem, u8 reg);
+
 void MemoryPrintAllReg(reg_mem_t *reg_mem);
-void MemoryPrintSingleReg(reg_mem_t *reg_mem, uint8_t size, uint8_t reg, enum befor_after_exec when);
+void MemoryPrintSingleReg(reg_mem_t *reg_mem, u8 size, u8 reg, enum befor_after_exec when);
 void MemoryPrintFlags(reg_mem_t *reg_mem);
-void MemoryFlagOn(reg_mem_t *reg_mem, uint8_t flag);
-void MemoryFlagOff(reg_mem_t *reg_mem, uint8_t flag);
-uint8_t MemoryGetFlag(reg_mem_t *reg_mem, uint8_t flag);
+
+void MemoryFlagOn(reg_mem_t *reg_mem, u8 flag);
+void MemoryFlagOff(reg_mem_t *reg_mem, u8 flag);
+u8 MemoryGetFlag(reg_mem_t *reg_mem, u8 flag);
+
+
+/**
+ * 
+ * @param n - Can only be ether 1 or 2
+ * @return - Always 2 bytes from reg_mem->memory[segment + offset] and increments IP by n
+*/
+u16 MemoryNextGetNByteMemory(reg_mem_t *reg_mem, u8 segment, u8 n);
+void MemoryDecIPByN(reg_mem_t *reg_mem, u16 n);
+s64 MemorySetupCodeSeg(reg_mem_t *reg_mem, FILE *bin);
 
 #endif /* __SIM86_MEMORY_H__ */ 
 

@@ -1,7 +1,7 @@
 #ifndef __SIM86_INSTRUCTION_H__
 #define __SIM86_INSTRUCTION_H__
 
-#include <stdint.h>
+#include "my_int.h"
 
 enum operation_type
 {
@@ -42,9 +42,9 @@ typedef struct inst_field
 {
     enum field_type field_type;
     enum field_state state;
-    uint8_t offset;         // field location in instruction, offset from LSB
-    uint8_t mask;           // represents the number of bits in the field
-    uint16_t value;
+    u8 offset;         // field location in instruction, offset from LSB
+    u8 mask;           // represents the number of bits in the field
+    u16 value;
 } inst_field_t;
 
 typedef struct inst

@@ -1,6 +1,6 @@
 #include "sim86_manager.h"
 
-int32_t main(int32_t argc, uint8_t *argv[])
+u32 main(u32 argc, u8 *argv[])
 {
     if (argc < 3)
     {
@@ -8,7 +8,7 @@ int32_t main(int32_t argc, uint8_t *argv[])
         return 1;
     }
     
-    uint8_t option = ManagerParseOption(argv[1]); 
+    u8 option = ManagerParseOption(argv[1]); 
     if (option < 0)
     {
         printf("Invalid option");
@@ -23,7 +23,7 @@ int32_t main(int32_t argc, uint8_t *argv[])
         return 1;
     }
 
-    ManagerDecodeBin(bin, option);
+    ManagerOperate(bin, option);
    
     return 0;
 }

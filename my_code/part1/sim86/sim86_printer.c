@@ -55,7 +55,7 @@ void PrinterPrintInst(expression_t *instruction)
     {
         sprintf(buff, "%s ", jmp_types[instruction->operands[DEST].jmp_code]);
         sprintf(&buff[strlen(buff)], "%d", instruction->operands[SRC].jmp_offset);
-        printf("%s\n", buff);
+        printf("%s", buff);
         return;
     }
     

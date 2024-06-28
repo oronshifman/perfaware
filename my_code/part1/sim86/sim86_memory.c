@@ -193,6 +193,11 @@ static u16 MemoryGetMemoryValue(reg_mem_t *reg_mem, u8 segment, u16 offset)
     return *(u16 *)&(reg_mem->memory[segment_base + offset]);
 }
 
+u16 MemoryGetIP(reg_mem_t *reg_mem)
+{
+    return *(u16 *)&reg_mem->memory[IP];
+}
+
 void MemoryChangeIPByN(reg_mem_t *reg_mem, u16 n)
 {
     assert(reg_mem);

@@ -63,13 +63,13 @@ void MemoryFlagOn(reg_mem_t *reg_mem, u8 flag);
 void MemoryFlagOff(reg_mem_t *reg_mem, u8 flag);
 u8 MemoryGetFlag(reg_mem_t *reg_mem, u8 flag);
 
-
 /**
  * 
  * @param n - Can only be ether 1 or 2
  * @return - Always 2 bytes from reg_mem->memory[segment + offset] and increments IP by n
 */
 u16 MemoryGetNextNByteMemory(reg_mem_t *reg_mem, u8 segment, u8 n);
+u16 MemoryGetIP(reg_mem_t *reg_mem);
 void MemoryChangeIPByN(reg_mem_t *reg_mem, u16 n);
 s64 MemorySetupCodeSeg(reg_mem_t *reg_mem, FILE *bin);
 

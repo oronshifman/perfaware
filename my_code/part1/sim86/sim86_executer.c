@@ -1,9 +1,18 @@
+#include <stdlib.h>
+
 #include "sim86_executer.h"
 #include "sim86_instruction.h"
 
 typedef void (*set_reg_func_ptr)(reg_mem_t *, u8, u16);
 typedef u16 (*get_reg_func_ptr)(reg_mem_t *, u8);
 typedef void (*memory_flag_setter_func_ptr)(reg_mem_t *, u8);
+
+enum jump_types
+{
+    JNE = 5, 
+
+    NUM_JUMP_TYPES
+};
 
 set_reg_func_ptr reg_setters[NUM_REG_SETTERS] =
 {
@@ -106,7 +115,16 @@ static void ExecJmp(expression_t *instruction, reg_mem_t *reg_mem)
     {
         case JNE:
         {
-            .....
+            if (!MemoryGetFlag(reg_mem, ZF))
+            {
+                MemoryChangeIPByN(reg_mem, src_value);
+            }
+        } break;
+
+        default:
+        {
+            fprintf(stderr, "jump not supported\n");
+            exit(1);
         } break;
     }
 }

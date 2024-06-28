@@ -1,4 +1,5 @@
 #include "sim86_executer.h"
+#include "sim86_instruction.h"
 
 typedef void (*set_reg_func_ptr)(reg_mem_t *, u8, u16);
 typedef u16 (*get_reg_func_ptr)(reg_mem_t *, u8);
@@ -25,7 +26,7 @@ static void ExecSub(expression_t *instruction, reg_mem_t *reg_mem);
 static void ExecAdd(expression_t *instruction, reg_mem_t *reg_mem);
 static void ExecCmp(expression_t *instruction, reg_mem_t *reg_mem);
 static void ExecJmp(expression_t *instruction, reg_mem_t *reg_mem);
-static u16 DoOperation(expression_t *instruction, reg_mem_t *reg_mem, u8 reg_code, u16 src_value, u8 op);
+static u16 DoArithmetics(expression_t *instruction, reg_mem_t *reg_mem, u8 reg_code, u16 src_value, u8 op);
 static u16 GetSignBitMask(u8 size);
 static u8 GetSignBitVal(u8 size, u16 op_outcome, u16 sing_bit_mask);
 
@@ -73,7 +74,7 @@ static void ExecSub(expression_t *instruction, reg_mem_t *reg_mem)
     u8 reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
     u16 src_value = GetOperandValue(reg_mem, &instruction->operands[SRC]);
 
-    u16 op_outcome = DoOperation(instruction, reg_mem, reg_code, src_value, SUB);
+    u16 op_outcome = DoArithmetics(instruction, reg_mem, reg_code, src_value, SUB);
 
     reg_setters[instruction->operands[DEST].size](reg_mem, reg_code, op_outcome);
 }
@@ -83,7 +84,7 @@ static void ExecAdd(expression_t *instruction, reg_mem_t *reg_mem)
     u8 reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
     u16 src_value = GetOperandValue(reg_mem, &instruction->operands[SRC]);
 
-    u16 op_outcome = DoOperation(instruction, reg_mem, reg_code, src_value, ADD);
+    u16 op_outcome = DoArithmetics(instruction, reg_mem, reg_code, src_value, ADD);
 
     reg_setters[instruction->operands[DEST].size](reg_mem, reg_code, op_outcome);
 }
@@ -93,14 +94,24 @@ static void ExecCmp(expression_t *instruction, reg_mem_t *reg_mem)
     u8 reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
     u16 src_value = GetOperandValue(reg_mem, &instruction->operands[SRC]);
 
-    u16 op_outcome = DoOperation(instruction, reg_mem, reg_code, src_value, SUB);
+    u16 op_outcome = DoArithmetics(instruction, reg_mem, reg_code, src_value, SUB);
 }
 
 static void ExecJmp(expression_t *instruction, reg_mem_t *reg_mem)
 {
+    u8 reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
+    u16 src_value = GetOperandValue(reg_mem, &instruction->operands[SRC]);
+
+    switch (reg_code)
+    {
+        case JNE:
+        {
+            .....
+        } break;
+    }
 }
 
-static u16 DoOperation(expression_t *instruction, reg_mem_t *reg_mem, u8 reg_code, u16 src_value, u8 op)
+static u16 DoArithmetics(expression_t *instruction, reg_mem_t *reg_mem, u8 reg_code, u16 src_value, u8 op)
 {
     u16 reg_value = reg_getters[instruction->operands[DEST].size](reg_mem, reg_code);
 
@@ -169,6 +180,16 @@ static u16 GetOperandValue(reg_mem_t *reg_mem, operand_t *operand)
         case IMMEDIATE:
         {
             return operand->unsigned_immediate;
+        } break;
+
+        case JUMP_CODE:
+        {
+            return operand->jmp_code;
+        } break;
+    
+        case JUMP_OFFSET:
+        {
+            return operand->jmp_offset;
         } break;
 
         default:

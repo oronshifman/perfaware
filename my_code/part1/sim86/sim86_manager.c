@@ -13,10 +13,11 @@ char *str_options[NUM_OPTIONS] =
     "-exec", "-print"
 };
 
-typedef void (*option_func_ptr)(expression_t *, reg_mem_t *);
+typedef void (*option_func_ptr)(expression_t *, reg_mem_t *, s64 *);
 
-static void Print(expression_t *expression, reg_mem_t *reg_mem);
-static void Exec(expression_t *expression, reg_mem_t *reg_mem);
+static void Print(expression_t *expression, reg_mem_t *reg_mem, s64 *code_left);
+static void Exec(expression_t *expression, reg_mem_t *reg_mem, s64 *code_left);
+static void GetNextInstruction(expression_t *expression, reg_mem_t *reg_mem, s64 *code_left);
 
 void ManagerOperate(FILE *bin, u8 option)
 {
@@ -42,9 +43,7 @@ void ManagerOperate(FILE *bin, u8 option)
     expression_t *decoded_inst = malloc(sizeof(*decoded_inst));
     while (code_left) 
     {
-        u8 inst_len = DecoderGetNextInst(decoded_inst, reg_mem);
-        code_left -= inst_len;
-        option_func(decoded_inst, reg_mem);
+        option_func(decoded_inst, reg_mem, &code_left);
     }
     
     if (option == EXEC_BIN)
@@ -70,18 +69,47 @@ u8 ManagerParseOption(char *option)
     return -1;
 }
 
-static void Print(expression_t *expression, reg_mem_t *reg_mem)
+static void Print(expression_t *expression, reg_mem_t *reg_mem, s64 *code_left)
 {
+    GetNextInstruction(expression, reg_mem, code_left);
+
     PrinterPrintInst(expression);
     printf("\n");
 }
 
-static void Exec(expression_t *expression, reg_mem_t *reg_mem)
+static void Exec(expression_t *expression, reg_mem_t *reg_mem, s64 *code_left)
 {
+    // print IP value before decode
+    MemoryPrintIPReg(reg_mem, BEFOR_EXEC);
+    
+    // decode instruction
+    GetNextInstruction(expression, reg_mem, code_left);
+    
+    // print instruction disassembly
     PrinterPrintInst(expression);
+    
+    // print modified register value before exec
     MemoryPrintSingleReg(reg_mem, expression->operands[DEST].size, expression->operands[DEST].reg_code, BEFOR_EXEC);
+    
+    // print IP value after decode
+    MemoryPrintIPReg(reg_mem, AFTER_EXEC);
+    
+    // execute instruction
     ExecutorExecInst(expression, reg_mem);
+    
+    // print modified register value after exec
     MemoryPrintSingleReg(reg_mem, expression->operands[DEST].size, expression->operands[DEST].reg_code, AFTER_EXEC);
+    
+    // print flags values after exec
     MemoryPrintFlags(reg_mem);
     printf("\n");
+}
+
+/**
+ * decodes the next instruction and updated code_left to (code_left - next instruction length)
+ */
+static void GetNextInstruction(expression_t *expression, reg_mem_t *reg_mem, s64 *code_left)
+{
+    u8 inst_len = DecoderGetNextInst(expression, reg_mem);
+    *code_left -= inst_len;
 }

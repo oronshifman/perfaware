@@ -1,6 +1,6 @@
 #include "sim86_manager.h"
 
-u32 main(u32 argc, u8 *argv[])
+int main(u32 argc, u8 *argv[])
 {
     if (argc < 3)
     {

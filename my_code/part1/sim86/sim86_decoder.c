@@ -25,14 +25,13 @@ u8 DecoderGetNextInst(expression_t *decoded_inst, reg_mem_t *reg_mem)
         InstructionInitOpTable(op_table);
     }
 
-    // TODO(23.7.24): changed from work with IP (3 lines)
-    u16 instruction_bytes = MemoryNextGetNByteMemory(reg_mem, CODE_SEG, sizeof(instruction_bytes)); // TODO(23.7.24): under construction
+    u16 instruction_bytes = MemoryGetNextNByteMemory(reg_mem, CODE_SEG, sizeof(instruction_bytes));
     u8 bytes_read = sizeof(instruction_bytes);
 
     inst_t full_inst;
     GetInstructionForm(instruction_bytes & OP_MASK, &full_inst);
 
-    InitInstructionValues(&full_inst, instruction_bytes, reg_mem, &bytes_read); // TODO(23.7.24): under construction
+    InitInstructionValues(&full_inst, instruction_bytes, reg_mem, &bytes_read);
 
     InitDecodedInst(decoded_inst, &full_inst, instruction_bytes);
 
@@ -229,7 +228,7 @@ static void InitInstructionValues(inst_t *instruction, u16 instruction_bytes, re
             else
             {
                 // TODO(23.7.24): changed from work with IP (3 lines)
-                u8 extra_byte = MemoryNextGetNByteMemory(reg_mem, CODE_SEG, sizeof(extra_byte));
+                u8 extra_byte = MemoryGetNextNByteMemory(reg_mem, CODE_SEG, sizeof(extra_byte));
                 *bytes_read += sizeof(extra_byte);
                 
                 u8 offset = instruction->field[DATA].offset;
@@ -272,11 +271,8 @@ static void InitInstructionValues(inst_t *instruction, u16 instruction_bytes, re
     }
 }
 
-static u8 isArithmeticImmediateToAcc(u16 instruction_bytes) {
-    u8 ADD_IMMEDIATE_TO_ACC = 0b00000100;
-    u8 SUB_IMMEDIATE_TO_ACC = 0b00000100;
-    u8 CMP_IMMEDIATE_TO_ACC = 0b00000100;
-
+static u8 isArithmeticImmediateToAcc(u16 instruction_bytes) 
+{
     switch (instruction_bytes & OP_MASK)
     {
         case 0b00000100: // ADD_IMMEDIATE_TO_ACC
@@ -316,11 +312,11 @@ static void InitFieldWithExtraBytes(inst_t *instruction, u8 field, u8 bytes_to_r
     {
         case 1:
         {
-            instruction->field[field].value = (u8) MemoryNextGetNByteMemory(reg_mem, CODE_SEG, bytes_to_read);
+            instruction->field[field].value = (u8) MemoryGetNextNByteMemory(reg_mem, CODE_SEG, bytes_to_read);
         } break;
         case 2:
         {
-            instruction->field[field].value = MemoryNextGetNByteMemory(reg_mem, CODE_SEG, bytes_to_read);
+            instruction->field[field].value = MemoryGetNextNByteMemory(reg_mem, CODE_SEG, bytes_to_read);
         } break;
     }
     instruction->field[field].state = INITIALIZED;

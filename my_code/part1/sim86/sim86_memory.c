@@ -2,6 +2,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
 
 #include "sim86_memory.h"
 
@@ -172,7 +173,7 @@ u16 MemoryGetByteRegValue(reg_mem_t *reg_mem, u8 reg)
     return reg_mem->memory[reg_trans];
 }
 
-u16 MemoryNextGetNByteMemory(reg_mem_t *reg_mem, u8 segment, u8 n)
+u16 MemoryGetNextNByteMemory(reg_mem_t *reg_mem, u8 segment, u8 n)
 {
     assert(reg_mem);
     assert(segment >= 0 && segment < NUM_SEGMENTS);
@@ -180,7 +181,7 @@ u16 MemoryNextGetNByteMemory(reg_mem_t *reg_mem, u8 segment, u8 n)
 
     u16 ip = *(u16 *)&reg_mem->memory[IP];
     u16 bytes = MemoryGetMemoryValue(reg_mem, CODE_SEG, ip); 
-    *(u16 *)&reg_mem->memory[IP] += n;
+    MemoryChangeIPByN(reg_mem, n);
 
     return bytes;
 }
@@ -192,11 +193,10 @@ static u16 MemoryGetMemoryValue(reg_mem_t *reg_mem, u8 segment, u16 offset)
     return *(u16 *)&(reg_mem->memory[segment_base + offset]);
 }
 
-void MemoryDecIPByN(reg_mem_t *reg_mem, u16 n)
+void MemoryChangeIPByN(reg_mem_t *reg_mem, u16 n)
 {
     assert(reg_mem);
-    assert(reg_mem->memory[IP] - n >= 0);
-    reg_mem->memory[IP] -= n;
+    *(u16 *)&reg_mem->memory[IP] += n;
 }
 
 void MemoryFlagOn(reg_mem_t *reg_mem, u8 flag)
@@ -234,12 +234,28 @@ void MemoryPrintSingleReg(reg_mem_t *reg_mem, u8 size, u8 reg, enum befor_after_
         MemoryGetByteRegValue, MemoryGetWordRegValue
     };
     
+    static char buff[50];
+
     if (when == BEFOR_EXEC)
     {
-        printf(" ; %s: (0x%x)->", reg_table[size][reg], reg_getters[size](reg_mem, reg));
+        sprintf(buff, " ; %s: (0x%x)->", reg_table[size][reg], reg_getters[size](reg_mem, reg));
         return;
     }
-    printf("(0x%x)", reg_getters[size](reg_mem, reg));
+    sprintf(&buff[strlen(buff)], "(0x%x)", reg_getters[size](reg_mem, reg));
+    printf("%s", buff);
+}
+
+void MemoryPrintIPReg(reg_mem_t *reg_mem,  enum befor_after_exec when)
+{
+    static char buff[50];
+
+    if (when == BEFOR_EXEC)
+    {
+        sprintf(buff, " ; IP: (0x%x)->", *(u16*)&reg_mem->memory[IP]);
+        return;
+    }
+    sprintf(&buff[strlen(buff)], "(0x%x)", *(u16*)&reg_mem->memory[IP]);
+    printf("%s", buff);
 }
 
 void MemoryPrintFlags(reg_mem_t *reg_mem)

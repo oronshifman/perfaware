@@ -57,6 +57,7 @@ u16 MemoryGetByteRegValue(reg_mem_t *reg_mem, u8 reg);
 void MemoryPrintAllReg(reg_mem_t *reg_mem);
 void MemoryPrintSingleReg(reg_mem_t *reg_mem, u8 size, u8 reg, enum befor_after_exec when);
 void MemoryPrintFlags(reg_mem_t *reg_mem);
+void MemoryPrintIPReg(reg_mem_t *reg_mem,  enum befor_after_exec when);
 
 void MemoryFlagOn(reg_mem_t *reg_mem, u8 flag);
 void MemoryFlagOff(reg_mem_t *reg_mem, u8 flag);
@@ -68,8 +69,8 @@ u8 MemoryGetFlag(reg_mem_t *reg_mem, u8 flag);
  * @param n - Can only be ether 1 or 2
  * @return - Always 2 bytes from reg_mem->memory[segment + offset] and increments IP by n
 */
-u16 MemoryNextGetNByteMemory(reg_mem_t *reg_mem, u8 segment, u8 n);
-void MemoryDecIPByN(reg_mem_t *reg_mem, u16 n);
+u16 MemoryGetNextNByteMemory(reg_mem_t *reg_mem, u8 segment, u8 n);
+void MemoryChangeIPByN(reg_mem_t *reg_mem, u16 n);
 s64 MemorySetupCodeSeg(reg_mem_t *reg_mem, FILE *bin);
 
 #endif /* __SIM86_MEMORY_H__ */ 

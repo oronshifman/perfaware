@@ -108,6 +108,7 @@ static void ExecCmp(expression_t *instruction, reg_mem_t *reg_mem)
 
 static void ExecJmp(expression_t *instruction, reg_mem_t *reg_mem)
 {
+    u8 masks[2] = {0xff, 0x0};
     u8 reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
     u16 src_value = GetOperandValue(reg_mem, &instruction->operands[SRC]);
 
@@ -115,10 +116,8 @@ static void ExecJmp(expression_t *instruction, reg_mem_t *reg_mem)
     {
         case JNE:
         {
-            if (!MemoryGetFlag(reg_mem, ZF))
-            {
-                MemoryChangeIPByN(reg_mem, src_value);
-            }
+            s8 calculated_jmp = src_value & masks[MemoryGetFlag(reg_mem, ZF)];
+            MemoryChangeIPByN(reg_mem, calculated_jmp);
         } break;
 
         default:

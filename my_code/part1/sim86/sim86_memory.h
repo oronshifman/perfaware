@@ -72,6 +72,8 @@ u16 MemoryGetNextNByteMemory(reg_mem_t *reg_mem, u8 segment, u8 n);
 u16 MemoryGetIP(reg_mem_t *reg_mem);
 void MemoryChangeIPByN(reg_mem_t *reg_mem, u16 n);
 s64 MemorySetupCodeSeg(reg_mem_t *reg_mem, FILE *bin);
+u16 MemoryGetMemoryValue(reg_mem_t *reg_mem, u8 segment, u16 offset);
+void MemorySetMemoryValue(reg_mem_t *reg_mem, u16 offset, u16 data);
 
 #endif /* __SIM86_MEMORY_H__ */ 
 

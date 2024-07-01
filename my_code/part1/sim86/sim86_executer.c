@@ -30,7 +30,8 @@ memory_flag_setter_func_ptr mem_flag_setters[NUM_FLAG_SETTERS] =
 };
 
 static u16 GetOperandValue(reg_mem_t *reg_mem, operand_t *operand);
-static void MovToReg(expression_t *instruction, reg_mem_t *reg_mem);
+// static void MovToReg(expression_t *instruction, reg_mem_t *reg_mem);
+static void ExecMov(expression_t *instruction, reg_mem_t *reg_mem);
 static void ExecSub(expression_t *instruction, reg_mem_t *reg_mem);
 static void ExecAdd(expression_t *instruction, reg_mem_t *reg_mem);
 static void ExecCmp(expression_t *instruction, reg_mem_t *reg_mem);
@@ -45,7 +46,8 @@ void ExecutorExecInst(expression_t *instruction, reg_mem_t *reg_mem)
     {
         case MOV:
         {
-            MovToReg(instruction, reg_mem);
+            // MovToReg(instruction, reg_mem); // NOTE: commented 1.7.24, started work on ExecMov()
+            ExecMov(instruction, reg_mem);
         } break;
 
         case SUB:
@@ -70,13 +72,44 @@ void ExecutorExecInst(expression_t *instruction, reg_mem_t *reg_mem)
     }
 }
 
-static void MovToReg(expression_t *instruction, reg_mem_t *reg_mem)
-{
-    u8 reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
-    u16 src_value = GetOperandValue(reg_mem, &instruction->operands[SRC]);
+// static void MovToReg(expression_t *instruction, reg_mem_t *reg_mem)
+// {
+//     u8 reg_code = GetOperandValue(reg_mem, &instruction->operands[DEST]);
+//     u16 src_value = GetOperandValue(reg_mem, &instruction->operands[SRC]);
 
-    reg_setters[instruction->operands[DEST].size](reg_mem, reg_code, src_value);
+//     reg_setters[instruction->operands[DEST].size](reg_mem, reg_code, src_value);
+// }
+static void ExecMov(expression_t *instruction, reg_mem_t *reg_mem)
+{
+    u8 dest_type = instruction->operands[DEST].operand_type;
+
+    u16 dest = GetOperandValue(reg_mem, &instruction->operands[DEST]);
+    u16 src = GetOperandValue(reg_mem, &instruction->operands[SRC]);
+
+    switch (dest_type) 
+    {
+        case DIRECT_ADDR:
+        {
+            MemorySetMemoryValue(reg_mem, dest, src);
+        } break;
+
+        case EFFECTIVE_ADDR: // TODO: finish testing and implementing (1.7.24)
+        {
+            u8 ea_code = dest;
+            u16 disp = instruction->operands[DEST].disp;
+
+            u16 reg_val = reg_getters[instruction->operands[DEST].size](reg_mem, ea_code);
+            MemorySetMemoryValue(reg_mem, reg_val + disp, src);
+        } break;
+
+        case REGISTER:
+        {
+            reg_setters[instruction->operands[DEST].size](reg_mem, dest, src);
+        } break;
+
+    }
 }
+
 
 static void ExecSub(expression_t *instruction, reg_mem_t *reg_mem)
 {

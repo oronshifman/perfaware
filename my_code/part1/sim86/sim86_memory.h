@@ -20,12 +20,6 @@ enum reg_types
     REG_TYPES
 };
 
-enum befor_after_exec
-{
-    BEFOR_EXEC,
-    AFTER_EXEC
-};
-
 enum segments
 {
     CODE_SEG,
@@ -51,13 +45,18 @@ void MemoryDestroy(reg_mem_t *reg_mem);
 
 void MemorySetWordRegValue(reg_mem_t *reg_mem, u8 reg, u16 value);
 void MemorySetByteRegValue(reg_mem_t *reg_mem, u8 reg, u16 value);
+void MemorySetMemoryValue(reg_mem_t *reg_mem, u8 segment, u16 offset, u16 data);
+// void MemorySetEAValue(reg_mem_t *reg_mem, u8 ea_code, u16 disp); // NOTE: not sure if needed yet (2.7.24)
+
 u16 MemoryGetWordRegValue(reg_mem_t *reg_mem, u8 reg);
 u16 MemoryGetByteRegValue(reg_mem_t *reg_mem, u8 reg);
+u16 MemoryGetMemoryValue(reg_mem_t *reg_mem, u8 segment, u16 offset);
+u16 MemoryGetEAValue(reg_mem_t *reg_mem, u8 ea_code);
 
-void MemoryPrintAllReg(reg_mem_t *reg_mem);
-void MemoryPrintSingleReg(reg_mem_t *reg_mem, u8 size, u8 reg, enum befor_after_exec when);
-void MemoryPrintFlags(reg_mem_t *reg_mem);
-void MemoryPrintIPReg(reg_mem_t *reg_mem,  enum befor_after_exec when);
+// void MemoryPrintAllReg(reg_mem_t *reg_mem);
+// void MemoryPrintSingleReg(reg_mem_t *reg_mem, u8 size, u8 reg, enum befor_after_exec when);
+// void MemoryPrintFlags(reg_mem_t *reg_mem);
+// void MemoryPrintIPReg(reg_mem_t *reg_mem,  enum befor_after_exec when);
 
 void MemoryFlagOn(reg_mem_t *reg_mem, u8 flag);
 void MemoryFlagOff(reg_mem_t *reg_mem, u8 flag);
@@ -72,8 +71,6 @@ u16 MemoryGetNextNByteMemory(reg_mem_t *reg_mem, u8 segment, u8 n);
 u16 MemoryGetIP(reg_mem_t *reg_mem);
 void MemoryChangeIPByN(reg_mem_t *reg_mem, u16 n);
 s64 MemorySetupCodeSeg(reg_mem_t *reg_mem, FILE *bin);
-u16 MemoryGetMemoryValue(reg_mem_t *reg_mem, u8 segment, u16 offset);
-void MemorySetMemoryValue(reg_mem_t *reg_mem, u16 offset, u16 data);
 
 #endif /* __SIM86_MEMORY_H__ */ 
 

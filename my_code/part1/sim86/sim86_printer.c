@@ -58,7 +58,7 @@ void PrinterPrintInst(expression_t *instruction)
         printf("%s", buff);
         return;
     }
-    
+
     sprintf(buff, "%s ", op_nems[instruction->operation_type]);
 
     AddOperandToBuff(buff, &instruction->operands[DEST]);
@@ -103,4 +103,73 @@ static void AddOperandToBuff(char *buff, operand_t *operand)
             sprintf(&buff[strlen(buff)], " <--ERROR--> ");
         } break;
     }
+}
+
+void PrinterPrintDest(reg_mem_t *reg_mem, expression_t *instruction, enum befor_after_exec when)
+{
+    typedef u16 (*get_reg_func_ptr)(reg_mem_t *, u8);
+
+    char *reg_table[REG_TYPES][NUM_GENERAL_PURPOSE_REG] = 
+    {
+        // byte (0)
+        {"al", "cl", "dl", "bl", 
+         "ah", "ch", "dh", "bh"},
+        // word (1)
+        {"ax", "cx", "dx", "bx",
+         "sp", "bp", "si", "di"}
+    };
+
+    get_reg_func_ptr reg_getters[NUM_REG_GETTERS] =
+    {
+        MemoryGetByteRegValue, MemoryGetWordRegValue
+    };
+    
+    static char buff[50];
+
+    if (when == BEFOR_EXEC)
+    {
+        // sprintf(buff, " ; %s: (0x%x)->", reg_table[size][reg], reg_getters[size](reg_mem, reg));
+        return;
+    }
+    // sprintf(&buff[strlen(buff)], "(0x%x);", reg_getters[size](reg_mem, reg));
+    printf("%s", buff);
+}
+
+void PrinterPrintIPReg(reg_mem_t *reg_mem,  enum befor_after_exec when)
+{
+    static char buff[50];
+
+    if (when == BEFOR_EXEC)
+    {
+        sprintf(buff, " ; IP: (0x%x)->", MemoryGetIP(reg_mem));
+        return;
+    }
+    sprintf(&buff[strlen(buff)], "(0x%x)", MemoryGetIP(reg_mem));
+    printf("%s", buff);
+}
+
+void PrinterPrintFlags(reg_mem_t *reg_mem)
+{
+    printf(" ZF: %d, SF: %d", MemoryGetFlag(reg_mem, ZF), MemoryGetFlag(reg_mem, SF));
+}
+
+void PrinterPrintAllReg(reg_mem_t *reg_mem)
+{
+    printf("ax - 0x%x (%d)\n", MemoryGetWordRegValue(reg_mem, 0), MemoryGetWordRegValue(reg_mem, 0));
+    printf("bx - 0x%x (%d)\n", MemoryGetWordRegValue(reg_mem, 3), MemoryGetWordRegValue(reg_mem, 3));
+    printf("cx - 0x%x (%d)\n", MemoryGetWordRegValue(reg_mem, 1), MemoryGetWordRegValue(reg_mem, 1));
+    printf("dx - 0x%x (%d)\n", MemoryGetWordRegValue(reg_mem, 2), MemoryGetWordRegValue(reg_mem, 2));
+    printf("sp - 0x%x (%d)\n", MemoryGetWordRegValue(reg_mem, 4), MemoryGetWordRegValue(reg_mem, 4));
+    printf("bp - 0x%x (%d)\n", MemoryGetWordRegValue(reg_mem, 5), MemoryGetWordRegValue(reg_mem, 5));
+    printf("si - 0x%x (%d)\n", MemoryGetWordRegValue(reg_mem, 6), MemoryGetWordRegValue(reg_mem, 6));
+    printf("di - 0x%x (%d)\n\n", MemoryGetWordRegValue(reg_mem, 7), MemoryGetWordRegValue(reg_mem, 7));
+
+    printf("al - 0x%x (%d)\n", MemoryGetByteRegValue(reg_mem, 0), MemoryGetByteRegValue(reg_mem, 0));
+    printf("ah - 0x%x (%d)\n", MemoryGetByteRegValue(reg_mem, 3), MemoryGetByteRegValue(reg_mem, 3));
+    printf("bl - 0x%x (%d)\n", MemoryGetByteRegValue(reg_mem, 1), MemoryGetByteRegValue(reg_mem, 1));
+    printf("bh - 0x%x (%d)\n", MemoryGetByteRegValue(reg_mem, 2), MemoryGetByteRegValue(reg_mem, 2));
+    printf("cl - 0x%x (%d)\n", MemoryGetByteRegValue(reg_mem, 4), MemoryGetByteRegValue(reg_mem, 4));
+    printf("ch - 0x%x (%d)\n", MemoryGetByteRegValue(reg_mem, 7), MemoryGetByteRegValue(reg_mem, 7));
+    printf("dl - 0x%x (%d)\n", MemoryGetByteRegValue(reg_mem, 6), MemoryGetByteRegValue(reg_mem, 6));
+    printf("dh - 0x%x (%d)\n", MemoryGetByteRegValue(reg_mem, 5), MemoryGetByteRegValue(reg_mem, 5));
 }

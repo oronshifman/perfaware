@@ -53,24 +53,22 @@ enum flags_reg
     SF_MASK = 0x40,
 };
 
-u8 flag_mask_table[NUM_FLAGS] =
+static u8 flag_mask_table[NUM_FLAGS] =
 {
     ZF_MASK, SF_MASK
 };
 
-u8 flag_index_table[NUM_FLAGS] =
+static u8 flag_index_table[NUM_FLAGS] =
 {
     ZF_INDEX, SF_INDEX
 };
 
-u8 register_translation_table[REG_TYPES][NUM_GENERAL_PURPOSE_REG] = 
+static u8 register_translation_table[REG_TYPES][NUM_GENERAL_PURPOSE_REG] = 
 {
     {AL, CL, DL, BL, AH, CH, DH, BH},
     {AX, CX, DX, BX, SP, BP, SI, DI},
     {CS, DS, SS, ES, -1, -1, -1, -1}
 };
-
-typedef u16 (*get_reg_func_ptr)(reg_mem_t *, u8);
 
 typedef struct reg_mem
 {
@@ -104,7 +102,7 @@ static void InitSegRegs(reg_mem_t * reg_mem)
 {
     reg_mem->memory[FLAGS_REG] = 0;
     reg_mem->memory[CS] = -1;
-    reg_mem->memory[DS] = -1;
+    *(u16 *)&reg_mem->memory[DS] = 5000;
     reg_mem->memory[SS] = -1;
     reg_mem->memory[ES] = -1;
     reg_mem->memory[IP] = 0;
@@ -192,9 +190,28 @@ u16 MemoryGetMemoryValue(reg_mem_t *reg_mem, u8 segment, u16 offset)
     return *(u16 *)&(reg_mem->memory[segment_base + offset]);
 }
 
-void MemorySetMemoryValue(reg_mem_t *reg_mem, u16 offset, u16 data)
+u16 MemoryGetEAValue(reg_mem_t *reg_mem, u8 ea_code)
 {
-    *(u16 *)&reg_mem->memory[offset] = data;
+    u32 ea_table[] =
+    {
+        *(u16 *)&(reg_mem->memory[BX]) + *(u16 *)&(reg_mem->memory[SI]),
+        *(u16 *)&(reg_mem->memory[BX]) + *(u16 *)&(reg_mem->memory[DI]),
+        *(u16 *)&(reg_mem->memory[BP]) + *(u16 *)&(reg_mem->memory[SI]),
+        *(u16 *)&(reg_mem->memory[BP]) + *(u16 *)&(reg_mem->memory[DI]),
+        *(u16 *)&(reg_mem->memory[SI]),
+        *(u16 *)&(reg_mem->memory[DI]),
+        -1,
+        *(u16 *)&(reg_mem->memory[BX]),
+    };
+
+    return ea_table[ea_code];
+}
+
+void MemorySetMemoryValue(reg_mem_t *reg_mem, u8 segment, u16 offset, u16 data)
+{
+    u8 segment_trans = register_translation_table[SEGMENT][segment];
+    u16 segment_base = reg_mem->memory[segment_trans];
+    *(u16 *)&reg_mem->memory[segment_base + offset] = data;
 }
 
 u16 MemoryGetIP(reg_mem_t *reg_mem)
@@ -226,69 +243,69 @@ u8 MemoryGetFlag(reg_mem_t *reg_mem, u8 flag)
     return (reg_mem->memory[FLAGS_REG] & flag_mask_table[flag]) >> flag_index_table[flag];
 }
 
-void MemoryPrintSingleReg(reg_mem_t *reg_mem, u8 size, u8 reg, enum befor_after_exec when)
-{
-    char *reg_table[REG_TYPES][NUM_GENERAL_PURPOSE_REG] = 
-    {
-        // byte (0)
-        {"al", "cl", "dl", "bl", 
-         "ah", "ch", "dh", "bh"},
-        // word (1)
-        {"ax", "cx", "dx", "bx",
-         "sp", "bp", "si", "di"}
-    };
+// void MemoryPrintSingleReg(reg_mem_t *reg_mem, u8 size, u8 reg, enum befor_after_exec when)
+// {
+//     char *reg_table[REG_TYPES][NUM_GENERAL_PURPOSE_REG] = 
+//     {
+//         // byte (0)
+//         {"al", "cl", "dl", "bl", 
+//          "ah", "ch", "dh", "bh"},
+//         // word (1)
+//         {"ax", "cx", "dx", "bx",
+//          "sp", "bp", "si", "di"}
+//     };
 
-    get_reg_func_ptr reg_getters[NUM_REG_GETTERS] =
-    {
-        MemoryGetByteRegValue, MemoryGetWordRegValue
-    };
+//     get_reg_func_ptr reg_getters[NUM_REG_GETTERS] =
+//     {
+//         MemoryGetByteRegValue, MemoryGetWordRegValue
+//     };
     
-    static char buff[50];
+//     static char buff[50];
 
-    if (when == BEFOR_EXEC)
-    {
-        sprintf(buff, " ; %s: (0x%x)->", reg_table[size][reg], reg_getters[size](reg_mem, reg));
-        return;
-    }
-    sprintf(&buff[strlen(buff)], "(0x%x)", reg_getters[size](reg_mem, reg));
-    printf("%s", buff);
-}
+//     if (when == BEFOR_EXEC)
+//     {
+//         sprintf(buff, " ; %s: (0x%x)->", reg_table[size][reg], reg_getters[size](reg_mem, reg));
+//         return;
+//     }
+//     sprintf(&buff[strlen(buff)], "(0x%x)", reg_getters[size](reg_mem, reg));
+//     printf("%s", buff);
+// }
 
-void MemoryPrintIPReg(reg_mem_t *reg_mem,  enum befor_after_exec when)
-{
-    static char buff[50];
+// void MemoryPrintIPReg(reg_mem_t *reg_mem,  enum befor_after_exec when)
+// {
+//     static char buff[50];
 
-    if (when == BEFOR_EXEC)
-    {
-        sprintf(buff, " ; IP: (0x%x)->", *(u16*)&reg_mem->memory[IP]);
-        return;
-    }
-    sprintf(&buff[strlen(buff)], "(0x%x)", *(u16*)&reg_mem->memory[IP]);
-    printf("%s", buff);
-}
+//     if (when == BEFOR_EXEC)
+//     {
+//         sprintf(buff, " ; IP: (0x%x)->", *(u16*)&reg_mem->memory[IP]);
+//         return;
+//     }
+//     sprintf(&buff[strlen(buff)], "(0x%x)", *(u16*)&reg_mem->memory[IP]);
+//     printf("%s", buff);
+// }
 
-void MemoryPrintFlags(reg_mem_t *reg_mem)
-{
-    printf(" ZF: %d, SF: %d", MemoryGetFlag(reg_mem, ZF), MemoryGetFlag(reg_mem, SF));
-}
+// void MemoryPrintFlags(reg_mem_t *reg_mem)
+// {
+//     printf(" ZF: %d, SF: %d", MemoryGetFlag(reg_mem, ZF), MemoryGetFlag(reg_mem, SF));
+// }
 
-void MemoryPrintAllReg(reg_mem_t *reg_mem)
-{
-    printf("ax - 0x%x (%d)\n", *(u16 *)(reg_mem->memory + AX), *(u16 *)(reg_mem->memory + AX));
-    printf("bx - 0x%x (%d)\n", *(u16 *)(reg_mem->memory + BX), *(u16 *)(reg_mem->memory + BX));
-    printf("cx - 0x%x (%d)\n", *(u16 *)(reg_mem->memory + CX), *(u16 *)(reg_mem->memory + CX));
-    printf("dx - 0x%x (%d)\n", *(u16 *)(reg_mem->memory + DX), *(u16 *)(reg_mem->memory + DX));
-    printf("sp - 0x%x (%d)\n", *(u16 *)(reg_mem->memory + SP), *(u16 *)(reg_mem->memory + SP));
-    printf("bp - 0x%x (%d)\n", *(u16 *)(reg_mem->memory + BP), *(u16 *)(reg_mem->memory + BP));
-    printf("si - 0x%x (%d)\n", *(u16 *)(reg_mem->memory + SI), *(u16 *)(reg_mem->memory + SI));
-    printf("di - 0x%x (%d)\n\n", *(u16 *)(reg_mem->memory + DI), *(u16 *)(reg_mem->memory + DI));
+// void MemoryPrintAllReg(reg_mem_t *reg_mem)
+// {
+//     printf("ax - 0x%x (%d)\n", *(u16 *)(reg_mem->memory + AX), *(u16 *)(reg_mem->memory + AX));
+//     printf("bx - 0x%x (%d)\n", *(u16 *)(reg_mem->memory + BX), *(u16 *)(reg_mem->memory + BX));
+//     printf("cx - 0x%x (%d)\n", *(u16 *)(reg_mem->memory + CX), *(u16 *)(reg_mem->memory + CX));
+//     printf("dx - 0x%x (%d)\n", *(u16 *)(reg_mem->memory + DX), *(u16 *)(reg_mem->memory + DX));
+//     printf("sp - 0x%x (%d)\n", *(u16 *)(reg_mem->memory + SP), *(u16 *)(reg_mem->memory + SP));
+//     printf("bp - 0x%x (%d)\n", *(u16 *)(reg_mem->memory + BP), *(u16 *)(reg_mem->memory + BP));
+//     printf("si - 0x%x (%d)\n", *(u16 *)(reg_mem->memory + SI), *(u16 *)(reg_mem->memory + SI));
+//     printf("di - 0x%x (%d)\n\n", *(u16 *)(reg_mem->memory + DI), *(u16 *)(reg_mem->memory + DI));
 
-    printf("al - 0x%x (%d)\n", reg_mem->memory[AL], reg_mem->memory[AL]);
-    printf("ah - 0x%x (%d)\n", reg_mem->memory[AH], reg_mem->memory[AH]);
-    printf("bl - 0x%x (%d)\n", reg_mem->memory[BL], reg_mem->memory[BL]);
-    printf("bh - 0x%x (%d)\n", reg_mem->memory[BH], reg_mem->memory[BH]);
-    printf("cl - 0x%x (%d)\n", reg_mem->memory[CL], reg_mem->memory[CL]);
-    printf("ch - 0x%x (%d)\n", reg_mem->memory[CH], reg_mem->memory[CH]);
-    printf("dl - 0x%x (%d)\n", reg_mem->memory[DL], reg_mem->memory[DL]);
-    printf("dh - 0x%x (%d)\n", reg_mem->memory[DH], reg_mem->memory[DH]);
-}
+//     printf("al - 0x%x (%d)\n", reg_mem->memory[AL], reg_mem->memory[AL]);
+//     printf("ah - 0x%x (%d)\n", reg_mem->memory[AH], reg_mem->memory[AH]);
+//     printf("bl - 0x%x (%d)\n", reg_mem->memory[BL], reg_mem->memory[BL]);
+//     printf("bh - 0x%x (%d)\n", reg_mem->memory[BH], reg_mem->memory[BH]);
+//     printf("cl - 0x%x (%d)\n", reg_mem->memory[CL], reg_mem->memory[CL]);
+//     printf("ch - 0x%x (%d)\n", reg_mem->memory[CH], reg_mem->memory[CH]);
+//     printf("dl - 0x%x (%d)\n", reg_mem->memory[DL], reg_mem->memory[DL]);
+//     printf("dh - 0x%x (%d)\n", reg_mem->memory[DH], reg_mem->memory[DH]);
+// }

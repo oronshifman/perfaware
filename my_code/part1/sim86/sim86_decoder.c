@@ -64,10 +64,29 @@ static void GetSrc(expression_t *decoded_inst, inst_t *full_inst, u16 instructio
     operand_t *src = &decoded_inst->operands[SRC];
     src->direction = SRC;
 
+    // NOTE: if JMP, src is JUMP_OFFSET
     if (full_inst->operation_type == JMP)
     {
         InitOperand(src, JUMP_OFFSET, full_inst->field[W].value, 0);
         src->jmp_offset = full_inst->field[JMP_OFFSET].value;
+
+        return;
+    }
+
+    // NOTE: src is an immediate
+    if (full_inst->field[DATA].state == INITIALIZED)
+    {
+        InitOperand(src, IMMEDIATE, full_inst->field[W].value, 0);
+        src->unsigned_immediate = full_inst->field[DATA].value;
+
+        return;
+    }
+
+    // NOTE: src is direct address
+    if (full_inst->field[MOD].value == 0b00 && full_inst->field[RM].value == 0b110)
+    {
+        InitOperand(src, DIRECT_ADDR, full_inst->field[W].value, full_inst->field[DISP].value);
+        src->ea_code = full_inst->field[RM].value;
 
         return;
     }
@@ -83,14 +102,6 @@ static void GetSrc(expression_t *decoded_inst, inst_t *full_inst, u16 instructio
         {
             InitOperand(src, EFFECTIVE_ADDR, full_inst->field[W].value, 0);
         }
-
-        return;
-    }
-
-    if (full_inst->field[DATA].state == INITIALIZED)
-    {
-        InitOperand(src, IMMEDIATE, full_inst->field[W].value, 0);
-        src->unsigned_immediate = full_inst->field[DATA].value;
 
         return;
     }

@@ -48,7 +48,7 @@ void ManagerOperate(FILE *bin, u8 option)
     if (option == EXEC_BIN)
     {
         printf("\n\n");
-        MemoryPrintAllReg(reg_mem);
+        PrinterPrintAllReg(reg_mem);
         MemoryDestroy(reg_mem);
     }
 }
@@ -79,7 +79,7 @@ static void Print(expression_t *expression, reg_mem_t *reg_mem)
 static void Exec(expression_t *expression, reg_mem_t *reg_mem)
 {
     // print IP value before decode
-    MemoryPrintIPReg(reg_mem, BEFOR_EXEC);
+    PrinterPrintIPReg(reg_mem, BEFOR_EXEC);
     
     // decode instruction
     DecoderGetNextInst(expression, reg_mem);
@@ -88,18 +88,18 @@ static void Exec(expression_t *expression, reg_mem_t *reg_mem)
     PrinterPrintInst(expression);
     
     // print modified register value before exec
-    MemoryPrintSingleReg(reg_mem, expression->operands[DEST].size, expression->operands[DEST].reg_code, BEFOR_EXEC);
+    PrinterPrintDest(reg_mem, expression, BEFOR_EXEC);
     
     // print IP value after decode
-    MemoryPrintIPReg(reg_mem, AFTER_EXEC);
+    PrinterPrintIPReg(reg_mem, AFTER_EXEC);
     
     // execute instruction
     ExecutorExecInst(expression, reg_mem);
     
     // print modified register value after exec
-    MemoryPrintSingleReg(reg_mem, expression->operands[DEST].size, expression->operands[DEST].reg_code, AFTER_EXEC);
+    PrinterPrintDest(reg_mem, expression, AFTER_EXEC);
     
     // print flags values after exec
-    MemoryPrintFlags(reg_mem);
+    PrinterPrintFlags(reg_mem);
     printf("\n");
 }

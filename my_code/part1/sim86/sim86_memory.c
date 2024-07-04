@@ -133,6 +133,13 @@ s64 MemorySetupCodeSeg(reg_mem_t *reg_mem, FILE *bin)
     return ftell(bin);
 }
 
+void MemoryDump(reg_mem_t *reg_mem, u32 from, u16 size)
+{
+    FILE *mem_dump = fopen("mem_dump.data", "w");
+    u16 segment_base = *(u16 *)&reg_mem->memory[DS];
+    fwrite(&reg_mem->memory[segment_base], size, 1, mem_dump);
+}
+
 void MemorySetWordRegValue(reg_mem_t *reg_mem, u8 reg, u16 value)
 {
     assert(reg_mem);
@@ -187,7 +194,7 @@ u16 MemoryGetMemoryValue(reg_mem_t *reg_mem, u8 segment, u16 offset)
 {
     u8 segment_trans = register_translation_table[SEGMENT][segment];
     u16 segment_base = *(u16 *)&reg_mem->memory[segment_trans];
-    return *(u16 *)&(reg_mem->memory[segment_base + offset]);
+    return *(u16 *)&reg_mem->memory[segment_base + offset];
 }
 
 u16 MemoryGetEAValue(reg_mem_t *reg_mem, u8 ea_code)
@@ -200,7 +207,7 @@ u16 MemoryGetEAValue(reg_mem_t *reg_mem, u8 ea_code)
         *(u16 *)&(reg_mem->memory[BP]) + *(u16 *)&(reg_mem->memory[DI]),
         *(u16 *)&(reg_mem->memory[SI]),
         *(u16 *)&(reg_mem->memory[DI]),
-        -1,
+        *(u16 *)&(reg_mem->memory[BP]),
         *(u16 *)&(reg_mem->memory[BX]),
     };
 

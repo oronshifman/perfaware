@@ -7,6 +7,7 @@
 enum option_types
 {
     EXEC_BIN,
+    DUMP_MEM,
     PRINT_TO_ASM,
 
     NUM_OPTIONS
@@ -15,4 +16,4 @@ enum option_types
 void ManagerOperate(FILE *bin, u8 option);
 u8 ManagerParseOption(char *option);
 
-#endif /* __SIM86_MANAGER_H__ */
+#endif /* SIM86_MANAGER_H */

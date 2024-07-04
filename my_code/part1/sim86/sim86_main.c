@@ -2,7 +2,7 @@
 
 int main(u32 argc, u8 *argv[])
 {
-    if (argc < 3)
+    if (argc < 3 || argc > 4)
     {
         printf("Usage: sim86 <option> <binary_file>\n");
         return 1;
@@ -12,11 +12,19 @@ int main(u32 argc, u8 *argv[])
     if (option < 0)
     {
         printf("Invalid option");
-        printf("Valid options: -exec, -print");
+        printf("Valid options: -exec, -dump -exec, -print");
         return 1;
     }
 
-    FILE *bin = fopen(argv[2], "rb");
+    FILE *bin = NULL;
+    if (option == EXEC_BIN)
+    {
+        bin = fopen(argv[2], "rb");
+    }
+    else if (option == DUMP_MEM)
+    {
+        bin = fopen(argv[3], "rb");
+    }
     if (!bin)
     {
         perror("Open file");

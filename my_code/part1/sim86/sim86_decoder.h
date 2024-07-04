@@ -55,7 +55,7 @@ typedef struct expression
 */
 u8 DecoderGetNextInst(expression_t *decoded_inst, reg_mem_t *reg_mem);
 
-#endif /* __SIM86_DECODER_H__ */
+#endif /* SIM86_DECODER_H */
 
 // compile only with decoder  for testing it
 // gcc -I. sim86_main.c sim86_decoder.c sim86_manager.c sim86_instruction.c -o test -g

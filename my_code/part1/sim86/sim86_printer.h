@@ -16,4 +16,4 @@ void PrinterPrintDest(reg_mem_t *reg_mem, expression_t *instruction, enum befor_
 void PrinterPrintFlags(reg_mem_t *reg_mem);
 void PrinterPrintIPReg(reg_mem_t *reg_mem,  enum befor_after_exec when);
 
-#endif /* __SIM86_PRINTER_H__ */
+#endif /* SIM86_PRINTER_H */

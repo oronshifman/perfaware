@@ -10,7 +10,7 @@
 
 char *str_options[NUM_OPTIONS] = 
 {
-    "-exec", "-print"
+    "-exec", "-dump", "-print"
 };
 
 typedef void (*option_func_ptr)(expression_t *, reg_mem_t *);
@@ -28,6 +28,7 @@ void ManagerOperate(FILE *bin, u8 option)
     option_func_ptr option_func = NULL;
     switch (option)
     {
+        case DUMP_MEM:
         case EXEC_BIN:
         {
             option_func = Exec;
@@ -45,12 +46,18 @@ void ManagerOperate(FILE *bin, u8 option)
         option_func(decoded_inst, reg_mem);
     }
     
-    if (option == EXEC_BIN)
+    if (option != PRINT_TO_ASM)
     {
         printf("\n\n");
         PrinterPrintAllReg(reg_mem);
-        MemoryDestroy(reg_mem);
     }
+
+    if (option == DUMP_MEM) 
+    {
+        MemoryDump(reg_mem, DATA_SEG, 64*64*4); // NOTE: the size to dump is hard coded!!! is right for listing_54 (5.7.24)
+    }
+    
+    MemoryDestroy(reg_mem);
 }
 
 u8 ManagerParseOption(char *option)

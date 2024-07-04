@@ -72,12 +72,14 @@ u16 MemoryGetIP(reg_mem_t *reg_mem);
 void MemoryChangeIPByN(reg_mem_t *reg_mem, u16 n);
 s64 MemorySetupCodeSeg(reg_mem_t *reg_mem, FILE *bin);
 
-#endif /* __SIM86_MEMORY_H__ */ 
+void MemoryDump(reg_mem_t *reg_mem, u32 from, u16 size);
+
+#endif /* SIM86_MEMORY_H */ 
 
 // compile only memory_test
 // gcc -I. sim86_memory_test.c sim86_memory.c -o test -g
 
-/*
+/* 
 MY_ENCODE  SPEC_ENCODE
 ax = 0     (000) 
 al = 0     (000) 

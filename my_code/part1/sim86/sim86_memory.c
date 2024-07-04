@@ -116,10 +116,10 @@ s64 MemorySetupCodeSeg(reg_mem_t *reg_mem, FILE *bin)
     u16 first_available_addr = 28;
     reg_mem->memory[CS] = first_available_addr;
 
-    u16 data = 0;
+    u8 data = 0;
     for (u32 offset = first_available_addr;
          fread(&data, sizeof(data), 1, bin) == 1;
-         offset += 2)
+         ++offset)
     {
         *(u16 *)&reg_mem->memory[offset] = data;
     }
@@ -186,7 +186,7 @@ u16 MemoryGetNextNByteMemory(reg_mem_t *reg_mem, u8 segment, u8 n)
 u16 MemoryGetMemoryValue(reg_mem_t *reg_mem, u8 segment, u16 offset)
 {
     u8 segment_trans = register_translation_table[SEGMENT][segment];
-    u16 segment_base = reg_mem->memory[segment_trans];
+    u16 segment_base = *(u16 *)&reg_mem->memory[segment_trans];
     return *(u16 *)&(reg_mem->memory[segment_base + offset]);
 }
 
@@ -210,7 +210,7 @@ u16 MemoryGetEAValue(reg_mem_t *reg_mem, u8 ea_code)
 void MemorySetMemoryValue(reg_mem_t *reg_mem, u8 segment, u16 offset, u16 data)
 {
     u8 segment_trans = register_translation_table[SEGMENT][segment];
-    u16 segment_base = reg_mem->memory[segment_trans];
+    u16 segment_base = *(u16 *)&reg_mem->memory[segment_trans];
     *(u16 *)&reg_mem->memory[segment_base + offset] = data;
 }
 

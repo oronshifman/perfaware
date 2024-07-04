@@ -109,16 +109,6 @@ void PrinterPrintDest(reg_mem_t *reg_mem, expression_t *instruction, enum befor_
 {
     typedef u16 (*get_reg_func_ptr)(reg_mem_t *, u8);
 
-    char *reg_table[REG_TYPES][NUM_GENERAL_PURPOSE_REG] = 
-    {
-        // byte (0)
-        {"al", "cl", "dl", "bl", 
-         "ah", "ch", "dh", "bh"},
-        // word (1)
-        {"ax", "cx", "dx", "bx",
-         "sp", "bp", "si", "di"}
-    };
-
     get_reg_func_ptr reg_getters[NUM_REG_GETTERS] =
     {
         MemoryGetByteRegValue, MemoryGetWordRegValue
@@ -126,12 +116,67 @@ void PrinterPrintDest(reg_mem_t *reg_mem, expression_t *instruction, enum befor_
     
     static char buff[50];
 
+    operand_t dest = instruction->operands[DEST];
     if (when == BEFOR_EXEC)
     {
         // sprintf(buff, " ; %s: (0x%x)->", reg_table[size][reg], reg_getters[size](reg_mem, reg));
+        switch (dest.operand_type)
+        {
+            case REGISTER:
+            {
+                sprintf(buff, "; %s: (0x%x)->", reg_table[dest.size][dest.reg_code], reg_getters[dest.size](reg_mem, dest.reg_code));
+            } break;
+            
+            case DIRECT_ADDR:
+            {
+                sprintf(buff, "; %d: (0x%x)->", dest.disp, MemoryGetMemoryValue(reg_mem, DATA_SEG, dest.disp));
+            } break;
+
+            case EFFECTIVE_ADDR:
+            {
+                sprintf(buff, "; %s", ea_calc[dest.ea_code]);
+                if (dest.disp)
+                {
+                    sprintf(&buff[strlen(buff)], " + %d: (0x%x)->", dest.disp, MemoryGetMemoryValue(reg_mem, DATA_SEG, MemoryGetEAValue(reg_mem, dest.ea_code) + dest.disp));
+                    break;
+                }
+                sprintf(&buff[strlen(buff)], ": (0x%x)->", MemoryGetMemoryValue(reg_mem, DATA_SEG, MemoryGetEAValue(reg_mem, dest.ea_code) + dest.disp));
+            } break;
+            
+            default:
+            {
+                sprintf(buff, ";");
+            } break;
+        }
         return;
     }
     // sprintf(&buff[strlen(buff)], "(0x%x);", reg_getters[size](reg_mem, reg));
+    switch (dest.operand_type)
+    {
+        case REGISTER:
+        {
+            sprintf(&buff[strlen(buff)], "(0x%x);", reg_getters[dest.size](reg_mem, dest.reg_code));
+        } break;
+        
+        case DIRECT_ADDR:
+        {
+            sprintf(&buff[strlen(buff)], "(0x%x)", MemoryGetMemoryValue(reg_mem, DATA_SEG, dest.disp));
+        } break;
+
+        case EFFECTIVE_ADDR:
+        {
+            if (dest.disp)
+            {
+                sprintf(&buff[strlen(buff)], "(0x%x);", MemoryGetMemoryValue(reg_mem, DATA_SEG, MemoryGetEAValue(reg_mem, dest.ea_code) + dest.disp));
+                break;
+            }
+            sprintf(&buff[strlen(buff)], "(0x%x);", MemoryGetMemoryValue(reg_mem, DATA_SEG, MemoryGetEAValue(reg_mem, dest.ea_code) + dest.disp));
+        } break;
+        
+        default:
+        {
+        } break;
+    }
     printf("%s", buff);
 }
 

@@ -89,17 +89,9 @@ static void ExecMov(expression_t *instruction, reg_mem_t *reg_mem)
     switch (dest_type) 
     {
         case DIRECT_ADDR:
-        {
-            MemorySetMemoryValue(reg_mem, DATA_SEG, dest, src);
-        } break;
-
         case EFFECTIVE_ADDR: // TODO: finish testing and implementing (2.7.24, 12:18)
         {
-            u8 ea_code = dest;
-            u16 disp = instruction->operands[DEST].disp;
-
-            u16 reg_val = reg_getters[instruction->operands[DEST].size](reg_mem, ea_code);
-            MemorySetMemoryValue(reg_mem, DATA_SEG, reg_val + disp, src);
+            MemorySetMemoryValue(reg_mem, DATA_SEG, dest, src);
         } break;
 
         case REGISTER:
@@ -219,13 +211,20 @@ static u16 GetOperandValue(reg_mem_t *reg_mem, operand_t *operand)
 
         case EFFECTIVE_ADDR:
         {
-            // return operand->ea_code;
-            return MemoryGetEAValue(reg_mem, operand->ea_code) + operand->disp;
+            if (operand->direction == DEST)
+            {
+                return MemoryGetEAValue(reg_mem, operand->ea_code) + operand->disp;
+            }
+            return MemoryGetMemoryValue(reg_mem, DATA_SEG, MemoryGetEAValue(reg_mem, operand->ea_code) + operand->disp);
         } break;
 
         case DIRECT_ADDR:
         {
-            return operand->disp;
+            if (operand->direction == DEST) 
+            {
+                return operand->disp;
+            }
+            return MemoryGetMemoryValue(reg_mem, DATA_SEG, operand->disp);
         } break;
 
         case IMMEDIATE:

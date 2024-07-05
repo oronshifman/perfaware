@@ -1,8 +1,9 @@
 ---
-# Project Name: sim86
+# Project Name: simple_8086_simulator
 ### By: Oron Shifman
 
-This project follows the course "Performance-Aware Programming" by Casey Muratori.
+This project follows part1 of the course "Performance-Aware Programming" by Casey Muratori.
+This is a simplefied simulation of the 8086 architecture, build for learning purposes.
 
 ## Description
 

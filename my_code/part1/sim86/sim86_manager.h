@@ -9,6 +9,7 @@ enum option_types
     EXEC_BIN,
     DUMP_MEM,
     PRINT_TO_ASM,
+    CLOCKS_ESTIMATION,
 
     NUM_OPTIONS
 };

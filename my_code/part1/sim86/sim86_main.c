@@ -17,7 +17,7 @@ int main(u32 argc, u8 *argv[])
     }
 
     FILE *bin = NULL;
-    if (option == EXEC_BIN)
+    if (option == EXEC_BIN || option == PRINT_TO_ASM)
     {
         bin = fopen(argv[2], "rb");
     }

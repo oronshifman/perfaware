@@ -10,7 +10,7 @@
 
 char *str_options[NUM_OPTIONS] = 
 {
-    "-exec", "-dump", "-print"
+    "-exec", "-dump", "-print" , "-clocks"
 };
 
 typedef void (*option_func_ptr)(expression_t *, reg_mem_t *);

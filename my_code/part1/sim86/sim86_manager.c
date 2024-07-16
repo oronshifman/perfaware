@@ -85,11 +85,11 @@ u8 ManagerParseOption(char *option)
 static void PrintWithClocks(expression_t *expression, reg_mem_t *reg_mem)
 {
     DecoderGetNextInst(expression, reg_mem);
-    EstimatorGetClocks(expression);
+    clock_est_t clock_estimation = EstimatorGetClocks(expression);
 
     PrinterPrintInst(expression);
     printf("; ");
-    PrinterPrintClocks(expression);
+    PrinterPrintClocks(&clock_estimation);
     printf("\n");
 }
 

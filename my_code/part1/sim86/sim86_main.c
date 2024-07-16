@@ -17,14 +17,27 @@ int main(u32 argc, u8 *argv[])
     }
 
     FILE *bin = NULL;
-    if (option == EXEC_BIN || option == PRINT_TO_ASM)
+    switch(option)
     {
-        bin = fopen(argv[2], "rb");
+        case EXEC_BIN:
+        case PRINT_TO_ASM:
+        case CLOCKS_ESTIMATION:
+        {
+            bin = fopen(argv[2], "rb");
+        } break;
+
+        case DUMP_MEM:
+        {
+            bin = fopen(argv[3], "rb");
+        } break;
+
+        default:
+        {
+            fprintf(stderr, "Option %s is not supported\n", argv[2]);
+            return 1;
+        } break;
     }
-    else if (option == DUMP_MEM)
-    {
-        bin = fopen(argv[3], "rb");
-    }
+
     if (!bin)
     {
         perror("Open file");

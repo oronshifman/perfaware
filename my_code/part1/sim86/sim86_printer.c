@@ -70,18 +70,22 @@ void PrinterPrintInst(expression_t *instruction)
     printf("%s", buff);
 }
 
-void PrinterPrintClocks(expression_t *instruction)
+void PrinterPrintClocks(clock_est_t *clock_estimation)
 {
     // TODO(15.7.24): impl
     char buff[50];
+    static u16 total_clocks = 0;
+    total_clocks += clock_estimation->base_clocks;
 
-    sprintf(buff, "%d", instruction->clock_estimation.base_clocks);
+    sprintf(buff, "%d", clock_estimation->base_clocks);
 
-    if (instruction->clock_estimation.ea_clocks != NONE)
+    if (clock_estimation->ea_clocks != NONE)
     {
-        sprintf(&buff[strlen(buff)], " + %d(EA)", instruction->clock_estimation.ea_clocks);
+        total_clocks += clock_estimation->ea_clocks;
+        sprintf(&buff[strlen(buff)], " + %d(EA)", clock_estimation->ea_clocks);
     }
 
+    sprintf(&buff[strlen(buff)], " = %d", total_clocks);
     printf("%s", buff);
 }
 

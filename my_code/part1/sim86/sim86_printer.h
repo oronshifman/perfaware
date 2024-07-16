@@ -1,6 +1,7 @@
 #ifndef __SIM86_PRINTER_H__
 #define __SIM86_PRINTER_H__
 
+#include "sim86_clock_estimator.h"
 #include "sim86_decoder.h"
 
 enum befor_after_exec
@@ -10,7 +11,7 @@ enum befor_after_exec
 };
 
 void PrinterPrintInst(expression_t *instruction);
-void PrinterPrintClocks(expression_t *instruction);
+void PrinterPrintClocks(clock_est_t *clock_estimation);
 
 void PrinterPrintAllReg(reg_mem_t *reg_mem);
 void PrinterPrintDest(reg_mem_t *reg_mem, expression_t *instruction, enum befor_after_exec when);

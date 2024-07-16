@@ -4,7 +4,6 @@
 #include <stdio.h>
 
 #include "sim86_instruction.h"
-#include "sim86_clock_estimator.h"
 #include "sim86_memory.h"
 
 enum operand_type
@@ -47,7 +46,6 @@ typedef struct expression
 {
     enum operation_type operation_type;
     operand_t operands[NUM_OPERANDS]; // NOTE: if JMP, <jmp_code in dest> and <jmp offset is in src.signed_immediate>
-    clock_est_t clock_estimation;
 } expression_t;
 
 /*

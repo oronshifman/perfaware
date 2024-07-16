@@ -20,6 +20,6 @@ typedef struct clock_estimation
     u8 ea_clocks;
 } clock_est_t;
 
-void EstimatorGetClocks(expression_t *decoded_inst);
+clock_est_t EstimatorGetClocks(expression_t *decoded_inst);
 
 #endif /* SIM86_CLOCK_ESTIMATOR_H */

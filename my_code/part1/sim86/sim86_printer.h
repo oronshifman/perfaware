@@ -10,6 +10,7 @@ enum befor_after_exec
 };
 
 void PrinterPrintInst(expression_t *instruction);
+void PrinterPrintClocks(expression_t *instruction);
 
 void PrinterPrintAllReg(reg_mem_t *reg_mem);
 void PrinterPrintDest(reg_mem_t *reg_mem, expression_t *instruction, enum befor_after_exec when);

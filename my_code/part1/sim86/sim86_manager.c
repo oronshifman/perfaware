@@ -4,6 +4,7 @@
 
 #include "sim86_manager.h"
 #include "sim86_decoder.h"
+#include "sim86_clock_estimator.h"
 #include "sim86_printer.h"
 #include "sim86_executer.h"
 #include "sim86_memory.h"
@@ -16,6 +17,7 @@ char *str_options[NUM_OPTIONS] =
 typedef void (*option_func_ptr)(expression_t *, reg_mem_t *);
 
 static void Print(expression_t *expression, reg_mem_t *reg_mem);
+static void PrintWithClocks(expression_t *expression, reg_mem_t *reg_mem);
 static void Exec(expression_t *expression, reg_mem_t *reg_mem);
 
 void ManagerOperate(FILE *bin, u8 option)
@@ -37,6 +39,11 @@ void ManagerOperate(FILE *bin, u8 option)
         case PRINT_TO_ASM:
         {
             option_func = Print;
+        } break;
+
+        case CLOCKS_ESTIMATION:
+        {
+            option_func = PrintWithClocks;
         } break;
     }
 
@@ -73,6 +80,17 @@ u8 ManagerParseOption(char *option)
     }
 
     return -1;
+}
+
+static void PrintWithClocks(expression_t *expression, reg_mem_t *reg_mem)
+{
+    DecoderGetNextInst(expression, reg_mem);
+    EstimatorGetClocks(expression);
+
+    PrinterPrintInst(expression);
+    printf("; ");
+    PrinterPrintClocks(expression);
+    printf("\n");
 }
 
 static void Print(expression_t *expression, reg_mem_t *reg_mem)

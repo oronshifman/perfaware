@@ -2,6 +2,8 @@
 #include <string.h>
 
 #include "sim86_printer.h"
+#include "sim86_clock_estimator.h"
+#include "sim86_decoder.h"
 
 #define NUM_EA 8
 #define NUM_REG 8
@@ -65,6 +67,21 @@ void PrinterPrintInst(expression_t *instruction)
     sprintf(&buff[strlen(buff)], ", ");
     AddOperandToBuff(buff, &instruction->operands[SRC]);
  
+    printf("%s", buff);
+}
+
+void PrinterPrintClocks(expression_t *instruction)
+{
+    // TODO(15.7.24): impl
+    char buff[50];
+
+    sprintf(buff, "%d", instruction->clock_estimation.base_clocks);
+
+    if (instruction->clock_estimation.ea_clocks != NONE)
+    {
+        sprintf(&buff[strlen(buff)], " + %d(EA)", instruction->clock_estimation.ea_clocks);
+    }
+
     printf("%s", buff);
 }
 

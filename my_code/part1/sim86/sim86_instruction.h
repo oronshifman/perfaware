@@ -49,17 +49,10 @@ typedef struct inst_field
     u16 value;
 } inst_field_t;
 
-typedef struct clock_estimation
-{
-    u8 base_clocks;
-    u8 ea_clocks;
-} clock_est_t;
-
 typedef struct inst
 {
     enum operation_type operation_type;        // NOTE: corresponds to enum operation_types from sim86_general.h
     inst_field_t field[NUM_FIELDS];
-    clock_est_t clock_estimation;
 } inst_t;
 
 void InstructionInitOpTable(inst_t *op_table);

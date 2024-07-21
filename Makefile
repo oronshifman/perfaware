@@ -1,4 +1,4 @@
-OBJS = src/haversine_generator.cpp test/haversine_generator_main.cpp
+OBJS = src/haversine_generator.cpp src/listing_0065_haversine_formula.cpp test/haversine_generator_main.cpp
 
 CC = g++
 

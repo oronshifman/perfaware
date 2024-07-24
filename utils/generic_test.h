@@ -8,6 +8,9 @@
 
 #include <iostream>
 #include <string>
+#include <stddef.h> // size_t
+
+#include "JSORONValue.h"
 
 /*************************************************
                   Color Defines   		                        
@@ -30,28 +33,64 @@
 #define BOLDCYAN    "\033[1m\033[36m"      /* Bold Cyan */
 #define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
 
-size_t g_test_counter = 0;
-size_t g_succeeded_test_counter = 0;
+/**
+ * Create an instance of Tester and the call it's test function as discribed above it
+ */
+class Tester {
+public:
+    Tester();
 
-/* TestInt(result, expected, "", __LINE__); */
-template<typename T>
-void Test(T result, T expected, std::string message, int line)
-{
-	++g_test_counter;
-	
-	if (result != expected)
-	{
-		std::cout << "\n" << BOLDMAGENTA << "Test " << std::to_string(g_test_counter) << DEFAULT << "\n" <<
-                     message << ":\n" << 
-                     BOLDRED << "FAIL " << DEFAULT << "at line " << std::to_string(line) << "\n" <<
-                     "Got" << std::to_string(result) << "expected" << std::to_string(expected) << "\n";
-	}
-	else
-	{
-		++g_succeeded_test_counter;
-	}	
-}
+    /**
+     * Call: Test<tested_type>(result, expected, "", __LINE__); 
+     */
+    template<typename T>
+    void TestPrimitive(T result, T expected, std::string message, int line)
+    {
+        ++test_counter;
+        
+        if (result != expected)
+        {
+            if (typeid(result) == typeid(std::string))
+            {
+                std::cout << "\n" << BOLDMAGENTA << "Test " << std::to_string(test_counter) << DEFAULT << "\n" <<
+                            message << "\n" << 
+                            BOLDRED << "FAIL " << DEFAULT <<
+                            "at line " << BOLDBLUE << std::to_string(line) << DEFAULT << "\n" <<
+                            "Got: " << RED << result << DEFAULT << 
+                            " expected: " << GREEN << expected << "\n";
+            }
+            else if (typeid(result) == typeid(JSORONType))
+            {
+                std::cout << "\n" << BOLDMAGENTA << "Test " << std::to_string(test_counter) << DEFAULT << "\n" <<
+                            message << "\n" << 
+                            BOLDRED << "FAIL " << DEFAULT <<
+                            "at line " << BOLDBLUE << std::to_string(line) << DEFAULT << "\n" <<
+                            "Got: " << RED << (int)result << DEFAULT << 
+                            " expected: " << GREEN << (int)expected << "\n";
+            }
+            else
+            {
+                std::cout << "\n" << BOLDMAGENTA << "Test " << std::to_string(test_counter) << DEFAULT << "\n" <<
+                            message << "\n" << 
+                            BOLDRED << "FAIL " << DEFAULT <<
+                            "at line " << BOLDBLUE << std::to_string(line) << DEFAULT << "\n" <<
+                            "Got: " << RED << std::to_string(result) << DEFAULT << 
+                            " expected: " << GREEN << std::to_string(expected) << "\n";
+            }
+        }
+        else
+        {
+            ++succeeded_test_counter;
+        }	
+    }
 
-void TestAll(void);
+    void TestJSORONType(JSORONType result, JSORONType expected, std::string message, int line);
+    void TestStr(std::string result, std::string expected, std::string message, int line);
+    void TestAll(void);
+
+private:
+    size_t test_counter;
+    size_t succeeded_test_counter;
+};
 
 #endif /* GENERIC_TEST_H */

@@ -37,28 +37,29 @@ public:
 
     union
     {
-        u32 int_val;
+        s32 int_val;
         f64 float_val;
         std::string str_val;
         JSORONObject json_val;
 
-        std::vector<u32> int_arr;
+        std::vector<s32> int_arr;
         std::vector<f64> float_arr;
         std::vector<std::string> str_arr;
         std::vector<JSORONObject> obj_arr;
     };
 
     JSORONValue() : type(JSORONType::NULL_TYPE) {}
+    ~JSORONValue();
 
-    JSORONValue(const u32 value) : type(JSORONType::INT), int_val(value) {}
+    JSORONValue(const s32 value) : type(JSORONType::INT), int_val(value) {}
     JSORONValue(const f64 value) : type(JSORONType::FLOAT), float_val(value) {}
     JSORONValue(const std::string value) : type(JSORONType::STR), str_val(value) {}
     JSORONValue(const JSORONObject value) : type(JSORONType::JSORON_OBJECT), json_val(value) {}
 
-    JSORONValue(const std::vector<u32>& arr);
-    JSORONValue(const std::vector<f64>& arr);
-    JSORONValue(const std::vector<std::string>& arr);
-    JSORONValue(const std::vector<JSORONObject>& arr);
+    JSORONValue(const std::vector<s32>& arr) : type(JSORONType::INT_ARR), int_arr(arr) {}
+    JSORONValue(const std::vector<f64>& arr) : type(JSORONType::FLOAT_ARR), float_arr(arr) {}
+    JSORONValue(const std::vector<std::string>& arr) : type(JSORONType::STR_ARR), str_arr(arr) {}
+    JSORONValue(const std::vector<JSORONObject>& arr) : type(JSORONType::OBJ_ARR), obj_arr(arr) {}
 };
 
 #endif /* JSORON_VALUE_H */

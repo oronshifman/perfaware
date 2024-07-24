@@ -10,7 +10,8 @@
 class JSORONObject 
 {
 public:
-
+    JSORONObject();
+    ~JSORONObject();
 };
 
 #endif /* JSORON_OBJECT_H */

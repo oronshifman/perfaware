@@ -1,25 +1,33 @@
-TEST_OBJ_OBJS = src/JSORONObject.cpp test/test_JSORONObject.cpp
-OBJ_ELF_NAME = build/test_JSORONObject
+TEST_OBJ_OBJS = src/JSORONObject.o test/test_JSORONObject.o
+TEST_OBJ_ELF = build/test_JSORONObject
 
-TEST_VALUE_OBJ = src/JSORONValue.cpp src/JSORONObject.cpp test/test_JSORONValue.cpp
-VALUE_ELF_NAME = build/test_JSORONValue
+TEST_VALUE_OBJ = src/_JSORONValue.o test/test_JSORONValue.o
+TEST_VALUE_ELF = build/test_JSORONValue
 
-TEST = ../../utils/generic_test.cpp
+TEST=../../utils/generic_test.o
 
-CC = g++
+CXX=g++
 
-COMPILER_FLAGS = 
+CXXFLAGS=-Wall -std=c++17
 
-INCLUDE_DIR = -Iinclude -I../../utils
+CPPFLAGS=-Iinclude -I../../utils
 
-DEBUG_FLAG = -g
+RELEASE_FLAGS=-DNDEBUG -O3
+DEBUG_FLAG=-g
 
-OBJ_NAME = build/JSORONObject
+all: 
 
-all: test_value test_obj
-	
-test_value: $(TEST_VALUE_OBJ) $(TEST)
-	$(CC) $(COMPILER_FLAGS) $(DEBUG_FLAG) -o $(VALUE_ELF_NAME) $(TEST_VALUE_OBJ) $(TEST) $(INCLUDE_DIR)
+test_value: CXXFLAGS+=$(DEBUG_FLAG)
+test_value: $(TEST_VALUE_ELF)
 
-test_obj: $(TEST_OBJ_OBJS) $(TEST)
-	$(CC) $(COMPILER_FLAGS) $(DEBUG_FLAG) -o $(OBJ_ELF_NAME) $(TEST_OBJ_OBJS) $(TEST) $(INCLUDE_DIR)
+test_obj: CXXFLAGS+=$(DEBUG_FLAG)
+test_obj: $(TEST_OBJ_ELF)
+
+$(TEST_OBJ_ELF): $(TEST_OBJ_OBJS) $(TEST)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $(TEST_OBJ_ELF) $(TEST_OBJ_OBJS) $(TEST)
+
+$(TEST_VALUE_ELF): $(TEST_VALUE_OBJ) $(TEST)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $(TEST_VALUE_ELF) $(TEST_VALUE_OBJ) $(TEST)
+
+clean:
+	rm build/test_* src/*.o test/*.o

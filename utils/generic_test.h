@@ -10,8 +10,6 @@
 #include <string>
 #include <stddef.h> // size_t
 
-#include "JSORONValue.h"
-
 /*************************************************
                   Color Defines   		                        
 *************************************************/
@@ -50,33 +48,12 @@ public:
         
         if (result != expected)
         {
-            if (typeid(result) == typeid(std::string))
-            {
-                std::cout << "\n" << BOLDMAGENTA << "Test " << std::to_string(test_counter) << DEFAULT << "\n" <<
-                            message << "\n" << 
-                            BOLDRED << "FAIL " << DEFAULT <<
-                            "at line " << BOLDBLUE << std::to_string(line) << DEFAULT << "\n" <<
-                            "Got: " << RED << result << DEFAULT << 
-                            " expected: " << GREEN << expected << "\n";
-            }
-            else if (typeid(result) == typeid(JSORONType))
-            {
-                std::cout << "\n" << BOLDMAGENTA << "Test " << std::to_string(test_counter) << DEFAULT << "\n" <<
-                            message << "\n" << 
-                            BOLDRED << "FAIL " << DEFAULT <<
-                            "at line " << BOLDBLUE << std::to_string(line) << DEFAULT << "\n" <<
-                            "Got: " << RED << (int)result << DEFAULT << 
-                            " expected: " << GREEN << (int)expected << "\n";
-            }
-            else
-            {
-                std::cout << "\n" << BOLDMAGENTA << "Test " << std::to_string(test_counter) << DEFAULT << "\n" <<
-                            message << "\n" << 
-                            BOLDRED << "FAIL " << DEFAULT <<
-                            "at line " << BOLDBLUE << std::to_string(line) << DEFAULT << "\n" <<
-                            "Got: " << RED << std::to_string(result) << DEFAULT << 
-                            " expected: " << GREEN << std::to_string(expected) << "\n";
-            }
+            std::cout << "\n" << BOLDMAGENTA << "Test " << std::to_string(test_counter) << DEFAULT << "\n" <<
+                        message << "\n" << 
+                        BOLDRED << "FAIL " << DEFAULT <<
+                        "at line " << BOLDBLUE << std::to_string(line) << DEFAULT << "\n" <<
+                        "Got: " << RED << std::to_string(result) << DEFAULT << 
+                        " expected: " << GREEN << std::to_string(expected) << "\n";
         }
         else
         {
@@ -84,7 +61,6 @@ public:
         }	
     }
 
-    void TestJSORONType(JSORONType result, JSORONType expected, std::string message, int line);
     void TestStr(std::string result, std::string expected, std::string message, int line);
     void TestAll(void);
 

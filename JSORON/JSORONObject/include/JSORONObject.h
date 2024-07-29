@@ -68,26 +68,19 @@ class JSORONObject
 
 public:
     JSORONObject() : json(), insertion_order() {}
-    JSORONObject(const JSORONObject& value);
+    JSORONObject(const JSORONObject& value) : json(value.json), insertion_order(value.insertion_order) {}
     ~JSORONObject();
 
     template<typename T>
-    void Put(const std::string& key, const T& value)
+    void Put(const std::string key, const T& value)
     {
-        JSORONValue new_value(value);
+        JSORONValue* new_value = new JSORONValue(value);
         auto res = json.insert({key, new_value});
         if (res.second)
         {
             insertion_order.push_back(key);
         }
     }
-    // void Put(const std::string& key, const f64 value);
-    // void Put(const std::string& key, const std::string value);
-    // void Put(const std::string& key, const JSORONObject& value);
-    // void Put(const std::string& key, const std::vector<s32>& value);
-    // void Put(const std::string& key, const std::vector<f64>& value);
-    // void Put(const std::string& key, const std::vector<std::string>& value);
-    // void Put(const std::string& key, const std::vector<JSORONObject>& value);
 
     /**
      * @brief adds a new json object to this json
@@ -105,7 +98,7 @@ public:
     std::vector<T>& AddArr(const std::string& key)
     {
         std::vector<T> new_arr;
-        JSORONValue new_value(new_arr);
+        JSORONValue* new_value = new JSORONValue(new_arr);
         auto res = json.insert({key, new_value});
         if (res.second)
         {
@@ -115,12 +108,17 @@ public:
     }
 
     void Remove(std::string key);
-
-    friend std::ostream& operator<<(std::ostream& out, const JSORONObject obj);
+    
+    /**
+     * @brief prints the contents of this json object
+     */
+    void Print();
 
 private:
-    std::unordered_map<std::string, JSORONValue> json;
+    std::unordered_map<std::string, JSORONValue*> json;
     std::list<std::string> insertion_order;
+
+    void RecPrint(u8 indent);
 };
 
 #endif /* JSORON_OBJECT_H */

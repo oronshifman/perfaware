@@ -1,5 +1,5 @@
-TEST_OBJ_OBJS = src/JSORONObject.o test/test_JSORONObject.o
-TEST_OBJ_ELF = build/test_JSORONObject
+TEST_OBJ_OBJS = src/JSONObject.o test/test_JSONObject.o
+TEST_OBJ_ELF = build/test_JSONObject
 
 TEST_VALUE_OBJ = src/_JSORONValue.o test/test_JSORONValue.o
 TEST_VALUE_ELF = build/test_JSORONValue

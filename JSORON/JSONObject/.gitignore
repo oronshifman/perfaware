@@ -1,13 +1,11 @@
+# Ignore all
 *
 
 # Exclude these files:
 !/**/
-!**/*.asm
-!**/*.c
+!src/*.cpp
+!test/*.cpp
 !**/*.h
-!**/*.cpp
-!**/*.hpp
-!**/*.sh
 !**/*.md
 !.gitignore
 !Makefile

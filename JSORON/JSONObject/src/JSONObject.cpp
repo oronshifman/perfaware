@@ -312,6 +312,21 @@ JSONObject::JSONValue::~JSONValue()
     }
 }
 
+JSONObject& JSONObject::operator=(const JSONObject& other)
+{
+    if (this == &other)
+    {
+        return *this;
+    }
+    
+    json.clear();
+    json.insert(other.json.begin(), other.json.end());
+   
+    insertion_order.assign(other.insertion_order.begin(), other.insertion_order.end());
+
+    return *this;
+}
+
 JSONObject::~JSONObject()
 {
     // TODO(24.07.24): impl

@@ -65,13 +65,52 @@ class JSONObject
         JSONValue(const std::vector<f64>& arr) : type(JSONType::DOUBLE_ARR), double_arr(arr) {}
         JSONValue(const std::vector<std::string>& arr) : type(JSONType::STR_ARR), str_arr(arr) {}
         JSONValue(const std::vector<JSONObject*>& arr) : type(JSONType::OBJ_ARR), obj_arr(arr) {}
+        /**
+         * @brief overloding cast to int.
+         * @throw bad_cast
+         */
         operator int() const;
+        
+        /**
+         * @brief overloding cast to double.
+         * @throw bad_cast
+         */
         operator double() const;
+       
+        /**
+         * @brief overloding cast to string.
+         * @throw bad_cast
+         */
         operator std::string() const;
+      
+        /**
+         * @brief overloding cast to JSONObject.
+         * @throw bad_cast
+         */
         operator JSONObject*() const;
+     
+        /**
+         * @brief overloding cast to std::vector<int>.
+         * @throw bad_cast
+         */
         operator std::vector<int>() const;
+    
+        /**
+         * @brief overloding cast to std::vector<double>.
+         * @throw bad_cast
+         */
         operator std::vector<double>() const;
+   
+        /**
+         * @brief overloding cast to std::vector<std::string>.
+         * @throw bad_cast
+         */
         operator std::vector<std::string>() const;
+  
+        /**
+         * @brief overloding cast to std::vector<JSONObject*>.
+         * @throw bad_cast
+         */
         operator std::vector<JSONObject*>() const;
         
         void PrintValueByType(u8 indent, std::ostream& out, JSONType type) const;
@@ -84,6 +123,7 @@ class JSONObject
 public:
     JSONObject() : json(), insertion_order() {}
     JSONObject(const JSONObject& value) : json(value.json), insertion_order(value.insertion_order) {}
+    JSONObject& operator=(const JSONObject& obj);
     ~JSONObject();
 
     template<typename T>

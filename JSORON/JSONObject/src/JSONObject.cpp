@@ -285,7 +285,7 @@ JSONObject::JSONValue::~JSONValue()
         case JSONType::DOUBLE:
         case JSONType::NUM_JSON_TYPES:
         {
-
+            type = JSONType::NULL_TYPE;
         } break;
 
         case JSONType::STR:

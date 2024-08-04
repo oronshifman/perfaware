@@ -96,6 +96,9 @@ void TestJSONValueCopyAssignment()
     json["intKey"] = 42;
     std::cout << json;
 
+    json["strKey"] = json["strKey"];
+    std::cout << json;
+    
     json["intKey"] = "not an int!";
     std::cout << json;
 

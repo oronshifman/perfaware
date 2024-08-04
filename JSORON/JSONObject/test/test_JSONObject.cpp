@@ -12,6 +12,7 @@ void TestObjectCopyCtor();
 void TestObjectCopyAssignment();
 void TestJSONValueCopyAssignment();
 void TestOperatorSquereBrakets();
+void TestJSONValueCasting();
 JSONObject CreateJson();
 
 int main(int argc, char *argv[])
@@ -32,6 +33,9 @@ int main(int argc, char *argv[])
 
     std::cout << "\nTestJSONValueCopyAssignment:\n";
     TestJSONValueCopyAssignment();
+    
+    std::cout << "\nTetstJSONValueCastring\n";
+    TestJSONValueCasting();
 
 	return 0;
 }
@@ -79,7 +83,6 @@ void TestObjectCopyCtor()
 
 void TestObjectCopyAssignment()
 {
-    // TODO(3.8.24): finish implementing test
     JSONObject json1 = CreateJson();
     JSONObject json2 = json1;
 
@@ -88,7 +91,6 @@ void TestObjectCopyAssignment()
 
 void TestJSONValueCopyAssignment()
 {
-    // TODO(3.8.24): implement test
     JSONObject json = CreateJson();
 
     json["intKey"] = 42;
@@ -108,6 +110,32 @@ void TestOperatorSquereBrakets()
     std::cout << json["intKey"];
     std::cout << json["strKey"];
 }
+
+void TestJSONValueCasting()
+{
+    JSONObject json = CreateJson();
+
+    s32 int_val = json["intKey"];
+    std::vector<JSONObject*> array_of_jsons = json["ArrayOfJsons"];
+
+    std::cout << "this is intkey's value: " << int_val << "\n";
+    std::cout << "this is ArrayOfJsons's value:\n" << array_of_jsons;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -50,7 +50,7 @@ JSONObject::JSONValue::operator int() const
 
 JSONObject::JSONValue::operator double() const
 {
-    if (type == JSONObject::JSONType::INT)
+    if (type == JSONObject::JSONType::DOUBLE)
     {
         return double_val;
     }
@@ -62,7 +62,7 @@ JSONObject::JSONValue::operator double() const
 
 JSONObject::JSONValue::operator std::string() const
 {
-    if (type == JSONObject::JSONType::INT)
+    if (type == JSONObject::JSONType::STR)
     {
         return str_val;
     }
@@ -74,7 +74,7 @@ JSONObject::JSONValue::operator std::string() const
 
 JSONObject::JSONValue::operator JSONObject*() const
 {
-    if (type == JSONObject::JSONType::INT)
+    if (type == JSONObject::JSONType::JSON_OBJECT)
     {
         return json_val;
     }
@@ -86,7 +86,7 @@ JSONObject::JSONValue::operator JSONObject*() const
 
 JSONObject::JSONValue::operator std::vector<int>() const
 {
-    if (type == JSONObject::JSONType::INT)
+    if (type == JSONObject::JSONType::INT_ARR)
     {
         return int_arr;
     }
@@ -98,7 +98,7 @@ JSONObject::JSONValue::operator std::vector<int>() const
 
 JSONObject::JSONValue::operator std::vector<double>() const
 {
-    if (type == JSONObject::JSONType::INT)
+    if (type == JSONObject::JSONType::DOUBLE_ARR)
     {
         return double_arr;
     }
@@ -110,7 +110,7 @@ JSONObject::JSONValue::operator std::vector<double>() const
 
 JSONObject::JSONValue::operator std::vector<std::string>() const
 {
-    if (type == JSONObject::JSONType::INT)
+    if (type == JSONObject::JSONType::STR_ARR)
     {
         return str_arr;
     }
@@ -122,7 +122,7 @@ JSONObject::JSONValue::operator std::vector<std::string>() const
 
 JSONObject::JSONValue::operator std::vector<JSONObject*>() const
 {
-    if (type == JSONObject::JSONType::INT)
+    if (type == JSONObject::JSONType::OBJ_ARR)
     {
         return obj_arr;
     }

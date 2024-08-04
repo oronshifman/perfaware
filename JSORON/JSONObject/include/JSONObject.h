@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+#include "generic_test.h"
 #include "my_int.h"
 
 class JSONObject 
@@ -54,6 +55,11 @@ class JSONObject
 
         JSONValue() : type(JSONType::NULL_TYPE) {}
         JSONValue(const JSONValue& value);
+        JSONValue& operator=(const JSONValue& other);
+        
+        template<typename T>
+        JSONValue& operator=(const T& src);
+
         ~JSONValue();
 
         JSONValue(const s32 value) : type(JSONType::INT), int_val(value) {}
@@ -66,56 +72,57 @@ class JSONObject
         JSONValue(const std::vector<std::string>& arr) : type(JSONType::STR_ARR), str_arr(arr) {}
         JSONValue(const std::vector<JSONObject*>& arr) : type(JSONType::OBJ_ARR), obj_arr(arr) {}
         /**
-         * @brief overloding cast to int.
+         * @brief overloading cast to int.
          * @throw bad_cast
          */
         operator int() const;
         
         /**
-         * @brief overloding cast to double.
+         * @brief overloading cast to double.
          * @throw bad_cast
          */
         operator double() const;
        
         /**
-         * @brief overloding cast to string.
+         * @brief overloading cast to string.
          * @throw bad_cast
          */
         operator std::string() const;
       
         /**
-         * @brief overloding cast to JSONObject.
+         * @brief overloading cast to JSONObject.
          * @throw bad_cast
          */
         operator JSONObject*() const;
      
         /**
-         * @brief overloding cast to std::vector<int>.
+         * @brief overloading cast to std::vector<int>.
          * @throw bad_cast
          */
         operator std::vector<int>() const;
     
         /**
-         * @brief overloding cast to std::vector<double>.
+         * @brief overloading cast to std::vector<double>.
          * @throw bad_cast
          */
         operator std::vector<double>() const;
    
         /**
-         * @brief overloding cast to std::vector<std::string>.
+         * @brief overloading cast to std::vector<std::string>.
          * @throw bad_cast
          */
         operator std::vector<std::string>() const;
   
         /**
-         * @brief overloding cast to std::vector<JSONObject*>.
+         * @brief overloading cast to std::vector<JSONObject*>.
          * @throw bad_cast
          */
         operator std::vector<JSONObject*>() const;
         
         void PrintValueByType(u8 indent, std::ostream& out, JSONType type) const;
+        void AssignValueByType(const JSONValue& src);
 
-        friend std::ostream& operator<<(std::ostream& out, const JSONValue *value);
+        friend std::ostream& operator<<(std::ostream& out, const JSONValue& value);
 
         static const std::string JSONType_to_string[static_cast<u64>(JSONObject::JSONType::NUM_JSON_TYPES)];
     };
@@ -127,15 +134,7 @@ public:
     ~JSONObject();
 
     template<typename T>
-    void Put(const std::string key, const T& value)
-    {
-        JSONValue* new_value = new JSONValue(value);
-        auto res = json.insert({key, new_value});
-        if (res.second)
-        {
-            insertion_order.push_back(key);
-        }
-    }
+    void Put(const std::string key, const T& value);
 
     /**
      * @brief adds a new json object to this json
@@ -150,24 +149,20 @@ public:
      * @return a reference to the new array that was inserted
      */
     template<typename T>
-    std::vector<T>& AddArr(const std::string& key)
-    {
-        std::vector<T> new_arr;
-        JSONValue* new_value = new JSONValue(new_arr);
-        auto res = json.insert({key, new_value});
-        if (res.second)
-        {
-            insertion_order.push_back(key);
-        }
-        return res.first->second;
-    }
+    std::vector<T>& AddArr(const std::string& key);
 
     void Remove(std::string key);
     
-    JSONValue *operator[](std::string key);
+    /**
+     * @brief access values in json object
+     * @param key - the key associated with the value to be pulled from the json object
+     * @return if key exists in json object, returns a reference the value associated with 
+     *         key else return a reference to a JSONValue of type JSONType::NULL_TYPE
+     */
+    JSONValue& operator[](std::string key);
     
     friend std::ostream& operator<<(std::ostream& out, const JSONObject& obj);
-    friend std::ostream& operator<<(std::ostream& out, const JSONValue *value);
+    friend std::ostream& operator<<(std::ostream& out, const JSONValue& value);
 
 private:
     typedef std::unordered_map<std::string, JSONValue*>::iterator JSONIter;
@@ -177,6 +172,41 @@ private:
 
     void RecPrint(u8 indent, std::ostream& out) const;
 };
+
+template<typename T>
+JSONObject::JSONValue& JSONObject::JSONValue::operator=(const T& src)
+{
+    this->~JSONValue();
+
+    JSONValue *new_value = new JSONValue(src);
+    AssignValueByType(*new_value);
+
+    return *this;
+}
+
+template<typename T>
+void JSONObject::Put(const std::string key, const T& value)
+{
+    JSONValue* new_value = new JSONValue(value);
+    auto res = json.insert({key, new_value});
+    if (res.second)
+    {
+        insertion_order.push_back(key);
+    }
+}
+
+template<typename T>
+std::vector<T>& JSONObject::AddArr(const std::string& key)
+{
+    std::vector<T> new_arr;
+    JSONValue* new_value = new JSONValue(new_arr);
+    auto res = json.insert({key, new_value});
+    if (res.second)
+    {
+        insertion_order.push_back(key);
+    }
+    return res.first->second;
+}
 
 #endif /* JSON_OBJECT_H */
 

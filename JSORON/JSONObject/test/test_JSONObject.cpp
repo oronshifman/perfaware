@@ -9,14 +9,29 @@
 
 void TestObject(Tester& tester);
 void TestObjectCopyCtor();
+void TestObjectCopyAssignment();
+void TestJSONValueCopyAssignment();
 void TestOperatorSquereBrakets();
 JSONObject CreateJson();
 
 int main(int argc, char *argv[])
 {
 	Tester tester;
+
+    std::cout << "TestObject:\n";
 	TestObject(tester);
+
+    std::cout << "\nTestOperatorSquereBrakets:\n";
     TestOperatorSquereBrakets();
+
+    std::cout << "\nTestObjectCopyCtor:\n";
+    TestObjectCopyCtor();
+
+    std::cout << "\nTestObjectCopyAssignment:\n";
+    TestObjectCopyAssignment();
+
+    std::cout << "\nTestJSONValueCopyAssignment:\n";
+    TestJSONValueCopyAssignment();
 
 	return 0;
 }
@@ -56,7 +71,34 @@ void TestObject(Tester& tester)
 
 void TestObjectCopyCtor()
 {
+    JSONObject json1 = CreateJson();
+    JSONObject json2(json1);
 
+    std::cout << json2;
+}
+
+void TestObjectCopyAssignment()
+{
+    // TODO(3.8.24): finish implementing test
+    JSONObject json1 = CreateJson();
+    JSONObject json2 = json1;
+
+    std::cout << json2;
+}
+
+void TestJSONValueCopyAssignment()
+{
+    // TODO(3.8.24): implement test
+    JSONObject json = CreateJson();
+
+    json["intKey"] = 42;
+    std::cout << json;
+
+    json["intKey"] = "not an int!";
+    std::cout << json;
+
+    json["intKey"] = json["nestedJson"];
+    std::cout << json;
 }
 
 void TestOperatorSquereBrakets()

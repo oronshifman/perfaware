@@ -13,13 +13,14 @@
 #include <string>
 #include <vector>
 
-#include "generic_test.h"
 #include "my_int.h"
 
 class JSONObject 
 {
+public: // NOTE: this is only for debugging
     enum class JSONType
     {
+        BAD_TYPE,
         NULL_TYPE,
 
         INT,
@@ -62,6 +63,8 @@ class JSONObject
 
         ~JSONValue();
 
+        JSONValue(const JSONType& type) : type(type) {}
+
         JSONValue(const s32 value) : type(JSONType::INT), int_val(value) {}
         JSONValue(const f64 value) : type(JSONType::DOUBLE), double_val(value) {}
         JSONValue(const std::string value) : type(JSONType::STR), str_val(value) {}
@@ -70,7 +73,8 @@ class JSONObject
         JSONValue(const std::vector<s32>& arr) : type(JSONType::INT_ARR), int_arr(arr) {}
         JSONValue(const std::vector<f64>& arr) : type(JSONType::DOUBLE_ARR), double_arr(arr) {}
         JSONValue(const std::vector<std::string>& arr) : type(JSONType::STR_ARR), str_arr(arr) {}
-        JSONValue(const std::vector<JSONObject*>& arr) : type(JSONType::OBJ_ARR), obj_arr(arr) {}
+        JSONValue(const std::vector<JSONObject*>& arr);
+
         /**
          * @brief overloading cast to int.
          * @throw bad_cast
@@ -119,17 +123,15 @@ class JSONObject
          */
         operator std::vector<JSONObject*>() const;
         
-        void PrintValueByType(u8 indent, std::ostream& out, JSONType type) const;
+        void PrintValueByType(u8 indent, std::ostream& out) const;
         void AssignValueByType(const JSONValue& src);
 
         friend std::ostream& operator<<(std::ostream& out, const JSONValue& value);
-
-        static const std::string JSONType_to_string[static_cast<u64>(JSONObject::JSONType::NUM_JSON_TYPES)];
     };
 
 public:
     JSONObject() : json(), insertion_order() {}
-    JSONObject(const JSONObject& value) : json(value.json), insertion_order(value.insertion_order) {}
+    JSONObject(const JSONObject& other);
     JSONObject& operator=(const JSONObject& obj);
     ~JSONObject();
 
@@ -167,6 +169,7 @@ public:
 private:
     typedef std::unordered_map<std::string, JSONValue*>::iterator JSONIter;
 
+    static JSONValue bad_value;
     std::unordered_map<std::string, JSONValue*> json;
     std::list<std::string> insertion_order;
 
@@ -180,6 +183,7 @@ JSONObject::JSONValue& JSONObject::JSONValue::operator=(const T& src)
 
     JSONValue *new_value = new JSONValue(src);
     AssignValueByType(*new_value);
+    delete new_value;
 
     return *this;
 }

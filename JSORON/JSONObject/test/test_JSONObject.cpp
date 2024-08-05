@@ -7,6 +7,8 @@
 #include "JSONObject.h"
 #include "generic_test.h"
 
+void TestMemoryManagment();
+
 void TestObject(Tester& tester);
 void TestObjectCopyCtor();
 void TestObjectCopyAssignment();
@@ -18,6 +20,8 @@ JSONObject CreateJson();
 int main(int argc, char *argv[])
 {
 	Tester tester;
+    
+    TestMemoryManagment();
 
     std::cout << "TestObject:\n";
 	TestObject(tester);
@@ -43,7 +47,8 @@ int main(int argc, char *argv[])
 JSONObject CreateJson()
 {
 	JSONObject json;
-	json.Put("intKey", 13);
+
+    json.Put("intKey", 13);
 	json.Put("doubleKey", 13.3);
 	json.Put("strKey", "str");
 
@@ -62,8 +67,25 @@ JSONObject CreateJson()
 		json_arr.push_back(json_obj);
 	}	
 	json.Put("ArrayOfJsons", json_arr);
+    for (auto obj : json_arr)
+    {
+        delete obj;
+    }
 
     return json;
+}
+
+void TestMemoryManagment()
+{
+    JSONObject json;
+    
+	JSONObject nested_jason;
+	nested_jason.Put("nestedInt", 42);
+	nested_jason.Put("nestedIntArr", std::vector<s32>{1,2,3});
+
+    json.Put("nestedJson", nested_jason);
+
+    std::cout << json;
 }
 
 void TestObject(Tester& tester)

@@ -10,19 +10,27 @@
 
 #include "JSONObject.h"
 
-const std::string JSONObject::JSONValue::JSONType_to_string[static_cast<u64>(JSONObject::JSONType::NUM_JSON_TYPES)] = {
-    "NULL_TYPE", "INT", "DOUBLE", "STRING", "JSON_OBJECT",
-    "INT_ARR", "DOUBLE_ARR", "STR_ARR", "OBJ_ARR"
-};
+JSONObject::JSONValue JSONObject::bad_value(JSONObject::JSONType::BAD_TYPE);
+
+JSONObject::JSONValue::JSONValue(const JSONValue &value)
+{
+    AssignValueByType(value);
+}
 
 JSONObject::JSONValue::JSONValue(const JSONObject &value) : type(JSONType::JSON_OBJECT)
 {
     json_val = new JSONObject(value);
 }
 
-JSONObject::JSONValue::JSONValue(const JSONValue &value)
+JSONObject::JSONValue::JSONValue(const std::vector<JSONObject*>& arr) : type(JSONType::OBJ_ARR)
 {
-    AssignValueByType(value);
+    new (&obj_arr) std::vector<JSONObject*>();
+    obj_arr.reserve(arr.size());
+
+    for (JSONObject* obj : arr)
+    {
+        obj_arr.push_back(new JSONObject(*obj));
+    }
 }
 
 JSONObject::JSONValue& JSONObject::JSONValue::operator=(const JSONValue& other)
@@ -53,8 +61,7 @@ JSONObject::JSONValue::operator double() const
     if (type == JSONObject::JSONType::DOUBLE)
     {
         return double_val;
-    }
-    else
+    } else
     {
         throw std::bad_cast();
     }
@@ -132,10 +139,11 @@ JSONObject::JSONValue::operator std::vector<JSONObject*>() const
     }
 }
 
-void JSONObject::JSONValue::PrintValueByType(u8 indent, std::ostream& out, JSONObject::JSONType type) const
+void JSONObject::JSONValue::PrintValueByType(u8 indent, std::ostream& out) const
 {
         switch (type)
         {
+            case JSONObject::JSONType::BAD_TYPE:
             case JSONObject::JSONType::NULL_TYPE:
             {
             } break;
@@ -240,7 +248,7 @@ void JSONObject::JSONValue::AssignValueByType(const JSONValue& src)
         case JSONObject::JSONType::JSON_OBJECT:
         {
             type = JSONType::JSON_OBJECT;
-            json_val = src.json_val;
+            json_val = new JSONObject(*src.json_val);
         } break;
 
         case JSONObject::JSONType::INT_ARR:
@@ -264,13 +272,23 @@ void JSONObject::JSONValue::AssignValueByType(const JSONValue& src)
         case JSONObject::JSONType::OBJ_ARR:
         {
             type = JSONType::OBJ_ARR;
-            new (&obj_arr) std::vector<JSONObject*>(src.obj_arr);
+            new (&obj_arr) std::vector<JSONObject*>();
+            obj_arr.reserve(src.obj_arr.size());
+
+            for (JSONObject* obj : src.obj_arr)
+            {
+                obj_arr.push_back(new JSONObject(*obj));
+            }
         } break;
 
         case JSONObject::JSONType::NULL_TYPE:
         case JSONObject::JSONType::NUM_JSON_TYPES:
         {
             type = JSONType::NULL_TYPE;
+        } break;
+        
+        case JSONObject::JSONType::BAD_TYPE:
+        {
         } break;
     }
 }
@@ -321,6 +339,19 @@ JSONObject::JSONValue::~JSONValue()
             }
             obj_arr.~vector<JSONObject*>();
         } break;
+        
+        case JSONObject::JSONType::BAD_TYPE:
+        {
+        } break;
+    }
+}
+
+JSONObject::JSONObject(const JSONObject& other) : insertion_order(other.insertion_order)
+{
+    for (auto& pair : other.json)
+    {
+        JSONValue *copy_value = new JSONValue(*(pair.second));
+        json.insert({pair.first, copy_value});
     }
 }
 
@@ -343,10 +374,16 @@ JSONObject::~JSONObject()
 {
     // TODO(24.07.24): impl
 
+    for (auto& pair : json)
+    {
+        delete pair.second;
+    }
+    json.clear();
+    insertion_order.clear();
 }
 
 
-JSONObject &JSONObject::AddObj(const std::string &key)
+JSONObject& JSONObject::AddObj(const std::string &key)
 {
     JSONObject *new_obj = new JSONObject();
     return *new_obj;
@@ -362,7 +399,7 @@ JSONObject::JSONValue& JSONObject::operator[](std::string key)
     JSONIter value = json.find(key);
     if (value == json.end())
     {
-        return *(new JSONValue());
+        return bad_value;
     }
     return *(value->second);
 }
@@ -378,8 +415,7 @@ std::ostream& operator<<(std::ostream& out, const JSONObject& obj)
 
 std::ostream& operator<<(std::ostream& out, const JSONObject::JSONValue& value)
 {
-    // TODO(2.8.24): impl
-    value.PrintValueByType(0, out, value.type);
+    value.PrintValueByType(0, out);
     return out;
 }
 
@@ -390,6 +426,6 @@ void JSONObject::RecPrint(u8 indent, std::ostream& out) const
         const JSONObject::JSONValue* value = json.at(key);
 
         out << std::string(indent, '\t') << "\"" + key + "\": ";
-        value->PrintValueByType(indent, out, value->type);
+        value->PrintValueByType(indent, out);
     }
 }

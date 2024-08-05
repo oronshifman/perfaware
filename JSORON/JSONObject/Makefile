@@ -13,7 +13,7 @@ CXXFLAGS=-Wall -std=c++17
 CPPFLAGS=-Iinclude -I../../utils
 
 RELEASE_FLAGS=-DNDEBUG -O3
-DEBUG_FLAG=-g
+DEBUG_FLAG=-g3
 
 all: 
 

@@ -1,10 +1,11 @@
-TEST_OBJ_OBJS = src/JSONObject.o test/test_JSONObject.o
-TEST_OBJ_ELF = build/test_JSONObject
+TARGET = JSONObject
 
-TEST_VALUE_OBJ = src/_JSORONValue.o test/test_JSORONValue.o
-TEST_VALUE_ELF = build/test_JSORONValue
+OBJS = src/JSONObject.o test/test_JSONObject.o
 
 TEST=../../utils/generic_test.o
+
+RELEASE_BIN = build/$(TARGET)_release
+DEBUG_BIN = build/$(TARGET)_debug
 
 CXX=g++
 
@@ -15,19 +16,19 @@ CPPFLAGS=-Iinclude -I../../utils
 RELEASE_FLAGS=-DNDEBUG -O3
 DEBUG_FLAG=-g3
 
-all: 
+all:
 
-test_value: CXXFLAGS+=$(DEBUG_FLAG)
-test_value: $(TEST_VALUE_ELF)
+release: CXXFLAGS+=$(RELEASE_FLAGS)
+release: $(RELEASE_BIN) 
 
-test_obj: CXXFLAGS+=$(DEBUG_FLAG)
-test_obj: $(TEST_OBJ_ELF)
+debug: CXXFLAGS+=$(DEBUG_FLAG)
+debug: $(DEBUG_BIN)
 
-$(TEST_OBJ_ELF): $(TEST_OBJ_OBJS) $(TEST)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $(TEST_OBJ_ELF) $(TEST_OBJ_OBJS) $(TEST)
+$(DEBUG_BIN): $(OBJS) $(TEST)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $(TARGET) $(OBJS) $(TEST)
 
-$(TEST_VALUE_ELF): $(TEST_VALUE_OBJ) $(TEST)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $(TEST_VALUE_ELF) $(TEST_VALUE_OBJ) $(TEST)
+$(RELEASE_BIN): $(OBJS) $(TEST)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $(TARGET) $(OBJS) $(TEST)
 
 clean:
-	rm build/test_* src/*.o test/*.o
+	-rm -f build/* src/*.o test/*.o; touch build/dummy.md

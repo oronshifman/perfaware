@@ -17,7 +17,9 @@
 
 class JSONObject 
 {
+#ifndef DNDEBUG
 public: // NOTE: this is only for debugging
+#endif /* DNDEBUG */
     enum class JSONType
     {
         BAD_TYPE,

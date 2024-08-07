@@ -7,6 +7,8 @@
 #include "JSONObject.h"
 #include "generic_test.h"
 
+using namespace JSORON;
+
 void TestMemoryManagment();
 
 void TestObject(Tester& tester);
@@ -38,7 +40,7 @@ int main(int argc, char *argv[])
     std::cout << "\nTestJSONValueCopyAssignment:\n";
     TestJSONValueCopyAssignment();
     
-    std::cout << "\nTetstJSONValueCastring\n";
+    std::cout << "\n TetstJSONValueCastring\n";
     TestJSONValueCasting();
 
 	return 0;

@@ -10,6 +10,9 @@
 
 #include "JSONObject.h"
 
+namespace JSORON
+{
+
 JSONObject::JSONValue JSONObject::bad_value(JSONObject::JSONType::BAD_TYPE);
 
 JSONObject::JSONValue::JSONValue(const JSONValue &value)
@@ -428,4 +431,5 @@ void JSONObject::RecPrint(u8 indent, std::ostream& out) const
         out << std::string(indent, '\t') << "\"" + key + "\": ";
         value->PrintValueByType(indent, out);
     }
+}
 }

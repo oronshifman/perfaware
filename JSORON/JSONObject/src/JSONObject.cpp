@@ -432,4 +432,5 @@ void JSONObject::RecPrint(u8 indent, std::ostream& out) const
         value->PrintValueByType(indent, out);
     }
 }
-}
+
+} // namespace JSORON

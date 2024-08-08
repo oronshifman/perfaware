@@ -17,12 +17,15 @@ namespace JSORON
 {
     class JSONParser 
     {
+#ifndef NDEBUG
+    public:
+#endif /* NDEBUG */    
         enum class TokenType
         {
             NULL_TYPE,
     
             STR,
-            PANCTIOATION,
+            PANCTUATION,
             INT,
             DOUBLE,
     
@@ -43,34 +46,36 @@ namespace JSORON
             };
     
             Token() : type(TokenType::NULL_TYPE) {}
+            Token(const Token& other);
+
             Token(const std::string str_tok) : type(TokenType::STR), str_tok(str_tok) {}
-            Token(const char panc_tok) : type(TokenType::PANCTIOATION), panc_tok(panc_tok) {}
+            Token(const char panc_tok) : type(TokenType::PANCTUATION), panc_tok(panc_tok) {}
             Token(const s32 int_tok) : type(TokenType::INT), int_tok(int_tok) {}
             Token(const f64 double_tok) : type(TokenType::DOUBLE), double_tok(double_tok) {}
     
             ~Token();
-
-        private:
         };
     
     public:
         JSONObject Parse(const std::string& json_str);
         JSONObject Parse(const std::ifstream& json_file); 
-
+#ifdef NDEBUG
     private:
+#endif /* NDEBUG */
         static const JSONObject bad_obj;
     
-        typedef std::vector<Token> TokenList;
-        TokenList Lex(std::string json_str);
+        void Lex(std::string json_str);
 
         void LexPanctioation(const char panc);
         void LexString(const std::string& json_str);
+        u8 LexNumber(const std::string& json_str);
 
         /**
          * @brief determines if a char is {,},[,] or :
          */
         b8 IsPanctioation(const char panc);
 
+        typedef std::vector<Token> TokenList;
         TokenList tokens;
     };
 }

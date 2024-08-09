@@ -160,6 +160,11 @@ namespace JSORON
             {
                 tokens.push_back(Token(':'));
             } break;
+            
+            case ',':
+            {
+                tokens.push_back(Token(','));
+            } break;
         }
     }
     

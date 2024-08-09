@@ -20,21 +20,40 @@ void InitSimpleJson1();
 void InitSimpleJson2();
 void InitSimpleJson3();
 
-void TestLexer();
+void TestLexer1();
+void TestLexer2();
+void TestLexer3();
 
 void PrintTokenList(JSONParser::TokenList token_list);
 
 int main(int argc, char *argv[])
 {
-    TestLexer();
+    TestLexer1();
+    TestLexer2();
+    TestLexer3();
 
 	return 0;
 }
 
-void TestLexer()
+void TestLexer1()
 {
     JSONParser parser;
     parser.Lex("{ \"intKey\": 2 }");
+    PrintTokenList(parser.tokens);
+}
+
+
+void TestLexer2()
+{
+    JSONParser parser;
+    parser.Lex("{ \"nestedJson\": {\"nestedInt\": 2}, \"intKey\": 42 }");
+    PrintTokenList(parser.tokens);
+}
+
+void TestLexer3()
+{
+    JSONParser parser;
+    parser.Lex("{ \"jsonArray\": [{\"json1\": 1},{\"json2\": 2}]}");
     PrintTokenList(parser.tokens);
 }
 

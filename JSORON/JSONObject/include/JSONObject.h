@@ -15,18 +15,21 @@
 
 #include "my_int.h"
 
+
 namespace JSORON
 {
     class JSONObject 
     {
     #ifndef DNDEBUG
-    public: // NOTE: this is only for debugging
+    public: 
     #endif /* DNDEBUG */
-        enum class JSONType
+        enum class ValueType
         {
             BAD_TYPE,
             NULL_TYPE,
     
+            KEY,
+            
             INT,
             DOUBLE,
             STR,
@@ -43,7 +46,7 @@ namespace JSORON
         class JSONValue 
         {
         public:
-            JSONType type;
+            ValueType type;
     
             union
             {
@@ -58,7 +61,7 @@ namespace JSORON
                 std::vector<JSONObject*> obj_arr;
             };
     
-            JSONValue() : type(JSONType::NULL_TYPE) {}
+            JSONValue() : type(ValueType::NULL_TYPE) {}
             JSONValue(const JSONValue& value);
             JSONValue& operator=(const JSONValue& other);
             
@@ -67,16 +70,17 @@ namespace JSORON
     
             ~JSONValue();
     
-            JSONValue(const JSONType& type) : type(type) {}
+            JSONValue(const ValueType& type) : type(type) {}
     
-            JSONValue(const s32 value) : type(JSONType::INT), int_val(value) {}
-            JSONValue(const f64 value) : type(JSONType::DOUBLE), double_val(value) {}
-            JSONValue(const std::string value) : type(JSONType::STR), str_val(value) {}
+            JSONValue(const ValueType type, const std::string key) : type(type), str_val(key) {}
+            JSONValue(const s32 value) : type(ValueType::INT), int_val(value) {}
+            JSONValue(const f64 value) : type(ValueType::DOUBLE), double_val(value) {}
+            JSONValue(const std::string value) : type(ValueType::STR), str_val(value) {}
             JSONValue(const JSONObject &value);
     
-            JSONValue(const std::vector<s32>& arr) : type(JSONType::INT_ARR), int_arr(arr) {}
-            JSONValue(const std::vector<f64>& arr) : type(JSONType::DOUBLE_ARR), double_arr(arr) {}
-            JSONValue(const std::vector<std::string>& arr) : type(JSONType::STR_ARR), str_arr(arr) {}
+            JSONValue(const std::vector<s32>& arr) : type(ValueType::INT_ARR), int_arr(arr) {}
+            JSONValue(const std::vector<f64>& arr) : type(ValueType::DOUBLE_ARR), double_arr(arr) {}
+            JSONValue(const std::vector<std::string>& arr) : type(ValueType::STR_ARR), str_arr(arr) {}
             JSONValue(const std::vector<JSONObject*>& arr);
     
             /**
@@ -163,10 +167,12 @@ namespace JSORON
          * @brief access values in json object
          * @param key - the key associated with the value to be pulled from the json object
          * @return if key exists in json object, returns a reference the value associated with 
-         *         key else return a reference to a JSONValue of type JSONType::NULL_TYPE
+         *         key else return a reference to a JSONValue of type ValueType::NULL_TYPE
          */
         JSONValue& operator[](std::string key);
         
+        friend class JSONParser;
+
         friend std::ostream& operator<<(std::ostream& out, const JSONObject& obj);
         friend std::ostream& operator<<(std::ostream& out, const JSONValue& value);
     

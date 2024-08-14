@@ -25,10 +25,10 @@ debug: CXXFLAGS+=$(DEBUG_FLAG)
 debug: $(DEBUG_BIN)
 
 $(DEBUG_BIN): $(OBJS) $(TEST)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $(TARGET) $(OBJS) $(TEST)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $(DEBUG_BIN) $(OBJS) $(TEST)
 
 $(RELEASE_BIN): $(OBJS) $(TEST)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $(TARGET) $(OBJS) $(TEST)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $(RELEASE_BIN) $(OBJS) $(TEST)
 
 clean:
 	-rm -f build/* src/*.o test/*.o; touch build/dummy.md

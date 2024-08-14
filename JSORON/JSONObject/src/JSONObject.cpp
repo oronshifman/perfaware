@@ -13,19 +13,19 @@
 namespace JSORON
 {
 
-JSONObject::JSONValue JSONObject::bad_value(JSONObject::JSONType::BAD_TYPE);
+JSONObject::JSONValue JSONObject::bad_value(JSONObject::ValueType::BAD_TYPE);
 
 JSONObject::JSONValue::JSONValue(const JSONValue &value)
 {
     AssignValueByType(value);
 }
 
-JSONObject::JSONValue::JSONValue(const JSONObject &value) : type(JSONType::JSON_OBJECT)
+JSONObject::JSONValue::JSONValue(const JSONObject &value) : type(ValueType::JSON_OBJECT)
 {
     json_val = new JSONObject(value);
 }
 
-JSONObject::JSONValue::JSONValue(const std::vector<JSONObject*>& arr) : type(JSONType::OBJ_ARR)
+JSONObject::JSONValue::JSONValue(const std::vector<JSONObject*>& arr) : type(ValueType::OBJ_ARR)
 {
     new (&obj_arr) std::vector<JSONObject*>();
     obj_arr.reserve(arr.size());
@@ -49,7 +49,7 @@ JSONObject::JSONValue& JSONObject::JSONValue::operator=(const JSONValue& other)
 
 JSONObject::JSONValue::operator int() const
 {
-    if (type == JSONObject::JSONType::INT)
+    if (type == JSONObject::ValueType::INT)
     {
         return int_val;
     }
@@ -61,7 +61,7 @@ JSONObject::JSONValue::operator int() const
 
 JSONObject::JSONValue::operator double() const
 {
-    if (type == JSONObject::JSONType::DOUBLE)
+    if (type == JSONObject::ValueType::DOUBLE)
     {
         return double_val;
     } else
@@ -72,7 +72,7 @@ JSONObject::JSONValue::operator double() const
 
 JSONObject::JSONValue::operator std::string() const
 {
-    if (type == JSONObject::JSONType::STR)
+    if (type == JSONObject::ValueType::STR)
     {
         return str_val;
     }
@@ -84,7 +84,7 @@ JSONObject::JSONValue::operator std::string() const
 
 JSONObject::JSONValue::operator JSONObject*() const
 {
-    if (type == JSONObject::JSONType::JSON_OBJECT)
+    if (type == JSONObject::ValueType::JSON_OBJECT)
     {
         return json_val;
     }
@@ -96,7 +96,7 @@ JSONObject::JSONValue::operator JSONObject*() const
 
 JSONObject::JSONValue::operator std::vector<int>() const
 {
-    if (type == JSONObject::JSONType::INT_ARR)
+    if (type == JSONObject::ValueType::INT_ARR)
     {
         return int_arr;
     }
@@ -108,7 +108,7 @@ JSONObject::JSONValue::operator std::vector<int>() const
 
 JSONObject::JSONValue::operator std::vector<double>() const
 {
-    if (type == JSONObject::JSONType::DOUBLE_ARR)
+    if (type == JSONObject::ValueType::DOUBLE_ARR)
     {
         return double_arr;
     }
@@ -120,7 +120,7 @@ JSONObject::JSONValue::operator std::vector<double>() const
 
 JSONObject::JSONValue::operator std::vector<std::string>() const
 {
-    if (type == JSONObject::JSONType::STR_ARR)
+    if (type == JSONObject::ValueType::STR_ARR)
     {
         return str_arr;
     }
@@ -132,7 +132,7 @@ JSONObject::JSONValue::operator std::vector<std::string>() const
 
 JSONObject::JSONValue::operator std::vector<JSONObject*>() const
 {
-    if (type == JSONObject::JSONType::OBJ_ARR)
+    if (type == JSONObject::ValueType::OBJ_ARR)
     {
         return obj_arr;
     }
@@ -146,34 +146,34 @@ void JSONObject::JSONValue::PrintValueByType(u8 indent, std::ostream& out) const
 {
         switch (type)
         {
-            case JSONObject::JSONType::BAD_TYPE:
-            case JSONObject::JSONType::NULL_TYPE:
+            case JSONObject::ValueType::BAD_TYPE:
+            case JSONObject::ValueType::NULL_TYPE:
             {
             } break;
 
-            case JSONObject::JSONType::INT:
+            case JSONObject::ValueType::INT:
             {
                 out << int_val << "\n";
             } break;
 
-            case JSONObject::JSONType::DOUBLE:
+            case JSONObject::ValueType::DOUBLE:
             {
                 out << double_val << "\n";
             } break;
 
-            case JSONObject::JSONType::STR:
+            case JSONObject::ValueType::STR:
             {
                 out << "\"" << str_val << "\"" << "\n";
             } break;
 
-            case JSONObject::JSONType::JSON_OBJECT:
+            case JSONObject::ValueType::JSON_OBJECT:
             {
                 out << "{\n";
                 json_val->RecPrint(indent + 1, out);
                 out << std::string(indent, '\t') << "}\n";
             } break;
 
-            case JSONObject::JSONType::INT_ARR:
+            case JSONObject::ValueType::INT_ARR:
             {
                 out << "[";
                 for (u64 index = 0; index < int_arr.size() ; ++index)
@@ -184,7 +184,7 @@ void JSONObject::JSONValue::PrintValueByType(u8 indent, std::ostream& out) const
                 out << "\n";
             } break;
 
-            case JSONObject::JSONType::DOUBLE_ARR:
+            case JSONObject::ValueType::DOUBLE_ARR:
             {   
                 out << "[";
                 for (u64 index = 0; index < double_arr.size() ; ++index)
@@ -195,7 +195,7 @@ void JSONObject::JSONValue::PrintValueByType(u8 indent, std::ostream& out) const
                 out << "\n";
             } break;
 
-            case JSONObject::JSONType::STR_ARR:
+            case JSONObject::ValueType::STR_ARR:
             {
                 out << "[";
                 for (u64 index = 0; index < str_arr.size() ; ++index)
@@ -206,7 +206,7 @@ void JSONObject::JSONValue::PrintValueByType(u8 indent, std::ostream& out) const
                 out << "\n";
             } break;
 
-            case JSONObject::JSONType::OBJ_ARR:
+            case JSONObject::ValueType::OBJ_ARR:
             {
                 out << "[\n";
                 ++indent;
@@ -220,7 +220,7 @@ void JSONObject::JSONValue::PrintValueByType(u8 indent, std::ostream& out) const
                 out << std::string(--indent, '\t') << "]\n";
             } break;
 
-            case JSONObject::JSONType::NUM_JSON_TYPES:
+            case JSONObject::ValueType::NUM_JSON_TYPES:
             {
             } break;
         }
@@ -230,51 +230,51 @@ void JSONObject::JSONValue::AssignValueByType(const JSONValue& src)
 {
     switch (src.type)
     {   
-        case JSONObject::JSONType::INT:
+        case JSONObject::ValueType::INT:
         {
-            type = JSONType::INT;
+            type = ValueType::INT;
             int_val = src.int_val;
         } break;
 
-        case JSONObject::JSONType::DOUBLE:
+        case JSONObject::ValueType::DOUBLE:
         {
-            type = JSONType::DOUBLE;
+            type = ValueType::DOUBLE;
             double_val = src.double_val;
         } break;
 
-        case JSONObject::JSONType::STR:
+        case JSONObject::ValueType::STR:
         {
-            type = JSONType::STR;
+            type = ValueType::STR;
             new (&str_val) std::string(src.str_val);
         } break;
 
-        case JSONObject::JSONType::JSON_OBJECT:
+        case JSONObject::ValueType::JSON_OBJECT:
         {
-            type = JSONType::JSON_OBJECT;
+            type = ValueType::JSON_OBJECT;
             json_val = new JSONObject(*src.json_val);
         } break;
 
-        case JSONObject::JSONType::INT_ARR:
+        case JSONObject::ValueType::INT_ARR:
         {
-            type = JSONType::INT_ARR;
+            type = ValueType::INT_ARR;
             new (&int_arr) std::vector<s32>(src.int_arr);
         } break;
 
-        case JSONObject::JSONType::DOUBLE_ARR:
+        case JSONObject::ValueType::DOUBLE_ARR:
         {   
-            type = JSONType::DOUBLE_ARR;
+            type = ValueType::DOUBLE_ARR;
             new (&double_arr) std::vector<f64>(src.double_arr);
         } break;
 
-        case JSONObject::JSONType::STR_ARR:
+        case JSONObject::ValueType::STR_ARR:
         {
-            type = JSONType::STR_ARR;
+            type = ValueType::STR_ARR;
             new (&str_arr) std::vector<std::string>(src.str_arr);
         } break;
 
-        case JSONObject::JSONType::OBJ_ARR:
+        case JSONObject::ValueType::OBJ_ARR:
         {
-            type = JSONType::OBJ_ARR;
+            type = ValueType::OBJ_ARR;
             new (&obj_arr) std::vector<JSONObject*>();
             obj_arr.reserve(src.obj_arr.size());
 
@@ -284,13 +284,13 @@ void JSONObject::JSONValue::AssignValueByType(const JSONValue& src)
             }
         } break;
 
-        case JSONObject::JSONType::NULL_TYPE:
-        case JSONObject::JSONType::NUM_JSON_TYPES:
+        case JSONObject::ValueType::NULL_TYPE:
+        case JSONObject::ValueType::NUM_JSON_TYPES:
         {
-            type = JSONType::NULL_TYPE;
+            type = ValueType::NULL_TYPE;
         } break;
         
-        case JSONObject::JSONType::BAD_TYPE:
+        case JSONObject::ValueType::BAD_TYPE:
         {
         } break;
     }
@@ -301,40 +301,40 @@ JSONObject::JSONValue::~JSONValue()
 {
     switch (type)
     {
-        case JSONType::NULL_TYPE:
-        case JSONType::INT:
-        case JSONType::DOUBLE:
-        case JSONType::NUM_JSON_TYPES:
+        case ValueType::NULL_TYPE:
+        case ValueType::INT:
+        case ValueType::DOUBLE:
+        case ValueType::NUM_JSON_TYPES:
         {
-            type = JSONType::NULL_TYPE;
+            type = ValueType::NULL_TYPE;
         } break;
 
-        case JSONType::STR:
+        case ValueType::STR:
         {
             str_val.~basic_string();
         } break;
         
-        case JSONType::JSON_OBJECT:
+        case ValueType::JSON_OBJECT:
         {
             delete json_val;
         } break;
 
-        case JSONType::INT_ARR:
+        case ValueType::INT_ARR:
         {
             int_arr.~vector<s32>();
         } break;
 
-        case JSONType::DOUBLE_ARR:
+        case ValueType::DOUBLE_ARR:
         {
             double_arr.~vector<f64>();
         } break;
 
-        case JSONType::STR_ARR:
+        case ValueType::STR_ARR:
         {
             str_arr.~vector<std::string>();
         } break;
 
-        case JSONType::OBJ_ARR:
+        case ValueType::OBJ_ARR:
         {
             for (JSONObject *obj : obj_arr)
             {
@@ -343,7 +343,7 @@ JSONObject::JSONValue::~JSONValue()
             obj_arr.~vector<JSONObject*>();
         } break;
         
-        case JSONObject::JSONType::BAD_TYPE:
+        case JSONObject::ValueType::BAD_TYPE:
         {
         } break;
     }

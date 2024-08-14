@@ -47,6 +47,7 @@ namespace JSORON
     
             Token() : type(TokenType::NULL_TYPE) {}
             Token(const Token& other);
+            Token& operator=(const Token& other);
 
             Token(const std::string str_tok) : type(TokenType::STR), str_tok(str_tok) {}
             Token(const char panc_tok) : type(TokenType::PANCTUATION), panc_tok(panc_tok) {}
@@ -54,6 +55,9 @@ namespace JSORON
             Token(const f64 double_tok) : type(TokenType::DOUBLE), double_tok(double_tok) {}
     
             ~Token();
+
+        private:
+            void AssignTokByType(Token& dest, const Token& src, TokenType type);
         };
     
     public:
@@ -70,10 +74,13 @@ namespace JSORON
         void LexString(const std::string& json_str);
         u8 LexNumber(const std::string& json_str);
 
-        /**
-         * @brief determines if a char is {,},[,] or :
-         */
-        b8 IsPanctioation(const char panc);
+        b8 IsEndOfObj(const Token& tok);
+
+        JSONObject::JSONValue _Parse();
+        JSONObject::JSONValue ParseObj();
+        JSONObject::JSONValue ParseArray();
+        void ParseObj(JSONObject& obj);
+        void ParseArray(JSONObject& obj);
 
         typedef std::vector<Token> TokenList;
         TokenList tokens;

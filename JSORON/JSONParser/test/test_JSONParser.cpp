@@ -24,6 +24,10 @@ void TestLexer1();
 void TestLexer2();
 void TestLexer3();
 
+void TestParser1();
+void TestParser2();
+void TestParser3();
+
 void PrintTokenList(JSONParser::TokenList token_list);
 
 int main(int argc, char *argv[])
@@ -33,6 +37,21 @@ int main(int argc, char *argv[])
     TestLexer3();
 
 	return 0;
+}
+
+void TestParser1()
+{
+
+}
+
+void TestParser2()
+{
+
+}
+
+void TestParser3()
+{
+
 }
 
 void TestLexer1()

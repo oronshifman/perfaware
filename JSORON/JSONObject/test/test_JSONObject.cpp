@@ -90,63 +90,69 @@ void TestMemoryManagment()
     std::cout << json;
 }
 
-void TestObject(Tester& tester)
+void TestObject()
 {
     JSONObject json = CreateJson();
 
     std::cout << json;
 }
 
-void TestObjectCopyCtor()
+void TestObjectCopyCtor(Tester& tester)
 {
     JSONObject json1 = CreateJson();
     JSONObject json2(json1);
 
-    std::cout << json2;
+    tester.TestPrimitive(json2, json1, "TestObjectCopyCtor", __LINE__);
 }
 
-void TestObjectCopyAssignment()
+void TestObjectCopyAssignment(Tester& tester)
 {
     JSONObject json1 = CreateJson();
     JSONObject json2 = json1;
 
-    std::cout << json2;
+    tester.TestPrimitive(json2, json1, "TestObjectCopyCtor", __LINE__);
 }
 
-void TestJSONValueCopyAssignment()
+void TestJSONValueCopyAssignment(Tester& tester)
 {
     JSONObject json = CreateJson();
 
     json["intKey"] = 42;
-    std::cout << json;
+    tester.TestPrimitive(json["intKey"], JSONObject::JSONValue(42), "TestJSONValueCopyAssignment", __LINE__);
 
     json["strKey"] = json["strKey"];
-    std::cout << json;
+    tester.TestPrimitive(json["intKey"], JSONObject::JSONValue(42), "TestJSONValueCopyAssignment", __LINE__);
     
     json["intKey"] = "not an int!";
-    std::cout << json;
+    tester.TestPrimitive(json["intKey"], JSONObject::JSONValue("not an int!"), "TestJSONValueCopyAssignment", __LINE__);
 
     json["intKey"] = json["nestedJson"];
-    std::cout << json;
+    tester.TestPrimitive(json["intKey"], JSONObject::JSONValue(json["nestedJson"]), "TestJSONValueCopyAssignment", __LINE__);
 }
 
-void TestOperatorSquereBrakets()
+void TestOperatorSquereBrakets(Tester& tester)
 {
     JSONObject json = CreateJson();
 
-    std::cout << json["intKey"];
-    std::cout << json["strKey"];
+    tester.TestPrimitive(JSONObject::JSONValue(42), JSONObject::JSONValue(json["intKey"]), "TestOperatorSquereBrakets", __LINE__);
+    tester.TestPrimitive(JSONObject::JSONValue("str"), JSONObject::JSONValue(json["strKey"]), "TestOperatorSquereBrakets", __LINE__);
 }
 
-void TestJSONValueCasting()
+void TestJSONValueCasting(Tester& tester)
 {
     JSONObject json = CreateJson();
 
     s32 int_val = json["intKey"];
     std::vector<JSONObject*> array_of_jsons = json["ArrayOfJsons"];
 
-    std::cout << "this is intkey's value: " << int_val << "\n";
-    std::cout << "this is ArrayOfJsons's value:\n" << array_of_jsons;
+    tester.TestPrimitive(int_val, 13, "TestJSONValueCasting", __LINE__);
+
+    for (auto new_iter = array_of_jsons.begin(), og_iter = json["ArrayOfJsons"].obj_arr.begin();
+         new_iter != array_of_jsons.end() && og_iter != json["ArrayOfJsons"].obj_arr.end();
+         ++new_iter, ++og_iter)
+    {
+        tester.TestPrimitive(*new_iter, *og_iter, "TestJSONValueCasting", __LINE__);
+    }
 }
 
 

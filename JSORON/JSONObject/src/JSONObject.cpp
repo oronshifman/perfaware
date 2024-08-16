@@ -142,6 +142,52 @@ JSONObject::JSONValue::operator std::vector<JSONObject*>() const
     }
 }
 
+JSONObject::JSONValue JSONObject::JSONValue::operator[](u64 index)
+{
+    switch (type)
+    {
+        case JSONObject::ValueType::BAD_TYPE:
+        case JSONObject::ValueType::NULL_TYPE:
+        case JSONObject::ValueType::INT:
+        case JSONObject::ValueType::DOUBLE:
+        case JSONObject::ValueType::STR:
+        case JSONObject::ValueType::JSON_OBJECT:
+        {
+            return *this;
+        } break; 
+
+        case JSONObject::ValueType::INT_ARR:
+        {
+            return int_arr[index];
+        } break;
+
+        case JSONObject::ValueType::DOUBLE_ARR:
+        {
+            return double_arr[index];
+        } break;
+
+        case JSONObject::ValueType::STR_ARR:
+        {
+            return str_arr[index];
+        } break;
+        
+        case JSONObject::ValueType::OBJ_ARR:
+        {
+            return *(obj_arr[index]);
+        } break;
+    }
+}
+
+JSONObject::JSONValue JSONObject::JSONValue::operator[](std::string key)
+{
+    if (type == JSONObject::ValueType::JSON_OBJECT)
+    {
+        return (*json_val)[key];
+    }
+
+    return JSONObject::bad_value;
+}
+
 void JSONObject::JSONValue::PrintValueByType(u8 indent, std::ostream& out) const
 {
         switch (type)
@@ -375,8 +421,6 @@ JSONObject& JSONObject::operator=(const JSONObject& other)
 
 JSONObject::~JSONObject()
 {
-    // TODO(24.07.24): impl
-
     for (auto& pair : json)
     {
         delete pair.second;
@@ -405,6 +449,120 @@ JSONObject::JSONValue& JSONObject::operator[](std::string key)
         return bad_value;
     }
     return *(value->second);
+}
+
+bool operator==(const JSONObject& lhs, const JSONObject& rhs)
+{
+    if (&lhs == &rhs)
+    {
+        return 1;
+    }
+    
+    // TODO(15.8.24): test
+    for (auto lhs_iter = lhs.insertion_order.begin(), rhs_iter = rhs.insertion_order.begin();
+         lhs_iter != lhs.insertion_order.end() && rhs_iter != rhs.insertion_order.end();
+         ++lhs_iter, ++rhs_iter)
+    {
+        if (lhs.json.at(*lhs_iter) != rhs.json.at(*rhs_iter))
+        {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+bool operator!=(const JSONObject& lhs, const JSONObject& rhs)
+{
+    return !(lhs == rhs);
+}
+
+bool operator==(const JSONObject::JSONValue& lhs, const JSONObject::JSONValue& rhs)
+{
+    // TODO(16.8.24): test
+    if (&lhs == &rhs)
+    {
+        return 1;
+    }
+
+    if (lhs.type != rhs.type)
+    {
+        return 0;
+    }
+
+    switch (lhs.type)
+    {
+        case JSONObject::ValueType::BAD_TYPE:
+        case JSONObject::ValueType::NULL_TYPE:
+        {
+            return 1;
+        } break;
+
+        case JSONObject::ValueType::INT:
+        {
+            return lhs.int_val == rhs.int_val;
+        } break;
+        
+        case JSONObject::ValueType::DOUBLE:
+        {
+            return lhs.double_val == rhs.double_val;
+        } break;
+        
+        case JSONObject::ValueType::STR:
+        {
+            return lhs.str_val == rhs.str_val;
+        } break;
+
+        case JSONObject::ValueType::JSON_OBJECT:
+        {
+            return lhs.json_val == rhs.json_val;
+        } break;
+        
+        case JSONObject::ValueType::INT_ARR:
+        {
+             if (lhs.int_arr != rhs.int_arr)
+             {
+                 return 0;
+             }
+        } break;
+        
+        case JSONObject::ValueType::DOUBLE_ARR:
+        {
+             if (lhs.double_arr != rhs.double_arr)
+             {
+                 return 0;
+             }
+        } break;
+
+        case JSONObject::ValueType::STR_ARR:
+        {
+             if (lhs.str_arr != rhs.str_arr)
+             {
+                 return 0;
+             }
+        } break;
+
+        case JSONObject::ValueType::OBJ_ARR:
+        {
+             if (lhs.obj_arr != rhs.obj_arr)
+             {
+                 return 0;
+             }
+        } break;
+
+        default:
+        {
+             // TODO(16.8.24): SyntaxError() type not supported
+             return 0;
+        }
+    }
+
+    return 0;
+}
+
+bool operator!=(const JSONObject::JSONValue& lhs, const JSONObject::JSONValue& rhs)
+{
+    return !(lhs == rhs);
 }
 
 std::ostream& operator<<(std::ostream& out, const JSONObject& obj)

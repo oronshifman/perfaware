@@ -67,6 +67,9 @@ namespace JSORON
             
             template<typename T>
             JSONValue& operator=(const T& src);
+
+            template<typename T>
+            T operator[](const std::vector<T>& src);
     
             ~JSONValue();
     
@@ -131,9 +134,21 @@ namespace JSORON
              */
             operator std::vector<JSONObject*>() const;
             
+            JSONValue operator[](u64 key);
+
+            /**
+             * @brief for accessing keys from a nested json
+             * @return JSONValue with the nested JSONObject
+             */
+            JSONValue operator[](std::string key);
+
             void PrintValueByType(u8 indent, std::ostream& out) const;
             void AssignValueByType(const JSONValue& src);
     
+            friend bool operator==(const JSONObject& lhs, const JSONObject& rhs);
+            friend bool operator==(const JSONValue& lhs, const JSONValue& rhs);
+            friend bool operator!=(const JSONObject& lhs, const JSONObject& rhs);
+            friend bool operator!=(const JSONValue& lhs, const JSONValue& rhs);
             friend std::ostream& operator<<(std::ostream& out, const JSONValue& value);
         };
     
@@ -173,6 +188,8 @@ namespace JSORON
         
         friend class JSONParser;
 
+        friend bool operator==(const JSONObject& lhs, const JSONObject& rhs);
+        friend bool operator!=(const JSONObject& lhs, const JSONObject& rhs);
         friend std::ostream& operator<<(std::ostream& out, const JSONObject& obj);
         friend std::ostream& operator<<(std::ostream& out, const JSONValue& value);
     
@@ -221,6 +238,7 @@ namespace JSORON
         }
         return res.first->second;
     }
+    
 }
 
 #endif /* JSON_OBJECT_H */

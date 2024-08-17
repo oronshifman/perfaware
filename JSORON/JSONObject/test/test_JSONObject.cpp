@@ -9,39 +9,29 @@
 
 using namespace JSORON;
 
-void TestMemoryManagment();
-
-void TestObject(Tester& tester);
-void TestObjectCopyCtor();
-void TestObjectCopyAssignment();
-void TestJSONValueCopyAssignment();
-void TestOperatorSquereBrakets();
-void TestJSONValueCasting();
 JSONObject CreateJson();
+
+void TestObjectCopyCtor(Tester& tester);
+void TestObjectCopyAssignment(Tester& tester);
+void TestJSONValueCopyAssignment(Tester& tester);
+void TestOperatorSquereBrakets(Tester& tester);
+void TestJSONValueCasting(Tester& tester);
 
 int main(int argc, char *argv[])
 {
 	Tester tester;
     
-    TestMemoryManagment();
+    TestOperatorSquereBrakets(tester);
 
-    std::cout << "TestObject:\n";
-	TestObject(tester);
+    TestObjectCopyCtor(tester);
 
-    std::cout << "\nTestOperatorSquereBrakets:\n";
-    TestOperatorSquereBrakets();
+    TestObjectCopyAssignment(tester);
 
-    std::cout << "\nTestObjectCopyCtor:\n";
-    TestObjectCopyCtor();
-
-    std::cout << "\nTestObjectCopyAssignment:\n";
-    TestObjectCopyAssignment();
-
-    std::cout << "\nTestJSONValueCopyAssignment:\n";
-    TestJSONValueCopyAssignment();
+    TestJSONValueCopyAssignment(tester);
     
-    std::cout << "\n TetstJSONValueCastring\n";
-    TestJSONValueCasting();
+    TestJSONValueCasting(tester);
+
+    tester.TestAll();
 
 	return 0;
 }
@@ -75,26 +65,6 @@ JSONObject CreateJson()
     }
 
     return json;
-}
-
-void TestMemoryManagment()
-{
-    JSONObject json;
-    
-	JSONObject nested_jason;
-	nested_jason.Put("nestedInt", 42);
-	nested_jason.Put("nestedIntArr", std::vector<s32>{1,2,3});
-
-    json.Put("nestedJson", nested_jason);
-
-    std::cout << json;
-}
-
-void TestObject()
-{
-    JSONObject json = CreateJson();
-
-    std::cout << json;
 }
 
 void TestObjectCopyCtor(Tester& tester)
@@ -134,7 +104,7 @@ void TestOperatorSquereBrakets(Tester& tester)
 {
     JSONObject json = CreateJson();
 
-    tester.TestPrimitive(JSONObject::JSONValue(42), JSONObject::JSONValue(json["intKey"]), "TestOperatorSquereBrakets", __LINE__);
+    tester.TestPrimitive(JSONObject::JSONValue(13), JSONObject::JSONValue(json["intKey"]), "TestOperatorSquereBrakets", __LINE__);
     tester.TestPrimitive(JSONObject::JSONValue("str"), JSONObject::JSONValue(json["strKey"]), "TestOperatorSquereBrakets", __LINE__);
 }
 

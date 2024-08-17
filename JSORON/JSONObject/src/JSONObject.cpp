@@ -458,12 +458,11 @@ bool operator==(const JSONObject& lhs, const JSONObject& rhs)
         return 1;
     }
     
-    // TODO(15.8.24): test
     for (auto lhs_iter = lhs.insertion_order.begin(), rhs_iter = rhs.insertion_order.begin();
          lhs_iter != lhs.insertion_order.end() && rhs_iter != rhs.insertion_order.end();
          ++lhs_iter, ++rhs_iter)
     {
-        if (lhs.json.at(*lhs_iter) != rhs.json.at(*rhs_iter))
+        if (*(lhs.json.at(*lhs_iter)) != *(rhs.json.at(*rhs_iter)))
         {
             return 0;
         }
@@ -479,7 +478,6 @@ bool operator!=(const JSONObject& lhs, const JSONObject& rhs)
 
 bool operator==(const JSONObject::JSONValue& lhs, const JSONObject::JSONValue& rhs)
 {
-    // TODO(16.8.24): test
     if (&lhs == &rhs)
     {
         return 1;
@@ -515,7 +513,7 @@ bool operator==(const JSONObject::JSONValue& lhs, const JSONObject::JSONValue& r
 
         case JSONObject::ValueType::JSON_OBJECT:
         {
-            return lhs.json_val == rhs.json_val;
+            return *(lhs.json_val) == *(rhs.json_val);
         } break;
         
         case JSONObject::ValueType::INT_ARR:
@@ -544,10 +542,15 @@ bool operator==(const JSONObject::JSONValue& lhs, const JSONObject::JSONValue& r
 
         case JSONObject::ValueType::OBJ_ARR:
         {
-             if (lhs.obj_arr != rhs.obj_arr)
-             {
-                 return 0;
-             }
+            for (auto lhs_iter = lhs.obj_arr.begin(), rhs_iter = rhs.obj_arr.begin();
+                 lhs_iter != lhs.obj_arr.end() && rhs_iter != rhs.obj_arr.end();
+                 ++lhs_iter, ++rhs_iter)
+            {
+                if (*(*lhs_iter) != *(*rhs_iter))
+                {
+                    return 0;
+                }
+            }
         } break;
 
         default:
@@ -557,7 +560,7 @@ bool operator==(const JSONObject::JSONValue& lhs, const JSONObject::JSONValue& r
         }
     }
 
-    return 0;
+    return 1;
 }
 
 bool operator!=(const JSONObject::JSONValue& lhs, const JSONObject::JSONValue& rhs)

@@ -9,6 +9,7 @@
 
 #include "JSONParser.h"
 #include "JSONObject.h"
+#include "generic_test.h"
 
 using namespace JSORON;
 
@@ -20,60 +21,99 @@ void InitSimpleJson1();
 void InitSimpleJson2();
 void InitSimpleJson3();
 
-void TestLexer1();
-void TestLexer2();
-void TestLexer3();
+void TestLexer1(Tester& teser);
+void TestLexer2(Tester& teser);
+void TestLexer3(Tester& teser);
 
-void TestParser1();
-void TestParser2();
-void TestParser3();
+void TestParser1(Tester& teser);
+void TestParser2(Tester& teser);
+void TestParser3(Tester& teser);
 
 void PrintTokenList(JSONParser::TokenList token_list);
 
 int main(int argc, char *argv[])
 {
-    TestLexer1();
-    TestLexer2();
-    TestLexer3();
+    Tester tester;
+    
+    TestLexer1(tester);
+    TestLexer2(tester);
+    TestLexer3(tester);
+
+    tester.TestAll();
 
 	return 0;
 }
 
-void TestParser1()
+void TestParser1(Tester& tester)
 {
 
 }
 
-void TestParser2()
+void TestParser2(Tester& tester)
 {
 
 }
 
-void TestParser3()
+void TestParser3(Tester& tester)
 {
 
 }
 
-void TestLexer1()
+void TestLexer1(Tester& tester)
 {
     JSONParser parser;
     parser.Lex("{ \"intKey\": 2 }");
-    PrintTokenList(parser.tokens);
+    std::vector<JSONParser::Token> expected{JSONParser::Token('{'), 
+                                            JSONParser::Token("intKey"), 
+                                            JSONParser::Token(':'),
+                                            JSONParser::Token(2),
+                                            JSONParser::Token('}')};
+    tester.TestPrimitive(parser.tokens, expected, "TestLexer1", __LINE__);
 }
 
 
-void TestLexer2()
+void TestLexer2(Tester& tester)
 {
     JSONParser parser;
     parser.Lex("{ \"nestedJson\": {\"nestedInt\": 2}, \"intKey\": 42 }");
-    PrintTokenList(parser.tokens);
+    std::vector<JSONParser::Token> expected{JSONParser::Token('{'), 
+                                            JSONParser::Token("nestedJson"), 
+                                            JSONParser::Token(':'),
+                                            JSONParser::Token('{'),
+                                            JSONParser::Token("nestedInt"),
+                                            JSONParser::Token(':'),
+                                            JSONParser::Token(2),
+                                            JSONParser::Token('}'),
+                                            JSONParser::Token(','),
+                                            JSONParser::Token("intKey"), 
+                                            JSONParser::Token(':'),
+                                            JSONParser::Token(42),
+                                            JSONParser::Token('}')};
+    tester.TestPrimitive(parser.tokens, expected, "TestLexer2", __LINE__);
 }
 
-void TestLexer3()
+void TestLexer3(Tester& tester)
 {
     JSONParser parser;
     parser.Lex("{ \"jsonArray\": [{\"json1\": 1},{\"json2\": 2}]}");
-    PrintTokenList(parser.tokens);
+    std::vector<JSONParser::Token> expected{JSONParser::Token('{'), 
+                                            JSONParser::Token("jsonArray"), 
+                                            JSONParser::Token(':'),
+                                            JSONParser::Token('['),
+                                            JSONParser::Token('{'),
+                                            JSONParser::Token("json1"), 
+                                            JSONParser::Token(':'),
+                                            JSONParser::Token(1),
+                                            JSONParser::Token('}'),
+                                            JSONParser::Token(','),
+                                            JSONParser::Token('{'),
+                                            JSONParser::Token("json2"), 
+                                            JSONParser::Token(':'),
+                                            JSONParser::Token(2),
+                                            JSONParser::Token('}'),
+                                            JSONParser::Token(']'),
+                                            JSONParser::Token('}')};
+    tester.TestPrimitive(parser.tokens, expected, "TestLexer3", __LINE__);
 }
 
 void InitSimpleJson1()

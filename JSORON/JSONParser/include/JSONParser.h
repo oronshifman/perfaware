@@ -56,13 +56,26 @@ namespace JSORON
     
             ~Token();
 
+            friend bool operator==(const JSONParser& lhs, const JSONParser& rhs);
+            friend bool operator!=(const JSONParser& lhs, const JSONParser& rhs);
+            friend bool operator==(const Token& lhs, const Token& rhs);
+            friend bool operator!=(const Token& lhs, const Token& rhs);
+            friend std::ostream& operator<<(std::ostream& out, const Token& tok);
+
         private:
             void AssignTokByType(Token& dest, const Token& src, TokenType type);
         };
     
     public:
+        typedef std::vector<Token> TokenList;
+           
         JSONObject Parse(const std::string& json_str);
         JSONObject Parse(const std::ifstream& json_file); 
+        
+        friend bool operator==(const JSONParser& lhs, const JSONParser& rhs);
+        friend bool operator!=(const JSONParser& lhs, const JSONParser& rhs);
+        friend std::ostream& operator<<(std::ostream& out, const Token& tok);
+        friend std::ostream& operator<<(std::ostream& out, const TokenList& toks);
 #ifdef NDEBUG
     private:
 #endif /* NDEBUG */
@@ -82,7 +95,6 @@ namespace JSORON
         void ParseObj(JSONObject& obj);
         void ParseArray(JSONObject& obj);
 
-        typedef std::vector<Token> TokenList;
         TokenList tokens;
     };
 }

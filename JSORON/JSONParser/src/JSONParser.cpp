@@ -7,7 +7,6 @@
 #include <cctype>
 #include <fstream>
 #include <string>
-#include <unordered_set>
 
 #include "JSONParser.h"
 #include "JSONObject.h"
@@ -15,6 +14,8 @@
 
 namespace JSORON
 {
+    typedef std::vector<JSONParser::Token> TokenList;
+    
     JSONParser::Token::Token(const Token& other) : type(other.type)
     {
         AssignTokByType(*this, other, other.type);
@@ -320,6 +321,133 @@ namespace JSORON
 
         return num.size();
     }
+
+    bool operator==(const JSONParser& lhs, const JSONParser& rhs)
+    {
+        if (&lhs == &rhs)
+        {
+            return 1;
+        }
+
+        for (auto lhs_iter = lhs.tokens.begin(), rhs_iter = rhs.tokens.begin();
+             lhs_iter != lhs.tokens.end() && rhs_iter != rhs.tokens.end();
+             ++lhs_iter, ++rhs_iter)
+        {
+            if (*lhs_iter != *rhs_iter)
+            {
+                return 0;
+            }
+        }
+
+        return 1;
+    }
+    
+    bool operator!=(const JSONParser& lhs, const JSONParser& rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    bool operator==(const JSONParser::Token& lhs, const JSONParser::Token& rhs)
+    {
+        if (&lhs == &rhs)
+        {
+            return 1;
+        }
+
+        if (lhs.type != rhs.type)
+        {
+            return 0;
+        }
+
+        switch (lhs.type)
+        {
+            case JSONParser::TokenType::NULL_TYPE:
+            {
+                return 1;
+            } break;
+
+            case JSONParser::TokenType::DOUBLE:
+            {
+                return lhs.double_tok == rhs.double_tok;
+            } break;
+
+            case JSONParser::TokenType::INT:
+            {
+                return lhs.int_tok == rhs.int_tok;
+            } break;
+
+            case JSONParser::TokenType::STR:
+            {
+                return lhs.str_tok == rhs.str_tok;
+            } break;
+            
+            case JSONParser::TokenType::PANCTUATION:
+            {
+                return lhs.panc_tok == rhs.panc_tok;
+            } break;
+
+            default:
+            {
+                // TODO(17.8.24): output an error
+                return 0;
+            } break;
+        }
+    }
+
+    bool operator!=(const JSONParser::Token& lhs, const JSONParser::Token& rhs)
+    {
+        return !(lhs == rhs);
+    }
+    
+    std::ostream& operator<<(std::ostream& out, const JSONParser::Token& tok)
+    {
+        switch (tok.type)
+        {
+            case JSONParser::TokenType::NULL_TYPE:
+            {
+                out << "type: NULL_TYPE";
+            } break;
+
+            case JSONParser::TokenType::INT:
+            {
+                out << "type: INT, val: " << tok.int_tok;
+            } break;
+
+            case JSONParser::TokenType::DOUBLE:
+            {
+                out << "type: DOUBLE, val: " << tok.double_tok;
+            } break;
+
+            case JSONParser::TokenType::STR:
+            {
+                out << "type: STR, val: " << tok.str_tok;
+            } break;
+
+            case JSONParser::TokenType::PANCTUATION:
+            {
+                out << "type: PANCTUATION, val: " << tok.panc_tok;
+            } break;
+
+            default:
+            {
+                out << "Unknown Token type";
+            } break;
+        }
+
+        return out;
+    }
+        
+   std::ostream& operator<<(std::ostream& out, const TokenList& toks)
+   {
+       out << "[";
+       for (auto& tok : toks)
+       {
+           out << tok << (tok == toks.back() ? "" : ",");
+       }
+       out << "]";
+
+       return out;
+   }
 
 } // namespace JSORON
 

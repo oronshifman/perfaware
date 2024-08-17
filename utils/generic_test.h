@@ -32,11 +32,11 @@
 #define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
 
 /**
- * Create an instance of Tester and the call it's test function as discribed above it
+ * Create an instance of Tester and the call it's test function as described above it
  */
 class Tester {
 public:
-    Tester();
+    Tester() : test_counter(0), succeeded_test_counter(0) {}
 
     /**
      * Call: Test<tested_type>(result, expected, "", __LINE__); 
@@ -48,12 +48,12 @@ public:
         
         if (result != expected)
         {
-            std::cout << "\n" << BOLDMAGENTA << "Test " << std::to_string(test_counter) << DEFAULT << "\n" <<
+            std::cout << "\n" << BOLDMAGENTA << "Test " << test_counter << DEFAULT << "\n" <<
                         message << "\n" << 
                         BOLDRED << "FAIL " << DEFAULT <<
-                        "at line " << BOLDBLUE << std::to_string(line) << DEFAULT << "\n" <<
-                        "Got: " << RED << std::to_string(result) << DEFAULT << 
-                        " expected: " << GREEN << std::to_string(expected) << "\n";
+                        "at line " << BOLDBLUE << line << DEFAULT << "\n" <<
+                        "Got: " << RED << result << DEFAULT << 
+                        " expected: " << GREEN << expected << "\n";
         }
         else
         {
@@ -61,7 +61,6 @@ public:
         }	
     }
 
-    void TestStr(std::string result, std::string expected, std::string message, int line);
     void TestAll(void);
 
 private:

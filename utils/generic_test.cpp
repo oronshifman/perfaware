@@ -2,31 +2,6 @@
 
 #include "generic_test.h"
 
-Tester::Tester()
-{
-    test_counter = 0;
-    succeeded_test_counter = 0;
-}
-
-void Tester::TestStr(std::string result, std::string expected, std::string message, int line)
-{
-    ++test_counter;
-    
-    if (result != expected)
-    {
-        std::cout << "\n" << BOLDMAGENTA << "Test " << std::to_string(test_counter) << DEFAULT << "\n" <<
-                    message << "\n" << 
-                    BOLDRED << "FAIL " << DEFAULT <<
-                    "at line " << BOLDBLUE << std::to_string(line) << DEFAULT << "\n" <<
-                    "Got: " << RED << result << DEFAULT << 
-                    " expected: " << GREEN << expected << "\n";
-    }
-    else
-    {
-        ++succeeded_test_counter;
-    }	
-}
-
 void Tester::TestAll(void)
 {
 	if (test_counter == succeeded_test_counter)

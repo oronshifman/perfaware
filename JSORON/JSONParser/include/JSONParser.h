@@ -8,7 +8,7 @@
 #define __JSONPARSER_H__
 
 #include <fstream>
-#include <vector>
+#include <list>
 
 #include "JSONObject.h"
 #include "my_int.h"
@@ -25,7 +25,7 @@ namespace JSORON
             NULL_TYPE,
     
             STR,
-            PANCTUATION,
+            PUNCTUATION,
             INT,
             DOUBLE,
     
@@ -40,7 +40,7 @@ namespace JSORON
             union
             {
                 std::string str_tok;
-                char panc_tok;
+                char punc_tok;
                 s32 int_tok;
                 f64 double_tok;
             };
@@ -50,7 +50,7 @@ namespace JSORON
             Token& operator=(const Token& other);
 
             Token(const std::string str_tok) : type(TokenType::STR), str_tok(str_tok) {}
-            Token(const char panc_tok) : type(TokenType::PANCTUATION), panc_tok(panc_tok) {}
+            Token(const char punc_tok) : type(TokenType::PUNCTUATION), punc_tok(punc_tok) {}
             Token(const s32 int_tok) : type(TokenType::INT), int_tok(int_tok) {}
             Token(const f64 double_tok) : type(TokenType::DOUBLE), double_tok(double_tok) {}
     
@@ -67,7 +67,7 @@ namespace JSORON
         };
     
     public:
-        typedef std::vector<Token> TokenList;
+        typedef std::list<Token> TokenList;
            
         JSONObject Parse(const std::string& json_str);
         JSONObject Parse(const std::ifstream& json_file); 
@@ -83,7 +83,7 @@ namespace JSORON
     
         void Lex(std::string json_str);
 
-        void LexPanctioation(const char panc);
+        void LexPunctuation(const char punc);
         void LexString(const std::string& json_str);
         u8 LexNumber(const std::string& json_str);
 
@@ -92,8 +92,6 @@ namespace JSORON
         JSONObject::JSONValue _Parse();
         JSONObject::JSONValue ParseObj();
         JSONObject::JSONValue ParseArray();
-        void ParseObj(JSONObject& obj);
-        void ParseArray(JSONObject& obj);
 
         TokenList tokens;
     };

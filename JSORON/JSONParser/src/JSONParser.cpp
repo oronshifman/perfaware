@@ -4,9 +4,10 @@
 /* Author:   Oron                            */ 
 /* ------------------------------------------*/
 
-#include <cctype>
 #include <fstream>
 #include <string>
+#include <list>
+#include <iostream>
 
 #include "JSONParser.h"
 #include "JSONObject.h"
@@ -14,7 +15,7 @@
 
 namespace JSORON
 {
-    typedef std::vector<JSONParser::Token> TokenList;
+    typedef std::list<JSONParser::Token> TokenList;
     
     JSONParser::Token::Token(const Token& other) : type(other.type)
     {
@@ -28,6 +29,7 @@ namespace JSORON
             return *this;
         }
 
+        type = other.type;
         AssignTokByType(*this, other, other.type);
         return *this;
     }        
@@ -41,9 +43,9 @@ namespace JSORON
                 new (&dest.str_tok) std::string(src.str_tok);
             } break;
 
-            case JSONParser::TokenType::PANCTUATION:
+            case JSONParser::TokenType::PUNCTUATION:
             {
-                dest.panc_tok = src.panc_tok;
+                dest.punc_tok = src.punc_tok;
             } break;
 
             case JSONParser::TokenType::INT:
@@ -69,7 +71,7 @@ namespace JSORON
             case JSONParser::TokenType::NULL_TYPE:
             case JSONParser::TokenType::INT:
             case JSONParser::TokenType::DOUBLE:
-            case JSONParser::TokenType::PANCTUATION:
+            case JSONParser::TokenType::PUNCTUATION:
             {
             } break;
     
@@ -82,6 +84,7 @@ namespace JSORON
     
     const JSONObject JSONParser::bad_obj = JSONObject();
     
+    // NOTE(19.08.24): stub
     JSONObject JSONParser::Parse(const std::ifstream& json_file)
     {
         // TODO(7.8.24): impl
@@ -96,17 +99,17 @@ namespace JSORON
 
     JSONObject::JSONValue JSONParser::_Parse()
     {
-        // TODO(10.8.24): should be done, might still need some changes
-        Token curr_tok = tokens[0];
+        // TODO(10.8.24): test
+        Token curr_tok = tokens.front();
         tokens.erase(tokens.begin());
 
-        if (curr_tok.type == TokenType::PANCTUATION)
+        if (curr_tok.type == TokenType::PUNCTUATION)
         {
-            if (curr_tok.panc_tok == '{')
+            if (curr_tok.punc_tok == '{')
             {
                 return ParseObj();
             }
-            else if (curr_tok.panc_tok == '[')
+            else if (curr_tok.punc_tok == '[')
             {
                 return ParseArray();
             }
@@ -130,9 +133,10 @@ namespace JSORON
 
             case TokenType::STR:
             {
-                if (tokens[0].type == TokenType::PANCTUATION &&
-                    tokens[0].panc_tok == ':')
+                if (tokens.front().type == TokenType::PUNCTUATION &&
+                    tokens.front().punc_tok == ':')
                 {
+                    tokens.erase(tokens.begin());
                     return JSONObject::JSONValue(JSONObject::ValueType::KEY, curr_tok.str_tok);
                 }
                 else
@@ -147,11 +151,11 @@ namespace JSORON
     
     JSONObject::JSONValue JSONParser::ParseObj()
     {
-        // TODO(10.8.24): impl 
+        // TODO(10.8.24): test 
         JSONObject obj;
         
-        Token curr_tok = tokens[0];
-        while (IsEndOfObj(curr_tok))
+        Token curr_tok = tokens.front();
+        while (!IsEndOfObj(curr_tok))
         {
             JSONObject::JSONValue key = _Parse();
             if (key.type == JSONObject::ValueType::NULL_TYPE)
@@ -164,12 +168,12 @@ namespace JSORON
                 if (val.type == JSONObject::ValueType::NULL_TYPE ||
                     val.type == JSONObject::ValueType::BAD_TYPE)
                 {
-                    // SyntaxError(); TODO(14.8.24): work on SyntaxError()
+                    std::cerr << "Invalid value for key " << key.str_val << "\n";
                     break;
                 }
                 obj.Put(key.str_val, val); 
             }
-            curr_tok = tokens[0];
+            curr_tok = tokens.front();
         }
 
         return JSONObject::JSONValue(obj);
@@ -177,8 +181,8 @@ namespace JSORON
 
     b8 JSONParser::IsEndOfObj(const Token& tok)
     {
-        if (tok.type == TokenType::PANCTUATION &&
-            tok.panc_tok == '}')
+        if (tok.type == TokenType::PUNCTUATION &&
+            tok.punc_tok == '}')
         {
             return 1;
         }
@@ -188,21 +192,16 @@ namespace JSORON
 
     JSONObject::JSONValue JSONParser::ParseArray()
     {
-        // TODO(10.8.24): impl
+        // TODO(19.08.24): impl
     }
 
-    static void SyntaxError(std::string where, char expected, char got)
-    {
-        fprintf(stderr, "Syntax error: After %s, got: %c, expected: %c", where.c_str(), got, expected);
-    }
-    
     void JSONParser::Lex(std::string json_str)
     {
         while (!json_str.empty())
         {
             if (std::ispunct(json_str[0]))
             {
-                LexPanctioation(json_str[0]);
+                LexPunctuation(json_str[0]);
                 json_str.erase(json_str.begin());
                 continue;
             }
@@ -234,9 +233,9 @@ namespace JSORON
         }
     }
     
-    void JSONParser::LexPanctioation(const char panc)
+    void JSONParser::LexPunctuation(const char punc)
     {
-        switch (panc)
+        switch (punc)
         {
             case '{':
             {
@@ -381,9 +380,9 @@ namespace JSORON
                 return lhs.str_tok == rhs.str_tok;
             } break;
             
-            case JSONParser::TokenType::PANCTUATION:
+            case JSONParser::TokenType::PUNCTUATION:
             {
-                return lhs.panc_tok == rhs.panc_tok;
+                return lhs.punc_tok == rhs.punc_tok;
             } break;
 
             default:
@@ -423,9 +422,9 @@ namespace JSORON
                 out << "type: STR, val: " << tok.str_tok;
             } break;
 
-            case JSONParser::TokenType::PANCTUATION:
+            case JSONParser::TokenType::PUNCTUATION:
             {
-                out << "type: PANCTUATION, val: " << tok.panc_tok;
+                out << "type: PUNCTUATION, val: " << tok.punc_tok;
             } break;
 
             default:

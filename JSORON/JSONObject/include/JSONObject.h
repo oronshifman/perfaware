@@ -15,14 +15,13 @@
 
 #include "my_int.h"
 
-
 namespace JSORON
 {
     class JSONObject 
     {
-    #ifndef DNDEBUG
+#ifndef NDEBUG
     public: 
-    #endif /* DNDEBUG */
+#endif /* NDEBUG */
         enum class ValueType
         {
             BAD_TYPE,
@@ -35,12 +34,36 @@ namespace JSORON
             STR,
             JSON_OBJECT,
     
-            INT_ARR,
-            DOUBLE_ARR,
-            STR_ARR,
-            OBJ_ARR,
+            ARR,
     
             NUM_JSON_TYPES
+        };
+        
+        class JSONValue;
+        class JSONArray
+        {
+        public:
+            JSONArray() : array() {}
+            JSONArray(const JSONArray& other);
+            JSONArray& operator=(const JSONArray& other);
+
+            ~JSONArray();
+
+            u64 Size() const;
+            
+            template<typename T>
+            void PushBack(const T& value);
+
+            JSONValue Erase(u64 index);
+            JSONValue At(u64 index) const;
+
+            std::vector<JSONValue>::iterator begin();
+            std::vector<JSONValue>::iterator end();
+
+            friend bool operator==(const JSONArray& lhs, const JSONArray& rhs);
+            friend bool operator!=(const JSONArray& lhs, const JSONArray& rhs);
+        private:
+            std::vector<JSONValue> array;
         };
         
         class JSONValue 
@@ -55,10 +78,7 @@ namespace JSORON
                 std::string str_val;
                 JSONObject *json_val;
     
-                std::vector<s32> int_arr;
-                std::vector<f64> double_arr;
-                std::vector<std::string> str_arr;
-                std::vector<JSONObject*> obj_arr;
+                JSONArray json_arr;
             };
     
             JSONValue() : type(ValueType::NULL_TYPE) {}
@@ -79,13 +99,11 @@ namespace JSORON
             JSONValue(const s32 value) : type(ValueType::INT), int_val(value) {}
             JSONValue(const f64 value) : type(ValueType::DOUBLE), double_val(value) {}
             JSONValue(const std::string value) : type(ValueType::STR), str_val(value) {}
+            JSONValue(const JSONObject *value);
             JSONValue(const JSONObject &value);
     
-            JSONValue(const std::vector<s32>& arr) : type(ValueType::INT_ARR), int_arr(arr) {}
-            JSONValue(const std::vector<f64>& arr) : type(ValueType::DOUBLE_ARR), double_arr(arr) {}
-            JSONValue(const std::vector<std::string>& arr) : type(ValueType::STR_ARR), str_arr(arr) {}
-            JSONValue(const std::vector<JSONObject*>& arr);
-    
+            JSONValue(const JSONArray& arr) : type(ValueType::ARR), json_arr(arr) {}
+            
             /**
              * @brief overloading cast to int.
              * @throw bad_cast
@@ -111,29 +129,11 @@ namespace JSORON
             operator JSONObject*() const;
          
             /**
-             * @brief overloading cast to std::vector<int>.
+             * @brief overloading cast to JSONArray.
              * @throw bad_cast
              */
-            operator std::vector<int>() const;
+            operator JSONArray() const;
         
-            /**
-             * @brief overloading cast to std::vector<double>.
-             * @throw bad_cast
-             */
-            operator std::vector<double>() const;
-       
-            /**
-             * @brief overloading cast to std::vector<std::string>.
-             * @throw bad_cast
-             */
-            operator std::vector<std::string>() const;
-      
-            /**
-             * @brief overloading cast to std::vector<JSONObject*>.
-             * @throw bad_cast
-             */
-            operator std::vector<JSONObject*>() const;
-            
             JSONValue operator[](u64 key);
 
             /**
@@ -203,6 +203,13 @@ namespace JSORON
         void RecPrint(u8 indent, std::ostream& out) const;
     };
     
+    template<typename T>
+    void JSONObject::JSONArray::PushBack(const T& value)
+    {
+        JSONValue new_val(value);
+        array.push_back(new_val);
+    }
+
     template<typename T>
     JSONObject::JSONValue& JSONObject::JSONValue::operator=(const T& src)
     {

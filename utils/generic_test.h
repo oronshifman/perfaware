@@ -9,6 +9,10 @@
 #include <iostream>
 #include <string>
 #include <stddef.h> // size_t
+#include <list>
+
+#include "JSONObject.h"
+#include "JSONParser.h"
 
 /*************************************************
                   Color Defines   		                        
@@ -42,7 +46,7 @@ public:
      * Call: Test<tested_type>(result, expected, "", __LINE__); 
      */
     template<typename T>
-    void TestPrimitive(T result, T expected, std::string message, int line)
+    void AssertEqual(T result, T expected, std::string message, int line)
     {
         ++test_counter;
         

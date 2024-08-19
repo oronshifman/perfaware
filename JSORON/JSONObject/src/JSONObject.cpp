@@ -7,11 +7,61 @@
 #include <ostream>
 #include <string>
 #include <iostream>
+#include <assert.h>
 
 #include "JSONObject.h"
 
 namespace JSORON
 {
+
+JSONObject::JSONArray::JSONArray(const JSONObject::JSONArray& other)
+{
+    array.assign(other.array.begin(), other.array.end());
+}
+
+JSONObject::JSONArray& JSONObject::JSONArray::operator=(const JSONObject::JSONArray& other)
+{
+    array.assign(other.array.begin(), other.array.end());
+    return *this;
+}
+
+JSONObject::JSONArray::~JSONArray()
+{
+    for (auto value : array)
+    {
+        value.~JSONValue();
+    }
+}
+
+JSONObject::JSONValue JSONObject::JSONArray::Erase(u64 index)
+{
+    assert(index < array.size());
+
+    auto iter = array.erase(std::next(array.begin(), index));
+    return *iter;
+}
+
+JSONObject::JSONValue JSONObject::JSONArray::At(u64 index) const
+{
+    assert(index < array.size());
+    
+    return array[index];
+}
+
+u64 JSONObject::JSONArray::Size() const
+{
+    return array.size();
+}
+
+std::vector<JSONObject::JSONValue>::iterator JSONObject::JSONArray::begin()
+{
+    return array.begin();
+}
+
+std::vector<JSONObject::JSONValue>::iterator JSONObject::JSONArray::end()
+{
+    return array.begin();
+}
 
 JSONObject::JSONValue JSONObject::bad_value(JSONObject::ValueType::BAD_TYPE);
 
@@ -25,15 +75,9 @@ JSONObject::JSONValue::JSONValue(const JSONObject &value) : type(ValueType::JSON
     json_val = new JSONObject(value);
 }
 
-JSONObject::JSONValue::JSONValue(const std::vector<JSONObject*>& arr) : type(ValueType::OBJ_ARR)
+JSONObject::JSONValue::JSONValue(const JSONObject *value) : type(ValueType::JSON_OBJECT)
 {
-    new (&obj_arr) std::vector<JSONObject*>();
-    obj_arr.reserve(arr.size());
-
-    for (JSONObject* obj : arr)
-    {
-        obj_arr.push_back(new JSONObject(*obj));
-    }
+    json_val = new JSONObject(*value);
 }
 
 JSONObject::JSONValue& JSONObject::JSONValue::operator=(const JSONValue& other)
@@ -94,47 +138,11 @@ JSONObject::JSONValue::operator JSONObject*() const
     }
 }
 
-JSONObject::JSONValue::operator std::vector<int>() const
+JSONObject::JSONValue::operator JSONArray() const
 {
-    if (type == JSONObject::ValueType::INT_ARR)
+    if (type == JSONObject::ValueType::ARR)
     {
-        return int_arr;
-    }
-    else
-    {
-        throw std::bad_cast();
-    }
-}
-
-JSONObject::JSONValue::operator std::vector<double>() const
-{
-    if (type == JSONObject::ValueType::DOUBLE_ARR)
-    {
-        return double_arr;
-    }
-    else
-    {
-        throw std::bad_cast();
-    }
-}
-
-JSONObject::JSONValue::operator std::vector<std::string>() const
-{
-    if (type == JSONObject::ValueType::STR_ARR)
-    {
-        return str_arr;
-    }
-    else
-    {
-        throw std::bad_cast();
-    }
-}
-
-JSONObject::JSONValue::operator std::vector<JSONObject*>() const
-{
-    if (type == JSONObject::ValueType::OBJ_ARR)
-    {
-        return obj_arr;
+        return json_arr;
     }
     else
     {
@@ -156,24 +164,9 @@ JSONObject::JSONValue JSONObject::JSONValue::operator[](u64 index)
             return *this;
         } break; 
 
-        case JSONObject::ValueType::INT_ARR:
+        case JSONObject::ValueType::ARR:
         {
-            return int_arr[index];
-        } break;
-
-        case JSONObject::ValueType::DOUBLE_ARR:
-        {
-            return double_arr[index];
-        } break;
-
-        case JSONObject::ValueType::STR_ARR:
-        {
-            return str_arr[index];
-        } break;
-        
-        case JSONObject::ValueType::OBJ_ARR:
-        {
-            return *(obj_arr[index]);
+            return json_arr.At(index);
         } break;
     }
 }
@@ -219,51 +212,15 @@ void JSONObject::JSONValue::PrintValueByType(u8 indent, std::ostream& out) const
                 out << std::string(indent, '\t') << "}\n";
             } break;
 
-            case JSONObject::ValueType::INT_ARR:
+            case JSONObject::ValueType::ARR:
             {
                 out << "[";
-                for (u64 index = 0; index < int_arr.size() ; ++index)
+                for (u64 index = 0; index < json_arr.Size() ; ++index)
                 {
-                    out << int_arr[index] << 
-                           (index == int_arr.size() - 1 ? "]" : ",");
+                    out << json_arr.At(index) << 
+                           (index == json_arr.Size() - 1 ? "]" : ",");
                 }
                 out << "\n";
-            } break;
-
-            case JSONObject::ValueType::DOUBLE_ARR:
-            {   
-                out << "[";
-                for (u64 index = 0; index < double_arr.size() ; ++index)
-                {
-                    out << double_arr[index] << 
-                           (index == double_arr.size() - 1 ? "]" : ",");
-                }
-                out << "\n";
-            } break;
-
-            case JSONObject::ValueType::STR_ARR:
-            {
-                out << "[";
-                for (u64 index = 0; index < str_arr.size() ; ++index)
-                {
-                    out << str_arr[index] << 
-                           (index == str_arr.size() - 1 ? "]" : ",");
-                }
-                out << "\n";
-            } break;
-
-            case JSONObject::ValueType::OBJ_ARR:
-            {
-                out << "[\n";
-                ++indent;
-                for (u64 index = 0; index < obj_arr.size() ; ++index)
-                {
-                    out << std::string(indent, '\t') << "{\n";
-                    obj_arr[index]->RecPrint(indent + 1, out);
-                    out << std::string(indent, '\t') << "}";
-                    out << (index != obj_arr.size() - 1 ? ",\n" : "\n");
-                }
-                out << std::string(--indent, '\t') << "]\n";
             } break;
 
             case JSONObject::ValueType::NUM_JSON_TYPES:
@@ -300,34 +257,10 @@ void JSONObject::JSONValue::AssignValueByType(const JSONValue& src)
             json_val = new JSONObject(*src.json_val);
         } break;
 
-        case JSONObject::ValueType::INT_ARR:
+        case JSONObject::ValueType::ARR:
         {
-            type = ValueType::INT_ARR;
-            new (&int_arr) std::vector<s32>(src.int_arr);
-        } break;
-
-        case JSONObject::ValueType::DOUBLE_ARR:
-        {   
-            type = ValueType::DOUBLE_ARR;
-            new (&double_arr) std::vector<f64>(src.double_arr);
-        } break;
-
-        case JSONObject::ValueType::STR_ARR:
-        {
-            type = ValueType::STR_ARR;
-            new (&str_arr) std::vector<std::string>(src.str_arr);
-        } break;
-
-        case JSONObject::ValueType::OBJ_ARR:
-        {
-            type = ValueType::OBJ_ARR;
-            new (&obj_arr) std::vector<JSONObject*>();
-            obj_arr.reserve(src.obj_arr.size());
-
-            for (JSONObject* obj : src.obj_arr)
-            {
-                obj_arr.push_back(new JSONObject(*obj));
-            }
+            type = ValueType::ARR;
+            new (&json_arr) JSONArray(src.json_arr);
         } break;
 
         case JSONObject::ValueType::NULL_TYPE:
@@ -365,30 +298,11 @@ JSONObject::JSONValue::~JSONValue()
             delete json_val;
         } break;
 
-        case ValueType::INT_ARR:
+        case ValueType::ARR:
         {
-            int_arr.~vector<s32>();
+            json_arr.~JSONArray();
         } break;
 
-        case ValueType::DOUBLE_ARR:
-        {
-            double_arr.~vector<f64>();
-        } break;
-
-        case ValueType::STR_ARR:
-        {
-            str_arr.~vector<std::string>();
-        } break;
-
-        case ValueType::OBJ_ARR:
-        {
-            for (JSONObject *obj : obj_arr)
-            {
-                delete obj;
-            }
-            obj_arr.~vector<JSONObject*>();
-        } break;
-        
         case JSONObject::ValueType::BAD_TYPE:
         {
         } break;
@@ -449,6 +363,32 @@ JSONObject::JSONValue& JSONObject::operator[](std::string key)
         return bad_value;
     }
     return *(value->second);
+}
+
+bool operator==(const JSONObject::JSONArray& lhs, const JSONObject::JSONArray& rhs)
+{
+    if (&lhs == &rhs)
+    {
+        return 1;
+    }
+    
+    for (auto lhs_iter = lhs.array.begin(), rhs_iter = rhs.array.begin();
+         lhs_iter != lhs.array.end() && rhs_iter != rhs.array.end();
+         ++lhs_iter, ++rhs_iter)
+    {
+        if (*lhs_iter != *rhs_iter)
+        {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+
+bool operator!=(const JSONObject::JSONArray& lhs, const JSONObject::JSONArray& rhs)
+{
+    return !(lhs == rhs);
 }
 
 bool operator==(const JSONObject& lhs, const JSONObject& rhs)
@@ -516,48 +456,19 @@ bool operator==(const JSONObject::JSONValue& lhs, const JSONObject::JSONValue& r
             return *(lhs.json_val) == *(rhs.json_val);
         } break;
         
-        case JSONObject::ValueType::INT_ARR:
+        case JSONObject::ValueType::ARR:
         {
-             if (lhs.int_arr != rhs.int_arr)
-             {
-                 return 0;
-             }
-        } break;
-        
-        case JSONObject::ValueType::DOUBLE_ARR:
-        {
-             if (lhs.double_arr != rhs.double_arr)
-             {
-                 return 0;
-             }
-        } break;
-
-        case JSONObject::ValueType::STR_ARR:
-        {
-             if (lhs.str_arr != rhs.str_arr)
-             {
-                 return 0;
-             }
-        } break;
-
-        case JSONObject::ValueType::OBJ_ARR:
-        {
-            for (auto lhs_iter = lhs.obj_arr.begin(), rhs_iter = rhs.obj_arr.begin();
-                 lhs_iter != lhs.obj_arr.end() && rhs_iter != rhs.obj_arr.end();
-                 ++lhs_iter, ++rhs_iter)
+            if (lhs.json_arr != rhs.json_arr)
             {
-                if (*(*lhs_iter) != *(*rhs_iter))
-                {
-                    return 0;
-                }
+                return 0;
             }
         } break;
-
+        
         default:
         {
              // TODO(16.8.24): SyntaxError() type not supported
              return 0;
-        }
+        } break;
     }
 
     return 1;

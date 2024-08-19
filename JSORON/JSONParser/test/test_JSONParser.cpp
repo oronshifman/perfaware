@@ -5,6 +5,7 @@
 /* ------------------------------------------*/
 
 #include <vector>
+#include <list>
 #include <iostream>
 
 #include "JSONParser.h"
@@ -21,13 +22,13 @@ void InitSimpleJson1();
 void InitSimpleJson2();
 void InitSimpleJson3();
 
-void TestLexer1(Tester& teser);
-void TestLexer2(Tester& teser);
-void TestLexer3(Tester& teser);
+void TestLexer1(Tester& tester);
+void TestLexer2(Tester& tester);
+void TestLexer3(Tester& tester);
 
-void TestParser1(Tester& teser);
-void TestParser2(Tester& teser);
-void TestParser3(Tester& teser);
+void TestParser1(Tester& tester);
+void TestParser2(Tester& tester);
+void TestParser3(Tester& tester);
 
 void PrintTokenList(JSONParser::TokenList token_list);
 
@@ -39,6 +40,10 @@ int main(int argc, char *argv[])
     TestLexer2(tester);
     TestLexer3(tester);
 
+    TestParser1(tester);
+    TestParser2(tester);
+    TestParser3(tester);
+
     tester.TestAll();
 
 	return 0;
@@ -46,29 +51,39 @@ int main(int argc, char *argv[])
 
 void TestParser1(Tester& tester)
 {
+    JSONParser parser;
+    JSONObject obj = parser.Parse("{ \"intKey\": 2 }");
 
+    tester.AssertEqual(obj, simple_json1, "TesterParser1", __LINE__);
 }
 
 void TestParser2(Tester& tester)
 {
+    JSONParser parser;
+    JSONObject obj = parser.Parse("{ \"nestedJson\": {\"nestedInt\": 2}, \"intKey\": 42 }");
 
+    tester.AssertEqual(obj, simple_json2, "TesterParser2", __LINE__);
 }
 
 void TestParser3(Tester& tester)
 {
+    JSONParser parser;
+    JSONObject obj = parser.Parse("{ \"jsonArray\": [{\"json1\": 1},{\"json2\": 2}]}");
 
+    tester.AssertEqual(obj, simple_json3, "TesterParser3", __LINE__);
 }
 
 void TestLexer1(Tester& tester)
 {
     JSONParser parser;
     parser.Lex("{ \"intKey\": 2 }");
-    std::vector<JSONParser::Token> expected{JSONParser::Token('{'), 
-                                            JSONParser::Token("intKey"), 
-                                            JSONParser::Token(':'),
-                                            JSONParser::Token(2),
-                                            JSONParser::Token('}')};
-    tester.TestPrimitive(parser.tokens, expected, "TestLexer1", __LINE__);
+    std::list<JSONParser::Token> expected{JSONParser::Token('{'), 
+                                          JSONParser::Token("intKey"), 
+                                          JSONParser::Token(':'),
+                                          JSONParser::Token(2),
+                                          JSONParser::Token('}')};
+
+    tester.AssertEqual(parser.tokens, expected, "TestLexer1", __LINE__);
 }
 
 
@@ -76,44 +91,46 @@ void TestLexer2(Tester& tester)
 {
     JSONParser parser;
     parser.Lex("{ \"nestedJson\": {\"nestedInt\": 2}, \"intKey\": 42 }");
-    std::vector<JSONParser::Token> expected{JSONParser::Token('{'), 
-                                            JSONParser::Token("nestedJson"), 
-                                            JSONParser::Token(':'),
-                                            JSONParser::Token('{'),
-                                            JSONParser::Token("nestedInt"),
-                                            JSONParser::Token(':'),
-                                            JSONParser::Token(2),
-                                            JSONParser::Token('}'),
-                                            JSONParser::Token(','),
-                                            JSONParser::Token("intKey"), 
-                                            JSONParser::Token(':'),
-                                            JSONParser::Token(42),
-                                            JSONParser::Token('}')};
-    tester.TestPrimitive(parser.tokens, expected, "TestLexer2", __LINE__);
+    std::list<JSONParser::Token> expected{JSONParser::Token('{'), 
+                                          JSONParser::Token("nestedJson"), 
+                                          JSONParser::Token(':'),
+                                          JSONParser::Token('{'),
+                                          JSONParser::Token("nestedInt"),
+                                          JSONParser::Token(':'),
+                                          JSONParser::Token(2),
+                                          JSONParser::Token('}'),
+                                          JSONParser::Token(','),
+                                          JSONParser::Token("intKey"), 
+                                          JSONParser::Token(':'),
+                                          JSONParser::Token(42),
+                                          JSONParser::Token('}')};
+
+    tester.AssertEqual(parser.tokens, expected, "TestLexer2", __LINE__);
 }
 
 void TestLexer3(Tester& tester)
 {
     JSONParser parser;
     parser.Lex("{ \"jsonArray\": [{\"json1\": 1},{\"json2\": 2}]}");
-    std::vector<JSONParser::Token> expected{JSONParser::Token('{'), 
-                                            JSONParser::Token("jsonArray"), 
-                                            JSONParser::Token(':'),
-                                            JSONParser::Token('['),
-                                            JSONParser::Token('{'),
-                                            JSONParser::Token("json1"), 
-                                            JSONParser::Token(':'),
-                                            JSONParser::Token(1),
-                                            JSONParser::Token('}'),
-                                            JSONParser::Token(','),
-                                            JSONParser::Token('{'),
-                                            JSONParser::Token("json2"), 
-                                            JSONParser::Token(':'),
-                                            JSONParser::Token(2),
-                                            JSONParser::Token('}'),
-                                            JSONParser::Token(']'),
-                                            JSONParser::Token('}')};
-    tester.TestPrimitive(parser.tokens, expected, "TestLexer3", __LINE__);
+    std::list<JSONParser::Token> expected{JSONParser::Token('{'), 
+                                          JSONParser::Token("jsonArray"), 
+                                          JSONParser::Token(':'),
+                                          JSONParser::Token('['),
+                                          JSONParser::Token('{'),
+                                          JSONParser::Token("json1"), 
+                                          JSONParser::Token(':'),
+                                          JSONParser::Token(1),
+                                          JSONParser::Token('}'),
+                                          JSONParser::Token(','),
+                                          JSONParser::Token('{'),
+                                          JSONParser::Token("json2"), 
+                                          JSONParser::Token(':'),
+                                          JSONParser::Token(2),
+                                          JSONParser::Token('}'),
+                                          JSONParser::Token(']'),
+                                          JSONParser::Token('}')};
+
+    tester.AssertEqual(parser.tokens, expected, "TestLexer3", __LINE__);
 }
 
 void InitSimpleJson1()
@@ -160,9 +177,9 @@ void PrintTokenList(JSONParser::TokenList token_list)
                 std::cout << tok.str_tok;
             } break;
 
-            case JSONParser::TokenType::PANCTUATION:
+            case JSONParser::TokenType::PUNCTUATION:
             {
-                std::cout << tok.panc_tok;
+                std::cout << tok.punc_tok;
             } break;
             
             case JSONParser::TokenType::INT:
@@ -179,35 +196,3 @@ void PrintTokenList(JSONParser::TokenList token_list)
     
     std::cout << "]\n";
 }
-
-/*
-{
-    "intKey": 2
-}
-
-Things token should represent:
-    string: brace, sqr_bracket, quotation, colon, comma
-    int
-    float
-
-After lexing:
-    ["{",""","intKey",""",":",2,"}"]
-
-Thinking of parsing:
-    have a stack for braces ordering
-    for Token in TokenList
-        if token == { && (stack.isEmpty() || stack.peek() == [)
-            push to stack
-        else
-            exit with syntax error
-
-        if token == " && (stack.peek() == { || stack.peek() == } || 
-                          stack.peek() == [ || stack.peek() == ] ||)
-            push to stack
-        else
-            exit with syntax error
-
-        if token is a string
-            key == token.string        
-
-*/

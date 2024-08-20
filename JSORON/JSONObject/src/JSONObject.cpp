@@ -27,10 +27,7 @@ JSONObject::JSONArray& JSONObject::JSONArray::operator=(const JSONObject::JSONAr
 
 JSONObject::JSONArray::~JSONArray()
 {
-    for (auto value : array)
-    {
-        value.~JSONValue();
-    }
+    array.clear();
 }
 
 JSONObject::JSONValue JSONObject::JSONArray::Erase(u64 index)

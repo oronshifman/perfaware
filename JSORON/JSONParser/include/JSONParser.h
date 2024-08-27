@@ -88,6 +88,7 @@ namespace JSORON
         u8 LexNumber(const std::string& json_str);
 
         b8 IsEndOfObj(const Token& tok);
+        b8 IsEndOfArr(const Token& tok);
 
         JSONObject::JSONValue _Parse();
         JSONObject::JSONValue ParseObj();

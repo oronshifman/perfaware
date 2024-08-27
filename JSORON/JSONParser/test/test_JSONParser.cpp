@@ -51,6 +51,8 @@ int main(int argc, char *argv[])
 
 void TestParser1(Tester& tester)
 {
+    InitSimpleJson1();
+
     JSONParser parser;
     JSONObject obj = parser.Parse("{ \"intKey\": 2 }");
 
@@ -59,14 +61,18 @@ void TestParser1(Tester& tester)
 
 void TestParser2(Tester& tester)
 {
+    InitSimpleJson2();
+    
     JSONParser parser;
-    JSONObject obj = parser.Parse("{ \"nestedJson\": {\"nestedInt\": 2}, \"intKey\": 42 }");
+    JSONObject obj = parser.Parse("{ \"nestedJson\": {\"intKey\": 2}, \"intKey\": 42 }");
 
     tester.AssertEqual(obj, simple_json2, "TesterParser2", __LINE__);
 }
 
 void TestParser3(Tester& tester)
 {
+    InitSimpleJson3();
+
     JSONParser parser;
     JSONObject obj = parser.Parse("{ \"jsonArray\": [{\"json1\": 1},{\"json2\": 2}]}");
 
@@ -147,16 +153,17 @@ void InitSimpleJson2()
 
 void InitSimpleJson3()
 {
-    std::vector<JSONObject*> json_arr;
+    JSONArray json_arr;
     
     JSONObject *json1 = new JSONObject();
-    json1->Put("intKeyJson1", 1);
+    json1->Put("json1", 1);
     JSONObject *json2 = new JSONObject();
-    json2->Put("intKeyJson2", 2);
+    json2->Put("json2", 2);
 
-    json_arr.insert(json_arr.begin(), {json1, json2});
+    json_arr.PushBack(json1);
+    json_arr.PushBack(json2);
 
-    simple_json3.Put("arrayOfJson", json_arr);
+    simple_json3.Put("jsonArray", json_arr);
 }
 
 void PrintTokenList(JSONParser::TokenList token_list)

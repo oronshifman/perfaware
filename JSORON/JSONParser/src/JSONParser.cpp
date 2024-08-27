@@ -115,7 +115,7 @@ namespace JSORON
             }
             else 
             {
-                return JSONObject::JSONValue();
+                return JSONValue();
             }
         }
 
@@ -123,12 +123,12 @@ namespace JSORON
         {
             case TokenType::DOUBLE:
             {
-                return JSONObject::JSONValue(curr_tok.double_tok);
+                return JSONValue(curr_tok.double_tok);
             } break;
 
             case TokenType::INT:
             {
-                return JSONObject::JSONValue(curr_tok.int_tok);
+                return JSONValue(curr_tok.int_tok);
             } break;
 
             case TokenType::STR:
@@ -137,11 +137,11 @@ namespace JSORON
                     tokens.front().punc_tok == ':')
                 {
                     tokens.erase(tokens.begin());
-                    return JSONObject::JSONValue(JSONObject::ValueType::KEY, curr_tok.str_tok);
+                    return JSONValue(JSONObject::ValueType::KEY, curr_tok.str_tok);
                 }
                 else
                 {
-                    return JSONObject::JSONValue(curr_tok.str_tok);
+                    return JSONValue(curr_tok.str_tok);
                 }
             } break;
         }
@@ -157,14 +157,10 @@ namespace JSORON
         Token curr_tok = tokens.front();
         while (!IsEndOfObj(curr_tok))
         {
-            JSONObject::JSONValue key = _Parse();
-            if (key.type == JSONObject::ValueType::NULL_TYPE)
-            {
-                continue;
-            }
+            JSONValue key = _Parse();
             if (key.type == JSONObject::ValueType::KEY)
             {
-                JSONObject::JSONValue val = _Parse();
+                JSONValue val = _Parse();
                 if (val.type == JSONObject::ValueType::NULL_TYPE ||
                     val.type == JSONObject::ValueType::BAD_TYPE)
                 {
@@ -176,7 +172,7 @@ namespace JSORON
             curr_tok = tokens.front();
         }
 
-        return JSONObject::JSONValue(obj);
+        return JSONValue(obj);
     }
 
     b8 JSONParser::IsEndOfObj(const Token& tok)
@@ -193,6 +189,33 @@ namespace JSORON
     JSONObject::JSONValue JSONParser::ParseArray()
     {
         // TODO(19.08.24): impl
+        JSONArray arr;
+
+        Token curr_tok = tokens.front();
+        while (!IsEndOfArr(curr_tok))
+        {
+            JSONValue val = _Parse();
+            // NOTE(20.08.24): val might be NULL_TYPE. figure out what are the cases this could happen
+            if (val.type != JSONObject::ValueType::NULL_TYPE)
+            {
+                arr.PushBack(val);
+            }
+        
+            curr_tok = tokens.front();
+        }
+
+        return JSONValue(arr);
+    }
+    
+    b8 JSONParser::IsEndOfArr(const Token& tok)
+    {
+        if (tok.type == TokenType::PUNCTUATION &&
+            tok.punc_tok == ']')  
+        {
+            return 1;
+        }
+
+        return 0;
     }
 
     void JSONParser::Lex(std::string json_str)
@@ -295,14 +318,24 @@ namespace JSORON
         u64 index = 0;
         while (1)
         {
-            if (json_str[index] == '.')
-            {
-                is_float = 1;
-            }
-
             num += json_str[index];
             
             ++index;
+            if (json_str[index] == '.')
+            {
+                if (!is_float)
+                {
+                    is_float = 1;
+                    continue;
+                }
+                else
+                {
+                    // TODO(20.08.24): error
+                    std::cerr << "Error while parsing number. unexpected '.'\n";
+                    break;
+                }
+            }
+
             if (!std::isdigit(json_str[index]))
             {
                 break;

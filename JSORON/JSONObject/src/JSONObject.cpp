@@ -388,6 +388,7 @@ bool operator!=(const JSONObject::JSONArray& lhs, const JSONObject::JSONArray& r
     return !(lhs == rhs);
 }
 
+// TODO(20.08.24): fix equality check! currently not working!
 bool operator==(const JSONObject& lhs, const JSONObject& rhs)
 {
     if (&lhs == &rhs)
@@ -399,6 +400,11 @@ bool operator==(const JSONObject& lhs, const JSONObject& rhs)
          lhs_iter != lhs.insertion_order.end() && rhs_iter != rhs.insertion_order.end();
          ++lhs_iter, ++rhs_iter)
     {
+        if (*lhs_iter != *rhs_iter)
+        {
+            return 0;
+        }
+
         if (*(lhs.json.at(*lhs_iter)) != *(rhs.json.at(*rhs_iter)))
         {
             return 0;

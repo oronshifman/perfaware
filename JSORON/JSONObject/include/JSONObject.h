@@ -17,6 +17,7 @@
 
 namespace JSORON
 {
+
     class JSONObject 
     {
 #ifndef NDEBUG
@@ -88,9 +89,6 @@ namespace JSORON
             template<typename T>
             JSONValue& operator=(const T& src);
 
-            template<typename T>
-            T operator[](const std::vector<T>& src);
-    
             ~JSONValue();
     
             JSONValue(const ValueType& type) : type(type) {}
@@ -177,7 +175,8 @@ namespace JSORON
         std::vector<T>& AddArr(const std::string& key);
     
         void Remove(std::string key);
-        
+       
+       
         /**
          * @brief access values in json object
          * @param key - the key associated with the value to be pulled from the json object
@@ -192,8 +191,10 @@ namespace JSORON
         friend bool operator!=(const JSONObject& lhs, const JSONObject& rhs);
         friend std::ostream& operator<<(std::ostream& out, const JSONObject& obj);
         friend std::ostream& operator<<(std::ostream& out, const JSONValue& value);
-    
+
+#ifdef NDEBUG 
     private:
+#endif /* NDEBUG */
         typedef std::unordered_map<std::string, JSONValue*>::iterator JSONIter;
     
         static JSONValue bad_value;
@@ -203,6 +204,9 @@ namespace JSORON
         void RecPrint(u8 indent, std::ostream& out) const;
     };
     
+    typedef JSONObject::JSONArray JSONArray;    
+    typedef JSONObject::JSONValue JSONValue;    
+
     template<typename T>
     void JSONObject::JSONArray::PushBack(const T& value)
     {

@@ -70,7 +70,7 @@ namespace JSORON
         typedef std::list<Token> TokenList;
            
         JSONObject Parse(const std::string& json_str);
-        JSONObject Parse(const std::ifstream& json_file); 
+        JSONObject Parse(std::ifstream& json_file); 
         
         friend bool operator==(const JSONParser& lhs, const JSONParser& rhs);
         friend bool operator!=(const JSONParser& lhs, const JSONParser& rhs);

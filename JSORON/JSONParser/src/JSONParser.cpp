@@ -84,10 +84,17 @@ namespace JSORON
     
     const JSONObject JSONParser::bad_obj = JSONObject();
     
-    // NOTE(19.08.24): stub
-    JSONObject JSONParser::Parse(const std::ifstream& json_file)
+    JSONObject JSONParser::Parse(std::ifstream& json_file)
     {
         // TODO(7.8.24): impl
+        std::string json_str;
+        for (std::string line; std::getline(json_file, line);) 
+        {
+            json_str += line;
+        }
+
+        Parse(json_str);
+
         return bad_obj;
     }
     
@@ -99,7 +106,6 @@ namespace JSORON
 
     JSONObject::JSONValue JSONParser::_Parse()
     {
-        // TODO(10.8.24): test
         Token curr_tok = tokens.front();
         tokens.erase(tokens.begin());
 
@@ -151,7 +157,6 @@ namespace JSORON
     
     JSONObject::JSONValue JSONParser::ParseObj()
     {
-        // TODO(10.8.24): test 
         JSONObject obj;
         
         Token curr_tok = tokens.front();
@@ -188,7 +193,6 @@ namespace JSORON
 
     JSONObject::JSONValue JSONParser::ParseArray()
     {
-        // TODO(19.08.24): impl
         JSONArray arr;
 
         Token curr_tok = tokens.front();
@@ -222,6 +226,20 @@ namespace JSORON
     {
         while (!json_str.empty())
         {
+            if (std::isdigit(json_str[0]) || json_str[0] == '-')
+            {
+                u8 num_digits = LexNumber(json_str);
+
+                if (json_str[0] == '-')
+                {
+                    json_str.erase(json_str.begin());
+                }
+
+                json_str.erase(0, num_digits);
+
+                continue;
+            } 
+
             if (std::ispunct(json_str[0]))
             {
                 LexPunctuation(json_str[0]);
@@ -245,14 +263,6 @@ namespace JSORON
                 json_str.erase(0, tokens.back().str_tok.size());
                 continue;
             }
-            
-            if (std::isdigit(json_str[0]))
-            {
-                u8 num_digits = LexNumber(json_str);
-                json_str.erase(0, num_digits);
-
-                continue;
-            }       
         }
     }
     
@@ -312,10 +322,17 @@ namespace JSORON
     
     u8 JSONParser::LexNumber(const std::string& json_str)
     {
-        b8 is_float = 0;
         std::string num;
+        b8 is_float = 0;
 
         u64 index = 0;
+        s8 sign = 1;
+        if (json_str[0] == '-')
+        {
+            sign = -1;
+            index = 1;
+        }
+
         while (1)
         {
             num += json_str[index];
@@ -344,11 +361,15 @@ namespace JSORON
 
         if (is_float)
         {
-            tokens.push_back(Token(std::stod(num)));
+            f64 new_float = std::stod(num);
+            new_float *= sign;
+            tokens.push_back(Token(new_float));
         }
         else 
         {
-            tokens.push_back(Token(std::stoi(num)));
+            s32 new_int = std::stoi(num);
+            new_int *= sign;
+            tokens.push_back(Token(new_int));
         }
 
         return num.size();

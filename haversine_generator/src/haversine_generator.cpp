@@ -32,13 +32,13 @@ Point region_centers[NUM_REGIONS] =
     {135, -135}, {135,-45}, {135, 45}, {135, 135},
 };
 
-static f64 GetRandX(u8 stab);
-static f64 GetRandY(u8 stab);
-static f64 GetRandYForRegion(u8 region_num);
-static f64 GetRandXForRegion(u8 region_num);
+static f32 GetRandX(u8 stab);
+static f32 GetRandY(u8 stab);
+static f32 GetRandYForRegion(u8 region_num);
+static f32 GetRandXForRegion(u8 region_num);
 
-typedef f64 (*random_x_generator)(u8);
-typedef f64 (*random_y_generator)(u8);
+typedef f32 (*random_x_generator)(u8);
+typedef f32 (*random_y_generator)(u8);
 
 b8 HaversineJSONGenerator::GeneratePoints(exec_option exec_option, const u64 seed, const u64 num_points)
 {
@@ -85,11 +85,7 @@ b8 HaversineJSONGenerator::GeneratePoints(exec_option exec_option, const u64 see
         return 0;
     }
     
-    f64 sum_coef = 1.0 / (f64)num_points;
-
-    if (!json_file.good() || !distances_bin.good())
-    {
-    }
+    f32 sum_coef = 1.0 / (f32)num_points;
 
     json_file << "{\"pairs\":[\n";
     for (u64 point = 0; point < num_points; ++point)
@@ -107,7 +103,7 @@ b8 HaversineJSONGenerator::GeneratePoints(exec_option exec_option, const u64 see
                      "\"y1\":" + std::to_string(new_pair.y1) + "}";
         json_file << (point == num_points - 1 ? "\n" : ",\n");
         
-        f64 distance = ReferenceHaversine(new_pair.x0, new_pair.y0, new_pair.x1, new_pair.y1, EARTH_RADIUS);
+        f32 distance = ReferenceHaversine(new_pair.x0, new_pair.y0, new_pair.x1, new_pair.y1, EARTH_RADIUS);
         distances_bin.write(reinterpret_cast<s8*>(&distance), sizeof(distance));
 
         expected_sum += distance * sum_coef;
@@ -121,24 +117,24 @@ b8 HaversineJSONGenerator::GeneratePoints(exec_option exec_option, const u64 see
     return 1;
 }
 
-static f64 GetRandX(u8 stab)
+static f32 GetRandX(u8 stab)
 {
     return X_LOW_BOUND + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (X_UP_BOUND - X_LOW_BOUND)));
 }
 
-static f64 GetRandY(u8 stab)
+static f32 GetRandY(u8 stab)
 {
     return Y_LOW_BOUND + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (Y_UP_BOUND - Y_LOW_BOUND)));
 }
 
-static f64 GetRandXForRegion(u8 region_num)
+static f32 GetRandXForRegion(u8 region_num)
 {
     s16 region_low = region_centers[region_num].x - REGION_RADIOS;
     s16 region_high = region_centers[region_num].x + REGION_RADIOS;
     return region_low + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (region_high - region_low)));
 }
 
-static f64 GetRandYForRegion(u8 region_num)
+static f32 GetRandYForRegion(u8 region_num)
 {
     s16 region_low = region_centers[region_num].y - REGION_RADIOS;
     s16 region_high = region_centers[region_num].y + REGION_RADIOS;

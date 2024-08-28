@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <unordered_map>
+#include <cmath>
 
 #include "main.h"
 #include "haversine_generator.h"
@@ -17,25 +18,29 @@ int main(int argc, char *argv[])
 {
 	if (argc < 4)
 	{
-		std::cerr << "Usage: haversine_generator <option> <seed> <number_of_point>" << std::endl;
-		std::cerr << "option: uniform, cluster" << std::endl;
+		std::cerr << "Usage: haversine_generator <option> <seed> <number_of_point>\n";
+		std::cerr << "option: uniform, cluster\n";
 		return 1;
 	}
 
 	exec_option user_choice = SetExecOption(argv[1]);
 	
-	
 	s64 seed = atoi(argv[2]);
 	if (seed < 0)
 	{
-		std::cerr << "Usage: <seed> must be a positive number" << std::endl;
+		std::cerr << "Usage: <seed> must be a positive number\n";
 	}
 	u64 num_point = atoll(argv[3]);
 
-	if (num_point == 0)
+	if (num_point <= 0)
 	{
-		std::cout << "Usage: <number_of_point> must be more then 0" << std::endl;
+		std::cout << "Usage: <number_of_point> must be more then 0\n";
 		return 1;
+	}
+
+	if (num_point > std::pow(2, 32))
+	{
+		std::cerr << "Usage: <number_of_points> most be less the 2^32\n";
 	}
 
 	HaversineJSONGenerator generator;
@@ -43,7 +48,7 @@ int main(int argc, char *argv[])
 	{
 		return 1;
 	}
-	std::cout << "Expected sum: " << generator.expected_sum << std::endl;
+	std::cout << "Expected sum: " << generator.expected_sum << "\n";
 
 	return 0;
 }

@@ -95,76 +95,76 @@ void TestRealJson_Lex(Tester& tester)
                                           JSONParser::Token('{'),
                                           JSONParser::Token("x0"),
                                           JSONParser::Token(':'),
-                                          JSONParser::Token(-24.136337),
+                                          JSONParser::Token(-24.136337f),
                                           JSONParser::Token(','),
                                           JSONParser::Token("y0"),
                                           JSONParser::Token(':'),
-                                          JSONParser::Token(75.754684),
+                                          JSONParser::Token(75.754684f),
                                           JSONParser::Token(','),
                                           JSONParser::Token("x1"),
                                           JSONParser::Token(':'),
-                                          JSONParser::Token(-127.218956),
+                                          JSONParser::Token(-127.218956f),
                                           JSONParser::Token(','),
                                           JSONParser::Token("y1"),
                                           JSONParser::Token(':'),
-                                          JSONParser::Token(-25.416527),
+                                          JSONParser::Token(-25.416527f),
                                           JSONParser::Token('}'),
                                           JSONParser::Token(','),
 
                                           JSONParser::Token('{'),
                                           JSONParser::Token("x0"),
                                           JSONParser::Token(':'),
-                                          JSONParser::Token(25.535736),
+                                          JSONParser::Token(25.535736f),
                                           JSONParser::Token(','),
                                           JSONParser::Token("y0"),
                                           JSONParser::Token(':'),
-                                          JSONParser::Token(-43.788517),
+                                          JSONParser::Token(-43.788517f),
                                           JSONParser::Token(','),
                                           JSONParser::Token("x1"),
                                           JSONParser::Token(':'),
-                                          JSONParser::Token(-67.682999),
+                                          JSONParser::Token(-67.682999f),
                                           JSONParser::Token(','),
                                           JSONParser::Token("y1"),
                                           JSONParser::Token(':'),
-                                          JSONParser::Token(82.133118),
+                                          JSONParser::Token(82.133118f),
                                           JSONParser::Token('}'),
                                           JSONParser::Token(','),
                                           
                                           JSONParser::Token('{'),
                                           JSONParser::Token("x0"),
                                           JSONParser::Token(':'),
-                                          JSONParser::Token(-108.825356),
+                                          JSONParser::Token(-108.825356f),
                                           JSONParser::Token(','),
                                           JSONParser::Token("y0"),
                                           JSONParser::Token(':'),
-                                          JSONParser::Token(-80.391953),
+                                          JSONParser::Token(-80.391953f),
                                           JSONParser::Token(','),
                                           JSONParser::Token("x1"),
                                           JSONParser::Token(':'),
-                                          JSONParser::Token(93.193268),
+                                          JSONParser::Token(93.193268f),
                                           JSONParser::Token(','),
                                           JSONParser::Token("y1"),
                                           JSONParser::Token(':'),
-                                          JSONParser::Token(-5.138481),
+                                          JSONParser::Token(-5.138481f),
                                           JSONParser::Token('}'),
                                           JSONParser::Token(','),
                                           
                                           JSONParser::Token('{'),
                                           JSONParser::Token("x0"),
                                           JSONParser::Token(':'),
-                                          JSONParser::Token(150.926361),
+                                          JSONParser::Token(150.926361f),
                                           JSONParser::Token(','),
                                           JSONParser::Token("y0"),
                                           JSONParser::Token(':'),
-                                          JSONParser::Token(63.822083),
+                                          JSONParser::Token(63.822083f),
                                           JSONParser::Token(','),
                                           JSONParser::Token("x1"),
                                           JSONParser::Token(':'),
-                                          JSONParser::Token(-58.930611),
+                                          JSONParser::Token(-58.930611f),
                                           JSONParser::Token(','),
                                           JSONParser::Token("y1"),
                                           JSONParser::Token(':'),
-                                          JSONParser::Token(72.343033),
+                                          JSONParser::Token(72.343033f),
                                           JSONParser::Token('}'),
 
                                           JSONParser::Token(']'),
@@ -180,7 +180,7 @@ void TestRealJson_Parse(Tester& tester)
     JSONParser parser;
     JSONObject obj = parser.Parse("{\"pairs\":[{\"x0\":-24.136337,\"y0\":75.754684,\"x1\":-127.218956,\"y1\":-25.416527}, {\"x0\":25.535736,\"y0\":-43.788517,\"x1\":-67.682999,\"y1\":82.133118}, {\"x0\":-108.825356,\"y0\":-80.391953,\"x1\":93.193268,\"y1\":-5.138481}, {\"x0\":150.926361,\"y0\":63.822083,\"x1\":-58.930611,\"y1\":72.343033}]}");
 
-    tester.AssertEqual(obj, real_use_json, "TestRealJson", __LINE__);
+    tester.AssertEqual(obj, real_use_json, "TestRealJson_Parse", __LINE__);
 } 
 
 void TestParser1(Tester& tester)
@@ -305,28 +305,28 @@ void InitRealUseJson1()
     JSONArray json_arr;
     
     JSONObject *json1 = new JSONObject();
-    json1->Put("x0", -24.136337);
-    json1->Put("y0", 75.754684);
-    json1->Put("x1", -127.218956);
-    json1->Put("y1", -25.416527);
+    json1->Put("x0", -24.136337f);
+    json1->Put("y0", 75.754684f);
+    json1->Put("x1", -127.218956f);
+    json1->Put("y1", -25.416527f);
 
     JSONObject *json2 = new JSONObject();
-    json2->Put("x0", 25.535736);
-    json2->Put("y0", -43.788517);
-    json2->Put("x1", -67.682999);
-    json2->Put("y1", 82.133118);
+    json2->Put("x0", 25.535736f);
+    json2->Put("y0", -43.788517f);
+    json2->Put("x1", -67.682999f);
+    json2->Put("y1", 82.133118f);
 
     JSONObject *json3 = new JSONObject();
-    json3->Put("x0", -108.825356);
-    json3->Put("y0", -80.391953);
-    json3->Put("x1", 93.193268);
-    json3->Put("y1", -5.138481);
+    json3->Put("x0", -108.825356f);
+    json3->Put("y0", -80.391953f);
+    json3->Put("x1", 93.193268f);
+    json3->Put("y1", -5.138481f);
 
     JSONObject *json4 = new JSONObject();
-    json4->Put("x0", 150.926361);
-    json4->Put("y0", 63.822083);
-    json4->Put("x1", -58.930611);
-    json4->Put("y1", 72.343033);
+    json4->Put("x0", 150.926361f);
+    json4->Put("y0", 63.822083f);
+    json4->Put("x1", -58.930611f);
+    json4->Put("y1", 72.343033f);
 
     json_arr.PushBack(json1);
     json_arr.PushBack(json2);

@@ -42,7 +42,7 @@ namespace JSORON
                 std::string str_tok;
                 char punc_tok;
                 s32 int_tok;
-                f64 double_tok;
+                f32 double_tok;
             };
     
             Token() : type(TokenType::NULL_TYPE) {}
@@ -52,7 +52,7 @@ namespace JSORON
             Token(const std::string str_tok) : type(TokenType::STR), str_tok(str_tok) {}
             Token(const char punc_tok) : type(TokenType::PUNCTUATION), punc_tok(punc_tok) {}
             Token(const s32 int_tok) : type(TokenType::INT), int_tok(int_tok) {}
-            Token(const f64 double_tok) : type(TokenType::DOUBLE), double_tok(double_tok) {}
+            Token(const f32 double_tok) : type(TokenType::DOUBLE), double_tok(double_tok) {}
     
             ~Token();
 

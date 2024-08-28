@@ -361,7 +361,7 @@ namespace JSORON
 
         if (is_float)
         {
-            f64 new_float = std::stod(num);
+            f32 new_float = std::stof(num);
             new_float *= sign;
             tokens.push_back(Token(new_float));
         }

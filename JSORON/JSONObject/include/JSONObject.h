@@ -75,7 +75,7 @@ namespace JSORON
             union
             {
                 s32 int_val;
-                f64 double_val;
+                f32 double_val;
                 std::string str_val;
                 JSONObject *json_val;
     
@@ -95,7 +95,7 @@ namespace JSORON
     
             JSONValue(const ValueType type, const std::string key) : type(type), str_val(key) {}
             JSONValue(const s32 value) : type(ValueType::INT), int_val(value) {}
-            JSONValue(const f64 value) : type(ValueType::DOUBLE), double_val(value) {}
+            JSONValue(const f32 value) : type(ValueType::DOUBLE), double_val(value) {}
             JSONValue(const std::string value) : type(ValueType::STR), str_val(value) {}
             JSONValue(const JSONObject *value);
             JSONValue(const JSONObject &value);

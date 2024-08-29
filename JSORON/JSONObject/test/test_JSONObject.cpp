@@ -43,7 +43,7 @@ JSONObject CreateJson()
 	JSONObject json;
 
     json.Put("intKey", 13);
-	json.Put("doubleKey", 13.3);
+	json.Put("doubleKey", 13.3f);
 	json.Put("strKey", "str");
 
 	JSONObject nested_json;
@@ -110,6 +110,10 @@ void TestOperatorSquareBrackets(Tester& tester)
 
     tester.AssertEqual(JSONObject::JSONValue(13), JSONObject::JSONValue(json["intKey"]), "TestOperatorSquareBrackets", __LINE__);
     tester.AssertEqual(JSONObject::JSONValue("str"), JSONObject::JSONValue(json["strKey"]), "TestOperatorSquareBrackets", __LINE__);
+
+    const JSONObject const_obj = CreateJson();
+
+    tester.AssertEqual(JSONObject::JSONValue(13), JSONObject::JSONValue(const_obj["intKey"]), "TestOperatorSquareBrackets", __LINE__);
 }
 
 void TestJSONValueCasting(Tester& tester)

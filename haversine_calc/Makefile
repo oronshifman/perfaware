@@ -1,6 +1,6 @@
 TARGET = haversine_calc
 
-OBJS = src/haversine_calc.o test/haversine_calc_main.o
+OBJS = src/haversine_calc.o test/haversine_calc_main.o ../JSORON/JSONObject/src/JSONObject.o ../JSORON/JSONParser/src/JSONParser.o ../utils/listing_0065_haversine_formula.o
 
 TEST=../utils/generic_test.o
 

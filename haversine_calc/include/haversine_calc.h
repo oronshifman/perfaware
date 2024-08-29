@@ -10,7 +10,14 @@
 #include "JSONObject.h"
 #include "JSONParser.h"
 
-std::string *ReadEntireFile(std::ifstream& in, const std::string& filename);
+f64 HaversineCalc(const JSORON::JSONObject& json);
+char *ReadEntireFile(std::ifstream& in, const std::string& filename);
+
+/**
+ * @brief gets the size of a file from file name
+ * @return on success returns the file size if failed return 0
+ */
+u64 GetFileSize(std::ifstream& in);
 
 #endif /* HAVERSINE_CALC_H */
 

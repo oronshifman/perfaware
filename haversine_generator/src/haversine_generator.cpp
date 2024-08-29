@@ -20,7 +20,7 @@
 #define Y_LOW_BOUND -90
 #define Y_UP_BOUND 90
 
-#define REGION_RADIOS 45
+#define REGION_RADIUS 45
 
 #define EARTH_RADIUS 6372.8
 
@@ -110,6 +110,7 @@ b8 HaversineJSONGenerator::GeneratePoints(exec_option exec_option, const u64 see
     }
 
     json_file << "]}";
+    distances_bin.write(reinterpret_cast<s8*>(&expected_sum), sizeof(expected_sum));
 
     json_file.close();
     distances_bin.close();
@@ -129,14 +130,14 @@ static f32 GetRandY(u8 stab)
 
 static f32 GetRandXForRegion(u8 region_num)
 {
-    s16 region_low = region_centers[region_num].x - REGION_RADIOS;
-    s16 region_high = region_centers[region_num].x + REGION_RADIOS;
+    s16 region_low = region_centers[region_num].x - REGION_RADIUS;
+    s16 region_high = region_centers[region_num].x + REGION_RADIUS;
     return region_low + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (region_high - region_low)));
 }
 
 static f32 GetRandYForRegion(u8 region_num)
 {
-    s16 region_low = region_centers[region_num].y - REGION_RADIOS;
-    s16 region_high = region_centers[region_num].y + REGION_RADIOS;
+    s16 region_low = region_centers[region_num].y - REGION_RADIUS;
+    s16 region_high = region_centers[region_num].y + REGION_RADIUS;
     return region_low + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (region_high - region_low)));
 }

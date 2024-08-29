@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
 	{
 		return 1;
 	}
+
 	std::cout << "Expected sum: " << generator.expected_sum << "\n";
 
 	return 0;

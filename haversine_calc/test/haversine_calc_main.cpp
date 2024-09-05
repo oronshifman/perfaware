@@ -46,6 +46,9 @@ int main(int argc, char *argv[])
 	{
 		return 1;
 	}
+	json_str[GetFileSize(json_file)] = '\0';
+
+	json_file.close();
 
 	JSONParser parser;
 	JSONObject json_obj = parser.Parse(json_str);
@@ -59,9 +62,6 @@ int main(int argc, char *argv[])
 	std::cout << std::fixed << std::setprecision(16);
 	std::cout << "Sum: " << sum << "\n";
 
-	// TODO(29.08.24): debug the reference validation. At the moment reading of the expected sum
-	// from the reference file is not correct. not sure if the problem is with writing of the 
-	// data in the generator or is it the reading...
 	if (argc == 3)
 	{
 		JSONArray pairs = json_obj["pairs"];
@@ -74,6 +74,8 @@ int main(int argc, char *argv[])
 		}
 		u64 answers_count = (GetFileSize(answers_file) - sizeof(f64)) / sizeof(f32);
 
+		answers_file.close();
+
 		std::cout << "\nValidation:\n";
 
 		if (pairs_count != answers_count)
@@ -81,7 +83,7 @@ int main(int argc, char *argv[])
 			std::cerr << "ERROR - Number of pairs don't match number of answers\n";
 		}
 
-		f64 ref_sum = (f64)*(answers + answers_count);
+		f64 ref_sum = *((f64*)(answers + answers_count));
 
 		std::cout << "Reference sum: " << ref_sum << "\n";
 		std::cout << "Difference: " << sum - ref_sum << "\n";

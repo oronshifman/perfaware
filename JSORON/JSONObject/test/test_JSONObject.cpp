@@ -64,6 +64,7 @@ JSONObject CreateJson()
 		JSONObject *json_obj = new JSONObject();
 		json_obj->Put("num", (s32)index);
 		json_arr.PushBack(json_obj);
+        delete json_obj;
 	}	
 	
     json.Put("ArrayOfJsons", json_arr);

@@ -99,9 +99,7 @@ namespace JSORON
             return bad_obj;
         }
 
-        Parse(json_str);
-
-        return bad_obj;
+        return Parse(json_str);
     }
     
     JSONObject JSONParser::Parse(const std::string& json_str)

@@ -40,7 +40,7 @@ char *ReadEntireFile(std::ifstream& in, const std::string& filename)
 {
 	u64 file_size = GetFileSize(in);
 
-	char *data = (char *)malloc(file_size);
+	char *data = (char *)malloc(file_size + 1);
     
     in.read(data, file_size);
 	if (in.fail())

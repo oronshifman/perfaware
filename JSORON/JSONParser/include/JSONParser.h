@@ -15,6 +15,14 @@
 
 namespace JSORON
 {
+#ifdef PROFILING
+    struct parser_profiling_data
+    {
+        u64 lexing;
+        u64 parsing;
+    }; 
+#endif /* PROFILING */
+
     class JSONParser 
     {
 #ifndef NDEBUG
@@ -68,9 +76,17 @@ namespace JSORON
     
     public:
         typedef std::list<Token> TokenList;
+
+#ifdef PROFILING          
+        void InitProfilingData(parser_profiling_data* pd);
+#endif /* PROFILING */
            
         JSONObject Parse(const std::string& json_str);
         JSONObject Parse(std::ifstream& json_file); 
+#ifdef PROFILING          
+        JSONObject ProfiledParse(std::ifstream& json_file);
+        JSONObject ProfiledParse(const std::string& json_str); 
+#endif /* PROFILING */
         
         friend bool operator==(const JSONParser& lhs, const JSONParser& rhs);
         friend bool operator!=(const JSONParser& lhs, const JSONParser& rhs);
@@ -95,6 +111,10 @@ namespace JSORON
         JSONObject::JSONValue ParseArray();
 
         TokenList tokens;
+
+#ifdef PROFILING          
+        parser_profiling_data* pd;
+#endif /* PROFILING */
     };
 }
 

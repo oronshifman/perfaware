@@ -12,6 +12,7 @@
 #include "JSONParser.h"
 #include "JSONObject.h"
 #include "my_int.h"
+#include "profiler.h"
 
 namespace JSORON
 {
@@ -83,6 +84,13 @@ namespace JSORON
     }
     
     const JSONObject JSONParser::bad_obj = JSONObject();
+
+#ifdef PROFILING
+    void JSONParser::InitProfilingData(parser_profiling_data* new_pd)
+    {
+        pd = new_pd;
+    }
+#endif /* PROFILING */
     
     JSONObject JSONParser::Parse(std::ifstream& json_file)
     {
@@ -114,6 +122,44 @@ namespace JSORON
 
         return *(parsed.json_val);
     }
+
+#ifdef PROFILING
+    JSONObject JSONParser::ProfiledParse(std::ifstream& json_file)
+    {
+        u64 file_size = 0;
+	    json_file.seekg(0, std::ios_base::end);
+	    file_size = json_file.tellg();
+	    json_file.seekg(0);
+
+	    std::string json_str(file_size, ' ');
+        
+        json_file.read(&json_str[0], file_size);
+	    if (json_file.fail())
+        {
+            return bad_obj;
+        }
+
+        return ProfiledParse(json_str);
+    }
+
+    JSONObject JSONParser::ProfiledParse(const std::string& json_str)
+    {
+        pd->lexing = profiler::StartCPU();
+        Lex(json_str);
+        pd->lexing = profiler::EndCPU(pd->lexing);
+        
+        pd->parsing = profiler::StartCPU();
+        JSONValue parsed = _Parse();
+        pd->parsing = profiler::EndCPU(pd->parsing);
+
+        if (parsed == JSONObject::bad_value)
+        {
+            return bad_obj;
+        }
+
+        return *(parsed.json_val);
+    }
+#endif /* PROFILING */
 
     JSONObject::JSONValue JSONParser::_Parse()
     {

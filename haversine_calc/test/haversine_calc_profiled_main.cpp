@@ -31,6 +31,9 @@ struct profiling_data
 	u64 os_freq;
 };
 
+#ifdef PROFILING
+parser_profiling_data parser_pd = {0};
+#endif /* PROFILING */
 profiling_data pd = {0};
 
 void OutputProfilingStats();
@@ -110,11 +113,19 @@ int main(int argc, char *argv[])
 	pd.misc_setup += profiler::EndCPU(start);
 	/********PROFILING**********/
 
+
+	JSONParser parser;
+#ifdef PROFILING
+	parser.InitProfilingData(&parser_pd);
+#endif /* PROFILING */
 	/********PROFILING**********/
 	start = profiler::StartCPU();
 	/********PROFILING**********/
-	JSONParser parser;
+#ifdef PROFILING
+	JSONObject json_obj = parser.ProfiledParse(json_str);
+#else
 	JSONObject json_obj = parser.Parse(json_str);
+#endif /* PROFILING */
 	if (json_obj == JSONParser::bad_obj)
 	{
 		std::cerr << "ERROR - Failed to parse: " << argv[1] << "\n";
@@ -230,6 +241,10 @@ void OutputProfilingStats()
 			  << "          Read: " << pd.read << " (" <<  (f64)pd.read / total_cpu * 100 << "%)\n"
 			  << "     MiscSetup: " << pd.misc_setup << " (" <<  (f64)pd.misc_setup / total_cpu * 100<< "%)\n"
 			  << "         Parse: " << pd.parse << " (" <<  (f64)pd.parse / total_cpu * 100 << "%)\n"
+#ifdef PROFILING
+			  << "                 Lexing: " << parser_pd.lexing << "(" << (f64)parser_pd.lexing / pd.parse * 100 << "%, of parsing)\n"
+			  << "                Parsing: " << parser_pd.parsing << "(" << (f64)parser_pd.parsing / pd.parse * 100 << "%, of parsing)\n"
+#endif /* PROFILING */
 			  << "           Sum: " << pd.sum << " (" <<  (f64)pd.sum / total_cpu * 100 << "%)\n"
 			  << "    MiscOutput: " << pd.misc_output << " (" <<  (f64)pd.misc_output / total_cpu * 100 << "%)\n\n";
 }

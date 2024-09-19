@@ -121,12 +121,8 @@ int main(int argc, char *argv[])
 	/********PROFILING**********/
 	start = profiler::StartCPU();
 	/********PROFILING**********/
-#ifdef PROFILING
 	JSONObject json_obj = parser.ProfiledParse(json_str);
-#else
-	JSONObject json_obj = parser.Parse(json_str);
-#endif /* PROFILING */
-	if (json_obj == JSONParser::bad_obj)
+	if (json_obj == JSORON::bad_obj)
 	{
 		std::cerr << "ERROR - Failed to parse: " << argv[1] << "\n";
 	}
@@ -244,6 +240,8 @@ void OutputProfilingStats()
 #ifdef PROFILING
 			  << "                 Lexing: " << parser_pd.lexing << "(" << (f64)parser_pd.lexing / pd.parse * 100 << "%, of parsing)\n"
 			  << "                Parsing: " << parser_pd.parsing << "(" << (f64)parser_pd.parsing / pd.parse * 100 << "%, of parsing)\n"
+			  << "                erasing: " << parser_pd.erasing << "(" << (f64)parser_pd.erasing / pd.parse * 100 << "%, of parsing)\n"
+			  << "                create_keys: " << parser_pd.create_keys << "(" << (f64)parser_pd.create_keys / pd.parse * 100 << "%, of parsing)\n"
 #endif /* PROFILING */
 			  << "           Sum: " << pd.sum << " (" <<  (f64)pd.sum / total_cpu * 100 << "%)\n"
 			  << "    MiscOutput: " << pd.misc_output << " (" <<  (f64)pd.misc_output / total_cpu * 100 << "%)\n\n";

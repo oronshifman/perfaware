@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 	/********PROFILING**********/
 	start = profiler::StartCPU();
 	/********PROFILING**********/
-	JSONObject json_obj = parser.ProfiledParse(json_str);
+	JSONObject json_obj = parser.Parse(json_str);
 	if (json_obj == JSORON::bad_obj)
 	{
 		std::cerr << "ERROR - Failed to parse: " << argv[1] << "\n";

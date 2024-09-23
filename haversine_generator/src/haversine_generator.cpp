@@ -103,7 +103,7 @@ b8 HaversineJSONGenerator::GeneratePoints(exec_option exec_option, const u64 see
                      "\"y1\":" + std::to_string(new_pair.y1) + "}";
         json_file << (point == num_points - 1 ? "\n" : ",\n");
         
-        f32 distance = ReferenceHaversine(new_pair.x0, new_pair.y0, new_pair.x1, new_pair.y1, EARTH_RADIUS);
+        f64 distance = ReferenceHaversine(new_pair.x0, new_pair.y0, new_pair.x1, new_pair.y1, EARTH_RADIUS);
         distances_bin.write(reinterpret_cast<s8*>(&distance), sizeof(distance));
 
         expected_sum += distance * sum_coef;

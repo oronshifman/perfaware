@@ -2,7 +2,7 @@ OBJS = src/haversine_generator.cpp ../utils/listing_0065_haversine_formula.cpp t
 
 CC = g++
 
-COMPILER_FLAGS = 
+COMPILER_FLAGS = -DORON_JSON
 
 INCLUDE_DIR = -Iinclude -I../utils
 

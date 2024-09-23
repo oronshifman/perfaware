@@ -7,7 +7,9 @@
 #ifndef __PROFILER_H__
 #define __PROFILER_H__
 
+#ifndef WITH_CASEY
 #include <my_int.h>
+#endif /* WITH_CASEY */
 
 namespace profiler
 {

@@ -33,7 +33,17 @@ make -C profiler/ release; echo
 echo "+=============================================+"
 echo "+ Compiling simple_haversine and dependencies +"
 echo "+=============================================+"
+echo casey_calc_debug/release
 pushd haversine_calc/build
-g++ -g3 -o casy_calc_debug ../../casy_code/listing_0067_simple_haversine_main.cpp
-g++ -DNDEBUG -O3 -o casy_calc_release ../../casy_code/listing_0067_simple_haversine_main.cpp
+g++ -g3 -o casey_calc_debug ../../casey_code/listing_0067_simple_haversine_main.cpp
+g++ -DNDEBUG -O3 -o casey_calc_release ../../casey_code/listing_0067_simple_haversine_main.cpp
+popd; echo
+
+echo "+=====================================+"
+echo "+ Compiling simple_haversine profiled +"
+echo "+=====================================+"
+echo profiled_calc_debug/release
+pushd haversine_calc/build
+g++ -DWITH_CASEY -g3 -o profiled_calc_debug -I../../profiler/include -I../../utils ../../profiler/src/profiler.cpp ../test/haversine_calc_v2_main.cpp
+g++ -DWITH_CASEY -DNDEBUG -O3 -o profiled_calc_release -I../../profiler/include -I../../utils ../../profiler/src/profiler.cpp ../test/haversine_calc_v2_main.cpp
 popd

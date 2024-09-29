@@ -1,6 +1,6 @@
 TARGET=haversine_calc
 
-OBJS=src/haversine_calc.o test/haversine_calc_main.o
+OBJS=src/haversine_calc.o test/haversine_calc_main.o ../profiler/src/profiler.o ../../JSORON/JSONParser/src/JSONParser.o ../../JSORON/JSONObject/src/JSONObject.o ../utils/listing_0065_haversine_formula.o
 
 TEST=../utils/generic_test.o
 
@@ -11,7 +11,7 @@ CXX=g++
 
 CXXFLAGS=-Wall -std=c++11
 
-CPPFLAGS=-Iinclude -I../../utils
+CPPFLAGS=-Iinclude -I../utils -I../profiler/include -I../../JSORON/JSONObject/include -I../../JSORON/JSONParser/include
 
 RELEASE_FLAGS=-DNDEBUG -O3
 DEBUG_FLAG=-g3

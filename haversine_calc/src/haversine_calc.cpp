@@ -11,6 +11,7 @@
 #include "listing_0065_haversine_formula.h"
 #include "haversine_calc.h"
 #include "JSONObject.h"
+#include "profiler.h"
 
 using namespace JSORON;
 
@@ -18,13 +19,15 @@ using namespace JSORON;
 
 f64 HaversineCalc(const JSONObject& json)
 {
+    Profiler::TimeFunction; // NOTE(25.09.24): PROFILING
+
     JSONArray pairs = json["pairs"];
     u64 num_points = pairs.Size();
     f32 sum_coef = 1.0 / (f32)num_points;
 
     f64 sum = 0.0;
 
-    for (auto pair : pairs)
+    for (auto& pair : pairs)
     {
         f64 x0 = pair["x0"];
         f64 y0 = pair["y0"];
@@ -40,6 +43,8 @@ f64 HaversineCalc(const JSONObject& json)
 
 char *ReadEntireFile(std::ifstream& in, const std::string& filename)
 {
+    Profiler::TimeFunction; // NOTE(25.09.24): PROFILING
+
 	u64 file_size = GetFileSize(filename);
 
 	char *data = (char *)malloc(file_size + 1);

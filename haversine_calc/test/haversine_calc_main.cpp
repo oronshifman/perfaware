@@ -10,11 +10,14 @@
 #include "haversine_calc.h"
 #include "JSONObject.h"
 #include "JSONParser.h"
+#include "profiler.h"
 
 using namespace JSORON;
 
 int main(int argc, char *argv[])
 {
+	Profiler::BeginProfiling(); // NOTE(26.09.24): PROFILING
+
 	std::cout << "\n";
 
 	if (argc < 2 || argc > 3)
@@ -92,6 +95,8 @@ int main(int argc, char *argv[])
 	}
 
 	free(json_str);
+
+	Profiler::EndProfilingAndPrint(); // NOTE(26.09.24): PROFILING
 
 	return 0;
 }

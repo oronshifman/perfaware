@@ -23,12 +23,11 @@ echo "+=================+"
 make -C profiler/ debug; echo
 make -C profiler/ release; echo
 
-# echo "+===================+"
-# echo "+ Making calculator +"
-# echo "+===================+"
-# make -C haversine_calc/ debug; echo
-# make -C haversine_calc/ release; echo
-# make -C haversine_calc/ profiled
+echo "+===================+"
+echo "+ Making calculator +"
+echo "+===================+"
+make -C haversine_calc/ debug; echo
+make -C haversine_calc/ release; 
 
 # echo "+=============================================+"
 # echo "+ Compiling simple_haversine and dependencies +"

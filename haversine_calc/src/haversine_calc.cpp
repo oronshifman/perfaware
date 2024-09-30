@@ -19,7 +19,7 @@ using namespace JSORON;
 
 f64 HaversineCalc(const JSONObject& json)
 {
-    Profiler::TimeFunction; // NOTE(25.09.24): PROFILING
+    Profiler_TimeFunction; // NOTE(25.09.24): PROFILING
 
     JSONArray pairs = json["pairs"];
     u64 num_points = pairs.Size();
@@ -29,6 +29,8 @@ f64 HaversineCalc(const JSONObject& json)
 
     for (auto& pair : pairs)
     {
+        Profiler_TimeBlock("Loop in HaversineCalc"); // NOTE(29.09.24): not working because increments Profiling::ProfilingData::anchors_index every iteration of the loop
+
         f64 x0 = pair["x0"];
         f64 y0 = pair["y0"];
         f64 x1 = pair["x1"];
@@ -43,7 +45,7 @@ f64 HaversineCalc(const JSONObject& json)
 
 char *ReadEntireFile(std::ifstream& in, const std::string& filename)
 {
-    Profiler::TimeFunction; // NOTE(25.09.24): PROFILING
+    Profiler_TimeFunction; // NOTE(25.09.24): PROFILING
 
 	u64 file_size = GetFileSize(filename);
 

@@ -9,8 +9,6 @@
 
 #include "profiler.h"
 
-using namespace profiler;
-
 void TimingOS(void);
 void TimingCPU(void);
 void TimingCPU_TimeToWait(u64 ms_wait);
@@ -36,21 +34,21 @@ int main(int argc, char *argv[])
 
 void TestGetCPUFreq(void)
 {
-	std::cout << "1000ms: " << GetCPUFreq(1000) << "\n"
-			  << " 100ms: " << GetCPUFreq(100) << "\n"
-			  << "  10ms: " << GetCPUFreq(10) << "\n";
+	std::cout << "1000ms: " << Profiler::GetCPUFreq(1000) << "\n"
+			  << " 100ms: " << Profiler::GetCPUFreq(100) << "\n"
+			  << "  10ms: " << Profiler::GetCPUFreq(10) << "\n";
 }
 
 void TimingOS(void)
 {
-	u64 os_freq = GetOSTimerFreq();
+	u64 os_freq = Profiler::GetOSTimerFreq();
 	
-	u64 os_start = ReadOSTimer();
+	u64 os_start = Profiler::ReadOSTimer();
 	u64 os_elapsed = 0;
 	u64 os_end = 0;
 	while (os_elapsed < os_freq)
 	{
-		os_end = ReadOSTimer();
+		os_end = Profiler::ReadOSTimer();
 		os_elapsed = os_end - os_start;
 	}
 
@@ -61,19 +59,19 @@ void TimingOS(void)
 
 void TimingCPU(void)
 {
-	u64 os_freq = GetOSTimerFreq();
+	u64 os_freq = Profiler::GetOSTimerFreq();
 	
-	u64 os_start = ReadOSTimer();
-	u64 cpu_start = ReadCPUTimer();
+	u64 os_start = Profiler::ReadOSTimer();
+	u64 cpu_start = Profiler::ReadCPUTimer();
 	u64 os_elapsed = 0;
 	u64 os_end = 0;
 	while (os_elapsed < os_freq)
 	{
-		os_end = ReadOSTimer();
+		os_end = Profiler::ReadOSTimer();
 		os_elapsed = os_end - os_start;
 	}
 
-	u64 cpu_end = ReadCPUTimer();
+	u64 cpu_end = Profiler::ReadCPUTimer();
 	u64 cpu_elapsed = cpu_end - cpu_start;
 
 	std::cout << "  OS Freq: " << os_freq << "\n"
@@ -88,20 +86,20 @@ void TimingCPU(void)
  */
 void TimingCPU_TimeToWait(u64 ms_wait)
 {
-	u64 os_freq = GetOSTimerFreq();
+	u64 os_freq = Profiler::GetOSTimerFreq();
 	
-	u64 os_start = ReadOSTimer();
-	u64 cpu_start = ReadCPUTimer();
+	u64 os_start = Profiler::ReadOSTimer();
+	u64 cpu_start = Profiler::ReadCPUTimer();
 	u64 os_elapsed = 0;
 	u64 os_end = 0;
 	u64 os_wait_time = os_freq * ms_wait / 1000; // NOTE(08.09.24): 1000 milliseconds in 1 second
 	while (os_elapsed < os_wait_time)
 	{
-		os_end = ReadOSTimer();
+		os_end = Profiler::ReadOSTimer();
 		os_elapsed = os_end - os_start;
 	}
 
-	u64 cpu_end = ReadCPUTimer();
+	u64 cpu_end = Profiler::ReadCPUTimer();
 	u64 cpu_elapsed = cpu_end - cpu_start;
 	u64 cpu_freq = 0;
 	if (os_elapsed)

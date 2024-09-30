@@ -16,7 +16,7 @@ CPPFLAGS=-Iinclude -I../utils -I../profiler/include -I../../JSORON/JSONObject/in
 RELEASE_FLAGS=-DNDEBUG -O3
 DEBUG_FLAG=-g3
 
-all: debug release
+all:
 
 release: CXXFLAGS+=$(RELEASE_FLAGS)
 release: $(RELEASE_BIN) 

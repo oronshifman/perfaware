@@ -10,45 +10,50 @@
 
 #include "profiler.h"
 
-u64 Profiler::total_time = 0;
+u64 Profiler::total_tsc = 0;
+u64 Profiler::call_id = 0;
 Profiler::ProfilingData Profiler::anchors[MAX_ANCHORS] = {};
-s8 Profiler::anchors_index = -1;
 
-Profiler::ProfilingData::ProfilingData(const std::string& block_name) : tsc_clocks(ReadCPUTimer()), block_name(block_name), index(++anchors_index)
+Profiler::ProfilingData::ProfilingData(const std::string& block_name_, u64 call_id)
 {
-	assert(anchors_index < MAX_ANCHORS);
+	assert(call_id < MAX_ANCHORS);
 
-	anchors[anchors_index] = *this;
+	tsc_clocks = ReadCPUTimer();
+	block_name = block_name_; 
+	index = call_id;
 }
 
 Profiler::ProfilingData::~ProfilingData()
 {
-	anchors[index].tsc_clocks = ReadCPUTimer() - anchors[index].tsc_clocks;
+	ProfilingData *anchor = anchors + index;
+
+	anchor->tsc_clocks += ReadCPUTimer() - tsc_clocks;
+	anchor->block_name = block_name;
+	anchor->index = index;
 }
     
 void Profiler::BeginProfiling()
 {
-	total_time = ReadOSTimer();
+	total_tsc = ReadCPUTimer();
 }
 
 void Profiler::EndProfilingAndPrint()
 {
-	total_time = ReadOSTimer() - total_time;
-	u64 total_tsc = 0;
-	for (s32 i = 0; i <= anchors_index; ++i)
-	{
-		total_tsc += anchors[i].tsc_clocks;
-	}
+	total_tsc = ReadCPUTimer() - total_tsc;
+	u64 cpu_freq = GetCPUFreq(100);
 
 	fprintf(stdout, "\n\n");
-	fprintf(stdout, "Total time: %.8f\n\n", (f64)total_time / 1000000);
+	fprintf(stdout, "Total time: %.4fms (CPU freq: %lu)\n\n", 1000.0 * (f64)total_tsc / (f64)cpu_freq, cpu_freq);
 	fprintf(stdout, "Total TSC: %lu\n", total_tsc);
 
-	for (; anchors_index >= 0; --anchors_index)
+	for (u64 anchor_index = 0; anchor_index < MAX_ANCHORS; ++anchor_index)
 	{
-		ProfilingData curr = anchors[anchors_index];
-		f32 percent_of_total = (f32)curr.tsc_clocks / total_tsc * 100;
-		fprintf(stdout, "    %s: %lu (%.2f%%)\n", curr.block_name.c_str(), curr.tsc_clocks, percent_of_total);
+		ProfilingData *curr = anchors + anchor_index;
+		if (curr->tsc_clocks)
+		{
+			f64 percent_of_total = 100.0 * ((f64)curr->tsc_clocks / (f64)total_tsc);
+			fprintf(stdout, "    %s: %lu (%.2f%%)\n", curr->block_name.c_str(), curr->tsc_clocks, percent_of_total);
+		}
 	}
 }
 

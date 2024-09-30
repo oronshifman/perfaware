@@ -12,9 +12,12 @@
 
 #include "my_int.h"
 
-#define MAX_ANCHORS 20
-#define TimeFunction Profiler::ProfilingData profiling_data(__func__)
-#define TimeBlock(block_name) Profiler::ProfilingData profiling_data(block_name)
+#define MAX_ANCHORS 4096
+#define UPDATE_COUNTER ({static u8 _this_counter_ = 0;\
+                         if (!_this_counter_) ++Profiler::call_id;\
+                         _this_counter_ = 1;})
+#define Profiler_TimeBlock(block_name) UPDATE_COUNTER; Profiler::ProfilingData profiling_data(block_name, Profiler::call_id);
+#define Profiler_TimeFunction Profiler_TimeBlock(__func__)
 
 class Profiler
 {
@@ -24,21 +27,29 @@ public:
     public:
         u64 tsc_clocks;
         std::string block_name;
-        s32 index;
+        u64 index;
 
-        ProfilingData() : tsc_clocks(0), block_name(""), index(MAX_ANCHORS + 1){}
-        ProfilingData(const std::string& block_name);
+        ProfilingData() : tsc_clocks(0), block_name("") {}
+        ProfilingData(const std::string& block_name_, u64 call_id);
         ~ProfilingData();
     };
 
 private:
-    static u64 total_time;
+    static u64 total_tsc;
     static ProfilingData anchors[MAX_ANCHORS];
-    static s8 anchors_index;
 
 public:
+    static u64 call_id;
+
+    /**
+     * @brief start the timing in wall clock time for the profiling
+    */
     static void BeginProfiling();
 
+    /**
+     * @brief takes the end timing for the wall clock timer and prints out all the profiling data that
+     *        was collected during profiling
+     */
     static void EndProfilingAndPrint();
 
     /**

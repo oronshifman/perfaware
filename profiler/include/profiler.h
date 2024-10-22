@@ -12,11 +12,16 @@
 
 #include "my_int.h"
 
+#define _NameConcat(A, B) A##B
+#define NameConcat(A, B) _NameConcat(A, B)
+
 #define MAX_ANCHORS 4096
-#define UPDATE_COUNTER ({static u8 _this_counter_ = 0;\
-                         if (!_this_counter_) ++Profiler::call_id;\
-                         _this_counter_ = 1;})
-#define Profiler_TimeBlock(block_name) UPDATE_COUNTER; Profiler::ProfilingData profiling_data(block_name, Profiler::call_id);
+#define UPDATE_COUNTER ({static u8 _local_counter_ = 0;\
+                         if (!_local_counter_)\
+                            ++Profiler::g_call_id;\
+                         _local_counter_ = 1;})
+
+#define Profiler_TimeBlock(block_name) UPDATE_COUNTER; Profiler::ProfilingData NameConcat(profiling_data_, __LINE__)(block_name, Profiler::g_call_id);
 #define Profiler_TimeFunction Profiler_TimeBlock(__func__)
 
 class Profiler
@@ -25,21 +30,24 @@ public:
     class ProfilingData
     {
     public:
-        u64 tsc_clocks;
+        u64 total_tsc;
+        u64 children_tsc;
         std::string block_name;
-        u64 index;
+        u16 index;
+        u16 index_of_parent;
 
-        ProfilingData() : tsc_clocks(0), block_name("") {}
-        ProfilingData(const std::string& block_name_, u64 call_id);
+        ProfilingData() : total_tsc(0), children_tsc(0), block_name("") {}
+        ProfilingData(const std::string& block_name_, u16 call_id);
         ~ProfilingData();
     };
 
 private:
     static u64 total_tsc;
     static ProfilingData anchors[MAX_ANCHORS];
+    static u16 g_total_parents;
 
 public:
-    static u64 call_id;
+    static u16 g_call_id;
 
     /**
      * @brief start the timing in wall clock time for the profiling

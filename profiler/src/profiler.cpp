@@ -11,25 +11,38 @@
 #include "profiler.h"
 
 u64 Profiler::total_tsc = 0;
-u64 Profiler::call_id = 0;
+u16 Profiler::g_call_id = 0;
+u16 Profiler::g_total_parents = 0;
 Profiler::ProfilingData Profiler::anchors[MAX_ANCHORS] = {};
 
-Profiler::ProfilingData::ProfilingData(const std::string& block_name_, u64 call_id)
+Profiler::ProfilingData::ProfilingData(const std::string& block_name_, u16 call_id)
 {
-	assert(call_id < MAX_ANCHORS);
+	assert(g_call_id < MAX_ANCHORS);
 
-	tsc_clocks = ReadCPUTimer();
-	block_name = block_name_; 
+	index_of_parent = g_total_parents;
+
 	index = call_id;
+	block_name = block_name_; 
+
+	g_total_parents = index;
+	total_tsc = ReadCPUTimer();
 }
 
 Profiler::ProfilingData::~ProfilingData()
 {
-	ProfilingData *anchor = anchors + index;
+	u64 elapsed_tsc = ReadCPUTimer() - total_tsc;
+	g_total_parents = index_of_parent;
 
-	anchor->tsc_clocks += ReadCPUTimer() - tsc_clocks;
+	ProfilingData *anchor = anchors + index;
+	ProfilingData *parent = anchors + index_of_parent;
+
+	anchor->total_tsc += elapsed_tsc;
+	parent->children_tsc += elapsed_tsc;
+
 	anchor->block_name = block_name;
 	anchor->index = index;
+
+	anchor->index_of_parent = index_of_parent;
 }
     
 void Profiler::BeginProfiling()
@@ -49,10 +62,17 @@ void Profiler::EndProfilingAndPrint()
 	for (u64 anchor_index = 0; anchor_index < MAX_ANCHORS; ++anchor_index)
 	{
 		ProfilingData *curr = anchors + anchor_index;
-		if (curr->tsc_clocks)
+		if (curr->total_tsc)
 		{
-			f64 percent_of_total = 100.0 * ((f64)curr->tsc_clocks / (f64)total_tsc);
-			fprintf(stdout, "    %s: %lu (%.2f%%)\n", curr->block_name.c_str(), curr->tsc_clocks, percent_of_total);
+			u64 exclusive_tsc = curr->total_tsc - curr->children_tsc;
+			f64 exclusive_percent = 100.0 * ((f64)exclusive_tsc / (f64)total_tsc);
+			fprintf(stdout, "    %s: %lu (%.2f%%)", curr->block_name.c_str(), exclusive_tsc, exclusive_percent);
+			if (curr->children_tsc)
+			{
+				f64 total_percent = 100.0 * ((f64)curr->total_tsc / (f64)total_tsc);
+				fprintf(stdout, ", w/children %lu (%.2f%%)", curr->total_tsc, total_percent);
+			}
+			fprintf(stdout, "\n");
 		}
 	}
 }

@@ -16,13 +16,24 @@
 #define NameConcat(A, B) _NameConcat(A, B)
 
 #define MAX_ANCHORS 4096
-#define UPDATE_COUNTER ({static u8 _local_counter_ = 0;\
-                         if (!_local_counter_)\
-                            ++Profiler::g_call_id;\
-                         _local_counter_ = 1;})
+#define UPDATE_COUNTER(local_id) ({static u8 is_first_pass = 0;\
+                                   if (!is_first_pass)\
+                                   {\
+                                      ++Profiler::g_call_id;\
+                                      local_id = Profiler::g_call_id;\
+                                   }\
+                                   is_first_pass = 1;})
 
-#define Profiler_TimeBlock(block_name) UPDATE_COUNTER; Profiler::ProfilingData NameConcat(profiling_data_, __LINE__)(block_name, Profiler::g_call_id);
+#define Profiler_TimeBlock(block_name) static u16 local_id; UPDATE_COUNTER(local_id); Profiler::ProfilingData NameConcat(profiling_data_, __LINE__)(block_name, local_id);
 #define Profiler_TimeFunction Profiler_TimeBlock(__func__)
+
+typedef struct profile_anchor
+{
+    u64 tsc_exclusive;
+    u64 tsc_inclusive;
+    std::string block_name;
+    u64 hit_count;
+} profile_anchor_t;
 
 class Profiler
 {
@@ -30,20 +41,20 @@ public:
     class ProfilingData
     {
     public:
-        u64 total_tsc;
-        u64 children_tsc;
+        u64 start_tsc;
         std::string block_name;
+        u64 old_tsc_inclusive;
         u16 index;
         u16 index_of_parent;
 
-        ProfilingData() : total_tsc(0), children_tsc(0), block_name("") {}
+        ProfilingData() : start_tsc(0), block_name("") {}
         ProfilingData(const std::string& block_name_, u16 call_id);
         ~ProfilingData();
     };
 
 private:
-    static u64 total_tsc;
-    static ProfilingData anchors[MAX_ANCHORS];
+    static u64 g_total_tsc;
+    static profile_anchor_t anchors[MAX_ANCHORS];
     static u16 g_total_parents;
 
 public:

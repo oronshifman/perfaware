@@ -10,10 +10,10 @@
 
 #include "profiler.h"
 
-u64 Profiler::total_tsc = 0;
+u64 Profiler::g_total_tsc = 0;
 u16 Profiler::g_call_id = 0;
 u16 Profiler::g_total_parents = 0;
-Profiler::ProfilingData Profiler::anchors[MAX_ANCHORS] = {};
+profile_anchor_t Profiler::anchors[MAX_ANCHORS] = {0};
 
 Profiler::ProfilingData::ProfilingData(const std::string& block_name_, u16 call_id)
 {
@@ -24,55 +24,56 @@ Profiler::ProfilingData::ProfilingData(const std::string& block_name_, u16 call_
 	index = call_id;
 	block_name = block_name_; 
 
+	profile_anchor_t *anchor = anchors + index;
+	old_tsc_inclusive = anchor->tsc_inclusive;
+
 	g_total_parents = index;
-	total_tsc = ReadCPUTimer();
+	start_tsc = ReadCPUTimer();
 }
 
 Profiler::ProfilingData::~ProfilingData()
 {
-	u64 elapsed_tsc = ReadCPUTimer() - total_tsc;
+	u64 elapsed_tsc = ReadCPUTimer() - start_tsc;
 	g_total_parents = index_of_parent;
 
-	ProfilingData *anchor = anchors + index;
-	ProfilingData *parent = anchors + index_of_parent;
+	profile_anchor_t *anchor = anchors + index;
+	profile_anchor_t *parent = anchors + index_of_parent;
 
-	anchor->total_tsc += elapsed_tsc;
-	parent->children_tsc += elapsed_tsc;
+	parent->tsc_exclusive -= elapsed_tsc;
+	anchor->tsc_exclusive += elapsed_tsc;
+	anchor->tsc_inclusive = old_tsc_inclusive + elapsed_tsc;
+	++(anchor->hit_count);
 
 	anchor->block_name = block_name;
-	anchor->index = index;
-
-	anchor->index_of_parent = index_of_parent;
 }
     
 void Profiler::BeginProfiling()
 {
-	total_tsc = ReadCPUTimer();
+	g_total_tsc = ReadCPUTimer();
 }
 
 void Profiler::EndProfilingAndPrint()
 {
-	total_tsc = ReadCPUTimer() - total_tsc;
+	g_total_tsc = ReadCPUTimer() - g_total_tsc;
 	u64 cpu_freq = GetCPUFreq(100);
 
 	fprintf(stdout, "\n\n");
-	fprintf(stdout, "Total time: %.4fms (CPU freq: %lu)\n\n", 1000.0 * (f64)total_tsc / (f64)cpu_freq, cpu_freq);
-	fprintf(stdout, "Total TSC: %lu\n", total_tsc);
+	fprintf(stdout, "Total time: %.4fms (CPU freq: %lu)\n\n", 1000.0 * (f64)g_total_tsc / (f64)cpu_freq, cpu_freq);
+	fprintf(stdout, "Total TSC: %lu\n", g_total_tsc);
 
-	for (u64 anchor_index = 0; anchor_index < MAX_ANCHORS; ++anchor_index)
+	for (u64 anchor_index = 1; anchor_index < MAX_ANCHORS; ++anchor_index)
 	{
-		ProfilingData *curr = anchors + anchor_index;
-		if (curr->total_tsc)
+		profile_anchor_t *curr = anchors + anchor_index;
+		if (curr->tsc_exclusive)
 		{
-			u64 exclusive_tsc = curr->total_tsc - curr->children_tsc;
-			f64 exclusive_percent = 100.0 * ((f64)exclusive_tsc / (f64)total_tsc);
-			fprintf(stdout, "    %s: %lu (%.2f%%)", curr->block_name.c_str(), exclusive_tsc, exclusive_percent);
-			if (curr->children_tsc)
+			f64 exclusive_percent = 100.0 * ((f64)curr->tsc_exclusive / (f64)g_total_tsc);
+			printf("    %s[%lu]: %lu (%.2f%%)", curr->block_name.c_str(), curr->hit_count, curr->tsc_exclusive, exclusive_percent);
+			if (curr->tsc_exclusive != curr->tsc_inclusive)
 			{
-				f64 total_percent = 100.0 * ((f64)curr->total_tsc / (f64)total_tsc);
-				fprintf(stdout, ", w/children %lu (%.2f%%)", curr->total_tsc, total_percent);
+				f64 percent_with_children = 100.0 * ((f64)curr->tsc_inclusive / (f64)g_total_tsc);
+				printf(", w/children %lu (%.2f%%)", curr->tsc_inclusive, percent_with_children);
 			}
-			fprintf(stdout, "\n");
+			printf("\n");
 		}
 	}
 }

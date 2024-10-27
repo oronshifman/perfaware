@@ -26,18 +26,21 @@ f64 HaversineCalc(const JSONObject& json)
     f32 sum_coef = 1.0 / (f32)num_points;
 
     f64 sum = 0.0;
-
-    for (auto& pair : pairs)
+    
     {
         Profiler_TimeBlock("Loop in HaversineCalc"); // NOTE(29.09.24): not working because increments Profiling::ProfilingData::anchors_index every iteration of the loop
 
-        f64 x0 = pair["x0"];
-        f64 y0 = pair["y0"];
-        f64 x1 = pair["x1"];
-        f64 y1 = pair["y1"];
+        for (auto& pair : pairs)
+        {
 
-        f32 distance = ReferenceHaversine(x0, y0, x1, y1, EARTH_RADIUS);
-        sum += distance * sum_coef;
+            f64 x0 = pair["x0"];
+            f64 y0 = pair["y0"];
+            f64 x1 = pair["x1"];
+            f64 y1 = pair["y1"];
+
+            f32 distance = ReferenceHaversine(x0, y0, x1, y1, EARTH_RADIUS);
+            sum += distance * sum_coef;
+        }
     }
 
     return sum;

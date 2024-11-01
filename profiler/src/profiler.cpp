@@ -11,11 +11,13 @@
 #include "profiler.h"
 
 u64 Profiler::g_total_tsc = 0;
+
+#if PROFILING
 u16 Profiler::g_call_id = 0;
 u16 Profiler::g_total_parents = 0;
 profile_anchor_t Profiler::anchors[MAX_ANCHORS] = {0};
 
-Profiler::ProfilingData::ProfilingData(const std::string& block_name_, u16 call_id)
+Profiler::ProfilingData::ProfilingData(const std::string& block_name_, u64 byte_count, u16 call_id)
 {
 	assert(g_call_id < MAX_ANCHORS);
 
@@ -26,6 +28,7 @@ Profiler::ProfilingData::ProfilingData(const std::string& block_name_, u16 call_
 
 	profile_anchor_t *anchor = anchors + index;
 	old_tsc_inclusive = anchor->tsc_inclusive;
+	anchor->bytes_processed += byte_count;
 
 	g_total_parents = index;
 	start_tsc = ReadCPUTimer();
@@ -46,7 +49,8 @@ Profiler::ProfilingData::~ProfilingData()
 
 	anchor->block_name = block_name;
 }
-    
+#endif /* PROFILING */    
+
 void Profiler::BeginProfiling()
 {
 	g_total_tsc = ReadCPUTimer();
@@ -57,25 +61,41 @@ void Profiler::EndProfilingAndPrint()
 	g_total_tsc = ReadCPUTimer() - g_total_tsc;
 	u64 cpu_freq = GetCPUFreq(100);
 
-	fprintf(stdout, "\n\n");
-	fprintf(stdout, "Total time: %.4fms (CPU freq: %lu)\n\n", 1000.0 * (f64)g_total_tsc / (f64)cpu_freq, cpu_freq);
-	fprintf(stdout, "Total TSC: %lu\n", g_total_tsc);
+	printf("\n\n");
+	printf("Total time: %.4fms (CPU freq: %lu)\n\n", 1000.0 * (f64)g_total_tsc / (f64)cpu_freq, cpu_freq);
+	printf("Total TSC: %lu\n", g_total_tsc);
 
+#if PROFILING
 	for (u64 anchor_index = 1; anchor_index < MAX_ANCHORS; ++anchor_index)
 	{
 		profile_anchor_t *curr = anchors + anchor_index;
 		if (curr->tsc_exclusive)
 		{
 			f64 exclusive_percent = 100.0 * ((f64)curr->tsc_exclusive / (f64)g_total_tsc);
-			printf("    %s[%lu]: %lu (%.2f%%)", curr->block_name.c_str(), curr->hit_count, curr->tsc_exclusive, exclusive_percent);
+			printf("	%s[%lu]: %lu (%.2f%%)", curr->block_name.c_str(), curr->hit_count, curr->tsc_exclusive, exclusive_percent);
 			if (curr->tsc_exclusive != curr->tsc_inclusive)
 			{
 				f64 percent_with_children = 100.0 * ((f64)curr->tsc_inclusive / (f64)g_total_tsc);
 				printf(", w/children %lu (%.2f%%)", curr->tsc_inclusive, percent_with_children);
 			}
+
+			if (curr->bytes_processed)
+			{
+				f64 megabyte = 1024.0f*1024.0f;
+				f64 gigabyte = megabyte*1024.0f;
+
+				f64 elapsed_seconds = (f64)curr->tsc_inclusive / (f64)cpu_freq;
+				f64 byte_per_second = (f64)curr->bytes_processed / (f64)elapsed_seconds;
+				f64 megabytes_processed = (f64)curr->bytes_processed / (f64)megabyte;
+				f64 gigabytes_per_second = (f64)byte_per_second / (f64)gigabyte;
+
+				printf(" %.3fmb at %.5fgb/s", megabytes_processed, gigabytes_per_second);
+			}
+
 			printf("\n");
 		}
 	}
+#endif /* PROFILING */
 }
 
 /**

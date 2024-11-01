@@ -19,28 +19,24 @@ using namespace JSORON;
 
 f64 HaversineCalc(const JSONObject& json)
 {
-    Profiler_TimeFunction; // NOTE(25.09.24): PROFILING
+    Profiler_TimeBandwidth(__func__, ((JSONArray&)json["pairs"]).Size() * 32); // NOTE(25.09.24): PROFILING
 
-    JSONArray pairs = json["pairs"];
+    const JSONArray& pairs = json["pairs"];
     u64 num_points = pairs.Size();
     f32 sum_coef = 1.0 / (f32)num_points;
 
     f64 sum = 0.0;
     
+    for (auto& pair : pairs)
     {
-        Profiler_TimeBlock("Loop in HaversineCalc"); // NOTE(29.09.24): not working because increments Profiling::ProfilingData::anchors_index every iteration of the loop
 
-        for (auto& pair : pairs)
-        {
+        f64 x0 = pair["x0"];
+        f64 y0 = pair["y0"];
+        f64 x1 = pair["x1"];
+        f64 y1 = pair["y1"];
 
-            f64 x0 = pair["x0"];
-            f64 y0 = pair["y0"];
-            f64 x1 = pair["x1"];
-            f64 y1 = pair["y1"];
-
-            f32 distance = ReferenceHaversine(x0, y0, x1, y1, EARTH_RADIUS);
-            sum += distance * sum_coef;
-        }
+        f32 distance = ReferenceHaversine(x0, y0, x1, y1, EARTH_RADIUS);
+        sum += distance * sum_coef;
     }
 
     return sum;
@@ -53,14 +49,16 @@ char *ReadEntireFile(std::ifstream& in, const std::string& filename)
 	u64 file_size = GetFileSize(filename);
 
 	char *data = (char *)malloc(file_size + 1);
-    
+
+    {
+    Profiler_TimeBandwidth("read", file_size); // NOTE(29.10.24): PROFILING
     in.read(data, file_size);
 	if (in.fail())
     {
         std::cerr << "ERROR - Failed to read file: " << filename << "\n"; 
 	    return nullptr;
     }
-
+    }
     return data;
 }
 

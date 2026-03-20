@@ -9,7 +9,7 @@ DEBUG_BIN = build/$(TARGET)_debug
 
 CXX=g++
 
-CXXFLAGS=-Wall -std=c++11
+CXXFLAGS=-Wall -std=c++20
 
 CPPFLAGS=-Iinclude -I../utils
 

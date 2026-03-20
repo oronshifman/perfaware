@@ -8,6 +8,7 @@
 #include <fstream> // ifstream
 #include <iostream>
 #include <string>
+#include <filesystem>
 
 #include "haversine_generator.h"
 #include "listing_0065_haversine_formula.h"
@@ -67,6 +68,9 @@ b8 HaversineJSONGenerator::GeneratePoints(exec_option exec_option, const u64 see
 
     std::string bin_dir = "haversine_distances_bins/";
     std::string distances_name =  file_name_prefix + "_distances.bin";
+
+    std::filesystem::create_directories(json_dir);
+    std::filesystem::create_directories(bin_dir);
 
     std::ofstream json_file;
     json_file.open(json_dir + json_name);

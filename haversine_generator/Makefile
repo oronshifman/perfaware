@@ -12,4 +12,7 @@ OBJ_NAME = build/haversine_generator
 
 all: $(OBJS)
 	$(CC) $(COMPILER_FLAGS) $(DEBUG_FLAG) -o $(OBJ_NAME) $(OBJS) $(INCLUDE_DIR)
+
+clean:
+	rm build/*; touch dummy.md
 	

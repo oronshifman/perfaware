@@ -1,4 +1,3 @@
-#!/bin/bash
 if [ "$1" = "all" ] || [ "$1" = "generator" ]; then
     echo "+==================+"
     echo "+ Making generator +"
@@ -29,6 +28,13 @@ elif [ "$1" = "all" ] || [ "$1" = "calc" ]; then
     make -C haversine_calc/ debug; echo
     # make -C haversine_calc/ release; echo 
     make -C haversine_calc/ profiled; 
+else
+    echo "Usage:"
+    echo "build.sh generator - to build only the haversine_generator"
+    echo "build.sh parser - to build only JSONParser"
+    echo "build.sh obj - to build only JSONObject"
+    echo "build.sh profiler - to build only the profiler"
+    echo "build.sh clac - to build only the clac and all it's dependencies"
 fi
 
 # echo "+=============================================+"

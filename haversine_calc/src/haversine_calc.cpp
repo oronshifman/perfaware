@@ -19,9 +19,9 @@ using namespace JSORON;
 
 f64 HaversineCalc(const JSONObject& json)
 {
-    Profiler_TimeBandwidth(__func__, ((JSONArray&)json["pairs"]).Size() * 32); // NOTE(25.09.24): PROFILING
+    Profiler_TimeBandwidth(__func__, ((JSONArray&)json.At("pairs")).Size() * 32); // NOTE(25.09.24): PROFILING
 
-    const JSONArray& pairs = json["pairs"];
+    const JSONArray& pairs = json.At("pairs");
     u64 num_points = pairs.Size();
     f32 sum_coef = 1.0 / (f32)num_points;
 
@@ -30,10 +30,10 @@ f64 HaversineCalc(const JSONObject& json)
     for (auto& pair : pairs)
     {
 
-        f64 x0 = pair["x0"];
-        f64 y0 = pair["y0"];
-        f64 x1 = pair["x1"];
-        f64 y1 = pair["y1"];
+        f64 x0 = pair.At("x0");
+        f64 y0 = pair.At("y0");
+        f64 x1 = pair.At("x1");
+        f64 y1 = pair.At("y1");
 
         f32 distance = ReferenceHaversine(x0, y0, x1, y1, EARTH_RADIUS);
         sum += distance * sum_coef;

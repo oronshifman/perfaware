@@ -1,6 +1,6 @@
 TARGET=haversine_calc
 
-OBJS=src/haversine_calc.o test/haversine_calc_main.o ../profiler/src/profiler.o ../JSORON/JSONParser/src/JSONParser.o ../JSORON/JSONObject/src/JSONObject.o ../utils/listing_0065_haversine_formula.o
+OBJS=src/haversine_calc.o test/haversine_calc_main.o ../profiler/src/profiler.o ../JSORON/JSONObject/src/JSONObject.o ../utils/listing_0065_haversine_formula.o
 
 TEST=../utils/generic_test.o
 
@@ -12,7 +12,7 @@ CXX=g++
 
 CXXFLAGS=-Wall -std=c++20
 
-CPPFLAGS=-Iinclude -I../utils -I../profiler/include -I../JSORON/JSONObject/include -I../JSORON/JSONParser/include
+CPPFLAGS=-Iinclude -I../utils -I../profiler/include -I../JSORON/JSONObject/include
 
 RELEASE_FLAGS=-DNDEBUG -O3
 DEBUG_FLAG=-g3
@@ -42,6 +42,5 @@ clean:
 	-rm -f src/*.o test/*.o; touch build/dummy.md
 
 clean_all:
-	make -C ../JSORON/JSONParser/ clean
 	make -C ../JSORON/JSONObject/ clean
 	make -C ../profiler/ clean

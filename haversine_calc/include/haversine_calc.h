@@ -8,7 +8,6 @@
 #define __HAVERSINE_CALC_H__
 
 #include "JSONObject.h"
-#include "JSONParser.h"
 
 f64 HaversineCalc(const JSORON::JSONObject& json);
 

@@ -6,10 +6,10 @@
 
 #include <iostream>
 #include <iomanip>
+#include <fstream>
 
 #include "haversine_calc.h"
 #include "JSONObject.h"
-#include "JSONParser.h"
 #include "profiler.h"
 
 using namespace JSORON;
@@ -53,9 +53,9 @@ int main(int argc, char *argv[])
 
 	json_file.close();
 
-	JSONParser parser;
-	JSONObject json_obj = parser.Parse(json_str);
-	if (json_obj == JSONParser::bad_obj)
+	JSONObject json_obj;
+	int parse_status = json_obj.Parse(json_str);
+	if (parse_status)
 	{
 		std::cerr << "ERROR - Failed to parse: " << argv[1] << "\n";
 	}
